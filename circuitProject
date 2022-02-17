@@ -1,0 +1,195 @@
+This project probably contains lots of logic that is
+somewhat similar to what we may write in our garduino project
+(light sensor, etc.) so I have included it for reference purposes.
+
+link to pseudo-gardunio on tinkercad: https://www.tinkercad.com/things/09XKRzyQKzA
+
+//build is meant to be pseudo-garduino
+//monitors plant temperature (serial printed, series of LEDs on left side of board)
+//monitors tilt to ensure plant is stable (serial printed, orange LED is lit when tilt detected)
+//monitors gas (serial printed, yellow LED is lit when harmful gas is detected)
+//monitors light (serial printed, neopixel shows optimal light (green), low light (red), too much light (orange))
+
+
+#include <Adafruit_NeoPixel.h>
+
+#define PIN 6
+#define NUMPIXELS 12
+#define DELAYVALONE 1000
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+//light
+int lightPin = A1;
+int light = 0;
+int colorCode1;
+int colorCode2;
+int colorCode3;
+
+//temp
+int tempPin = A0;
+int temp = 0;
+int blueled = 9;
+int greenled = 10;
+int redled = 11;
+
+//tilt
+int tiltPin = 7;
+int tiltled = 8;
+int detectUpright = 0;
+
+//gas
+int gasPin = A2;
+int gasLevel = 0;
+int gasled = 5;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  //light
+  pinMode(lightPin, INPUT);
+  pixels.begin();
+  pixels.clear();
+
+  //temp
+  pinMode(tempPin, INPUT);
+  pinMode(redled, OUTPUT);
+  pinMode(greenled, OUTPUT);
+  pinMode(blueled, OUTPUT);
+
+  //tilt
+  pinMode(tiltPin, INPUT);
+  pinMode(tiltled, OUTPUT);
+
+  //gas
+  pinMode(gasPin, INPUT);
+  pinMode(gasled, OUTPUT);
+
+}
+
+void loop()
+{
+
+  //used switch case for analog data (show errors for invalid data)
+  //if/else for digital data
+
+
+  /*
+  * min + max values in light and temp sections
+  * switch cases decreased/increased respectively by 50.
+  * noticed an error occassionally
+  * which seems to be due to small unaccounted for deviations
+  * (numbers are still printed correctly
+  * but don't hit the correct switch case)
+  * the rounding up and down is to allow a little flexibilty
+  * to account for this deviation
+  */
+
+   Serial.println("\n");
+
+  //light section
+  light = analogRead(lightPin);
+  Serial.println((String)"light: " + light);
+
+  switch (light) {
+    case 294 ...399:
+      colorCode1 = 255;
+      colorCode2 = 69;
+      colorCode3 = 0;
+      Serial.println("too much light, remove plant from light");
+      break;
+    case 400 ...700:
+      colorCode1 = 34;
+      colorCode2 = 139;
+      colorCode3 = 34;
+      Serial.println("light is optimal");
+      break;
+    case 701 ...1100:
+      colorCode1 = 139;
+      colorCode2 = 0;
+      colorCode3 = 0;
+      Serial.println("too dark, provide plant with more light");
+      break;
+    default:
+      Serial.println("ERROR: light reading error");
+      break;
+  }
+
+
+  Serial.println("\n");
+
+  //orange = too much light; green = optimal light; red = too dark
+  for(int i=0; i<NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(colorCode1, colorCode2, colorCode3));
+    pixels.show();
+  }
+
+
+  //temp section
+  temp = analogRead(tempPin);
+
+  Serial.println((String)"temperature: " + temp);
+
+  switch (temp) {
+    case 10 ...132:
+      digitalWrite(blueled, HIGH);
+      digitalWrite(greenled, LOW);
+      digitalWrite(redled, LOW);
+      Serial.println("plant is too cold, increase temperature");
+      break;
+    case 133 ...254:
+      digitalWrite(blueled, LOW);
+      digitalWrite(greenled, HIGH);
+      digitalWrite(redled, LOW);
+      Serial.println("plant temperature is optimal");
+      break;
+    case 255 ...370:
+      digitalWrite(blueled, LOW);
+      digitalWrite(greenled, LOW);
+      digitalWrite(redled, HIGH);
+      Serial.println("plant is too warm, decrease temperature");
+      break;
+    default:
+      Serial.println("ERROR: temp reading error");
+      break;
+  }
+
+  Serial.println("\n");
+
+  //tilt
+  detectUpright = digitalRead(tiltPin);
+  if (detectUpright) {
+  	Serial.println("orientation: plant is upright");
+    digitalWrite(tiltled, LOW);
+  } else {
+    Serial.println("orientation: plant may be unstable, please secure");
+    digitalWrite(tiltled, HIGH);
+  }
+
+  Serial.println("\n");
+
+  //gas
+  gasLevel = analogRead(gasPin);
+  Serial.println((String)"gas: " + gasLevel);
+
+  switch (gasLevel) {
+    case 470 ...738:
+      Serial.println("harmful gas has been detected, please move plant");
+      digitalWrite(gasled, HIGH);
+      break;
+    case 250 ...469:
+      Serial.println("air quality is optimal");
+      digitalWrite(gasled, LOW);
+      break;
+    default:
+      Serial.println("ERROR: gas reading error");
+      break;
+  }
+
+  Serial.println("\n");
+
+  Serial.println("_________________________________________");
+
+  delay(DELAYVALONE);
+
+}
