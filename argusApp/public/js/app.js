@@ -1871,7 +1871,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'app',
   props: {
@@ -1885,8 +1884,99 @@ __webpack_require__.r(__webpack_exports__);
       showSidebar: true
     };
   },
+  methods: {
+    storeAverageValues: function storeAverageValues() {
+      var _this = this;
+
+      //average store sensor data
+      var sensorObj = this.$store.state.sensorValues;
+      var moisture = this.getAvg(sensorObj.moisture);
+      var light = this.getAvg(sensorObj.light);
+      var temp = this.getAvg(sensorObj.temp);
+      var gas = this.getAvg(sensorObj.gas); //save averages to the database (will require a controller, model, migration, etc...)
+
+      var formData = new FormData();
+      formData.append('_method', 'POST');
+      formData.append('moisture', moisture);
+      formData.append('light', light);
+      formData.append('temp', temp);
+      formData.append('gas', gas);
+      formData.append('user_id', this.user.id); // formData.append('plant_id', 1); leave this out for now, ask marco what approach is best for generating different data for different plants
+      //method 1 -> can just use a transformer to change the data when it is being retrieved based on plant id provided
+      //method
+
+      axios.post('/api/sensors', formData).then(function (response) {
+        return response.data;
+      }).then(function (data) {
+        _this.$store.commit('currentReading', data);
+      })["catch"](function (error) {
+        console.log(error);
+      }); //display current reading and history on screen;
+      //reset sensorValues
+
+      this.$store.commit('sensorValueReset');
+    },
+    getAvg: function getAvg(arr) {
+      var total = arr.reduce(function (a, b) {
+        return a + b;
+      }, 0);
+      var average = total / arr.length || 0;
+      return Math.round(average);
+    }
+  },
+  // computed: {
+  //     values() {
+  //     let sensorData = firebase.database().ref('sensors');
+  //     let store = this.hitCount;
+  //     // let sensorVals = [];
+  //     sensorData.once('value', function(snapshot) {
+  //         // sensoreVals;
+  //         let sensorSnap = {}
+  //         //gas
+  //         sensorSnap.gas = Math.round(snapshot.val().gas.value);
+  //         //light
+  //         sensorSnap.light = Math.round(snapshot.val().light.value);
+  //         //temp
+  //         let val =  snapshot.val().temp.value;
+  //         let tempF = val.replace(/\D/g, '');
+  //         let tempC = Math.round(tempF * 9 / 5 + 32);
+  //         sensorSnap.temp = tempC;
+  //         //moisture
+  //         sensorSnap.moisture = Math.round(snapshot.val().moisture.value);
+  //             console.log(sensorSnap)
+  //         // sensorVals.push(sensorSnap);
+  //         return sensorSnap
+  //     });
+  //     // console.log('check', sensorVals)
+  //     // return sensorVals;
+  //     }
+  // },
   mounted: function mounted() {
     this.$store.commit('user', this.user);
+    var t = this;
+    console.log("IIFE fired!");
+    var sensorData = firebase.database().ref('sensors');
+    sensorData.on('value', function (snapshot) {
+      var sensorSnap = {};
+
+      if (t.$store.state.sensorValues.increment > 1) {
+        t.storeAverageValues();
+      } //gas
+
+
+      sensorSnap.gas = Math.round(snapshot.val().gas.value); //light
+
+      sensorSnap.light = Math.round(snapshot.val().light.value); //temp
+
+      var val = snapshot.val().temp.value;
+      var tempF = val.replace(/\D/g, '');
+      var tempC = Math.round(tempF * 9 / 5 + 32);
+      sensorSnap.temp = tempC; //moisture
+
+      sensorSnap.moisture = Math.round(snapshot.val().moisture.value);
+      t.$store.commit('sensorValues', sensorSnap);
+      console.log(t.$store.state.sensorValues);
+    });
   }
 });
 
@@ -1936,10 +2026,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     AvatarForm: _partials_profile_avatar_form_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  computed: {
+    sensor: function sensor() {
+      return this.$store.state.currentReading;
+    }
   }
 });
 
@@ -2020,22 +2120,23 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function () {
         _this.processing = false;
       });
-    },
-    logSensors: function logSensors() {
-      var sensorData = firebase.database().ref('sensors');
-      sensorData.on('value', function (snapshot) {
-        console.log('gas', Math.round(snapshot.val().gas.value));
-      });
-      sensorData.on('value', function (snapshot) {
-        console.log('light', Math.round(snapshot.val().light.value));
-      });
-      sensorData.on('value', function (snapshot) {
-        console.log('moisture', Math.round(snapshot.val().moisture.value));
-      });
-      sensorData.on('value', function (snapshot) {
-        console.log('temperature', snapshot.val().temp.value);
-      });
-    }
+    } // logSensors() {
+    //     console.log("IIFE fired!");
+    //     let sensorData = firebase.database().ref('sensors');
+    //      sensorData.on('value', function(snapshot){
+    //         console.log('gas', Math.round(snapshot.val().gas.value));
+    //     });
+    //     sensorData.on('value', function(snapshot){
+    //         console.log('light', Math.round(snapshot.val().light.value));
+    //     });
+    //     sensorData.on('value', function(snapshot){
+    //         console.log('temp', snapshot.val().temp.value);
+    //     });
+    //     sensorData.on('value', function(snapshot){
+    //         console.log('moisture', Math.round(snapshot.val().moisture.value));
+    //     });
+    // }
+
   }
 });
 
@@ -38386,22 +38487,29 @@ var render = function() {
     _c("h1", [_vm._v("Profile")]),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
-      _vm._m(0),
-      _vm._v(" "),
-      _c("div", { staticClass: "col-md-5" }, [_c("avatar-form")], 1)
+      _c("div", { staticClass: "col-md-7" }, [
+        _c("div", { staticClass: "mt-3" }, [
+          _c("p", [_vm._v("Light: " + _vm._s(_vm.sensor.light))]),
+          _c("br"),
+          _vm._v(" "),
+          _c("p", [_vm._v("Moisture: " + _vm._s(_vm.sensor.moisture))]),
+          _c("br"),
+          _vm._v(" "),
+          _c("p", [_vm._v("Gas: " + _vm._s(_vm.sensor.gas))]),
+          _c("br"),
+          _vm._v(" "),
+          _c("p", [
+            _vm._v(
+              "Temperature: " + _vm._s(_vm.sensor.temp) + " degrees celcius"
+            )
+          ]),
+          _c("br")
+        ])
+      ])
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-md-7" }, [
-      _c("div", { staticClass: "mt-3" })
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -38426,10 +38534,6 @@ var render = function() {
   return _c("div", { staticClass: "card" }, [
     _c("div", { staticClass: "card-header" }, [
       _vm._v("\n        Avatar\n    ")
-    ]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.logSensors } }, [
-      _vm._v("Log Sensor Data")
     ]),
     _vm._v(" "),
     _c(
@@ -55129,11 +55233,41 @@ console.log(firebase);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
-    user: null
+    user: null,
+    sensorValues: {
+      increment: 0,
+      light: [],
+      moisture: [],
+      gas: [],
+      temp: []
+    },
+    currentReading: {
+      light: 'reading data..',
+      moisture: 'reading data..',
+      gas: 'reading data..',
+      temp: 'reading data..'
+    }
   },
   mutations: {
     user: function user(state, myCustomData) {
       state.user = myCustomData;
+    },
+    sensorValues: function sensorValues(state, myCustomData) {
+      state.sensorValues.increment = state.sensorValues.increment + 1;
+      state.sensorValues.light.push(myCustomData.light);
+      state.sensorValues.moisture.push(myCustomData.moisture);
+      state.sensorValues.gas.push(myCustomData.gas);
+      state.sensorValues.temp.push(myCustomData.temp);
+    },
+    sensorValueReset: function sensorValueReset(state) {
+      state.sensorValues.increment = 0;
+      state.sensorValues.light = [];
+      state.sensorValues.moisture = [];
+      state.sensorValues.gas = [];
+      state.sensorValues.temp = [];
+    },
+    currentReading: function currentReading(state, myCustomData) {
+      state.currentReading = myCustomData;
     }
   }
 });

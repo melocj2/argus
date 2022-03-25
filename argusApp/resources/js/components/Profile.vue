@@ -4,11 +4,16 @@
         <div class="row">
             <div class="col-md-7">
                 <div class="mt-3">
+                     <p>Light: {{sensor.light}}</p><br/>
+            <p>Moisture: {{sensor.moisture}}</p><br/>
+            <p>Gas: {{sensor.gas}}</p><br/>
+            <p>Temperature: {{sensor.temp}} degrees celcius</p><br/>
                 </div>
             </div>
-            <div class="col-md-5">
+
+            <!-- <div class="col-md-5">
                 <avatar-form />
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -19,6 +24,12 @@
     export default {
         components: {
             AvatarForm
+        },
+
+        computed: {
+            sensor() {
+                return this.$store.state.currentReading;
+            }
         }
     };
 </script>
