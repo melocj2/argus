@@ -3,7 +3,7 @@
         <div class="card-header">
             Avatar
         </div>
-        <button @click="logSensors">Log Sensor Data</button>
+        <!-- <button @click="logSensors">Log Sensor Data</button> -->
         <div class="card-body">
             <template v-if="hasAvatar">
                 <div
@@ -73,28 +73,28 @@
                     });
             },
 
-        logSensors() {
+        // logSensors() {
 
-            console.log("IIFE fired!");
+        //     console.log("IIFE fired!");
 
-            let sensorData = firebase.database().ref('sensors');
+        //     let sensorData = firebase.database().ref('sensors');
 
-             sensorData.on('value', function(snapshot){
-                console.log('gas', Math.round(snapshot.val().gas.value));
-            });
+        //      sensorData.on('value', function(snapshot){
+        //         console.log('gas', Math.round(snapshot.val().gas.value));
+        //     });
 
-            sensorData.on('value', function(snapshot){
-                console.log(Math.round(snapshot.val().light.value));
-            });
+        //     sensorData.on('value', function(snapshot){
+        //         console.log('light', Math.round(snapshot.val().light.value));
+        //     });
 
-            sensorData.on('value', function(snapshot){
-                console.log(snapshot.val().temp.value);
-            });
+        //     sensorData.on('value', function(snapshot){
+        //         console.log('temp', snapshot.val().temp.value);
+        //     });
 
-            sensorData.on('value', function(snapshot){
-                console.log(Math.round(snapshot.val().moisture.value));
-            });
-        }
+        //     sensorData.on('value', function(snapshot){
+        //         console.log('moisture', Math.round(snapshot.val().moisture.value));
+        //     });
+        // }
     }
 }
 </script>

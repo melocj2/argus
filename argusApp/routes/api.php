@@ -18,3 +18,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::patch('users/{user}', 'Api\UserController@update')->name('users.update');
+
+Route::post('sensors', 'Api\SensorController@store')->name('sensors.store');

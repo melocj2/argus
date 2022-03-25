@@ -23,10 +23,40 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
         user: null,
+        sensorValues: {
+            increment: 0,
+            light: [],
+            moisture: [],
+            gas: [],
+            temp: [],
+        },
+        currentReading: {
+            light: 'reading data..',
+            moisture: 'reading data..',
+            gas: 'reading data..',
+            temp: 'reading data..',
+        }
     },
     mutations: {
         user (state, myCustomData) {
             state.user = myCustomData;
+        },
+        sensorValues (state, myCustomData) {
+            state.sensorValues.increment = state.sensorValues.increment + 1;
+            state.sensorValues.light.push(myCustomData.light);
+            state.sensorValues.moisture.push(myCustomData.moisture);
+            state.sensorValues.gas.push(myCustomData.gas);
+            state.sensorValues.temp.push(myCustomData.temp);
+        },
+        sensorValueReset (state) {
+            state.sensorValues.increment = 0;
+            state.sensorValues.light = [];
+            state.sensorValues.moisture = [];
+            state.sensorValues.gas = [];
+            state.sensorValues.temp = [];
+        },
+        currentReading (state, myCustomData) {
+            state.currentReading = myCustomData
         }
     }
 });
