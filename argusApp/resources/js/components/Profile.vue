@@ -1,35 +1,25 @@
 <template>
     <div>
-        <h1>Profile</h1>
-        <div class="row">
-            <div class="col-md-7">
-                <div class="mt-3">
-                     <p>Light: {{sensor.light}}</p><br/>
-            <p>Moisture: {{sensor.moisture}}</p><br/>
-            <p>Gas: {{sensor.gas}}</p><br/>
-            <p>Temperature: {{sensor.temp}} degrees celcius</p><br/>
-                </div>
-            </div>
-
-            <!-- <div class="col-md-5">
-                <avatar-form />
-            </div> -->
+        <h1>PROFILE</h1>
+        <div v-if="userInfo">
+          <p>name: {{userInfo.name}}</p>
+          <p>email: {{userInfo.email}}</p>
         </div>
     </div>
 </template>
 
 <script>
-    import AvatarForm from './partials/profile/avatar-form.vue';
-
     export default {
-        components: {
-            AvatarForm
-        },
 
-        computed: {
-            sensor() {
-                return this.$store.state.currentReading;
-            }
+      computed: {
+        userInfo() {
+          if (this.$store.state.user) {
+            console.log(this.$store.state.user);
+            return this.$store.state.user;
+          } else {
+            return false;
+          }
         }
+      }
     };
 </script>
