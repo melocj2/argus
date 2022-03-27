@@ -1,0 +1,133 @@
+html,
+body,
+main {
+  margin: 0 auto;
+  font-family: "Comfortaa", cursive;
+  min-height: 100vh;
+}
+
+.darken {
+  background: rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.background {
+  background: url(/images/bg.jpg?67092681574dcf0c31898274d1ea70db);
+  background-size: cover;
+  background-position: 50% 20%;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 120px 30px;
+  text-align: center;
+}
+
+.logo {
+  height: 100%;
+  width: 200px;
+  margin: auto;
+  -webkit-transition: all .5s ease-in-out;
+  transition: all .5s ease-in-out;
+}
+
+form {
+  margin: auto;
+  max-width: 400px;
+}
+
+input {
+  border: none;
+  text-decoration: none;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 20px;
+  font-family: "Comfortaa", cursive;
+}
+
+::-webkit-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+::-moz-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+:-ms-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+::-ms-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+::placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+a {
+  text-decoration: none;
+}
+
+.authlink {
+  color: #fff;
+  text-decoration: underline;
+  margin-top: 20px;
+}
+
+.linkFlex {
+  display: -webkit-box;
+  display: flex;
+  max-width: 400px;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+          justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.authbtn {
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 30px;
+  font-family: "Comfortaa", cursive;
+  color: #fff;
+  padding: 15px;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 10px;
+  background: #624972;
+  cursor: pointer;
+  -webkit-transition: all .5s ease-in-out;
+  transition: all .5s ease-in-out;
+}
+
+.authbtn:hover {
+  background: #fff;
+  color: #624972;
+  -webkit-transition: all .5s ease-in-out;
+  transition: all .5s ease-in-out;
+}
+
+@media screen and (max-width: 500px) {
+  .logo {
+    height: 100%;
+    width: 150px;
+    margin: auto;
+    -webkit-transition: all .5s ease-in-out;
+    transition: all .5s ease-in-out;
+  }
+}
+

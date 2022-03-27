@@ -1,9 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-@include('layouts.partials.nav')
-<div class="container">
-    <div class="row justify-content-center">
+<div class="background"><div class="darken">
+    <div class="container">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">{{ __('Reset Password') }}</div>
@@ -62,5 +61,5 @@
             </div>
         </div>
     </div>
-</div>
+</div></div>
 @endsection
