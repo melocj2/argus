@@ -30,6 +30,15 @@ const store = new Vuex.Store({
             gas: [],
             temp: [],
         },
+        dayTrend: [],
+        monthTrend: [],
+        sensorValues: {
+            increment: 0,
+            light: [],
+            moisture: [],
+            gas: [],
+            temp: [],
+        },
         currentReading: {
             light: 'reading data..',
             moisture: 'reading data..',
@@ -47,6 +56,8 @@ const store = new Vuex.Store({
             state.sensorValues.moisture.push(myCustomData.moisture);
             state.sensorValues.gas.push(myCustomData.gas);
             state.sensorValues.temp.push(myCustomData.temp);
+
+            state.currentReading = myCustomData;
         },
         sensorValueReset (state) {
             state.sensorValues.increment = 0;
@@ -55,8 +66,11 @@ const store = new Vuex.Store({
             state.sensorValues.gas = [];
             state.sensorValues.temp = [];
         },
-        currentReading (state, myCustomData) {
-            state.currentReading = myCustomData
+        dayTrend (state, myCustomData) {
+            state.dayTrend = myCustomData;
+        },
+        monthTrend (state, myCustomData) {
+            state.monthTrend = myCustomData;
         }
     }
 });

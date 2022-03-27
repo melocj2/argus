@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class Sensor extends Model
 {
 
@@ -24,19 +25,12 @@ class Sensor extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
         'moisture',
         'light',
         'temp',
-        'gas'
+        'gas',
+        'type',
+        'recorded_at'
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'recorded_at' => 'datetime',
-    ];
 }
