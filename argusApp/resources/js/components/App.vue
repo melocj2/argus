@@ -28,6 +28,51 @@
 
 
         methods: {
+
+            pullSensorData() {
+
+                let dayTrendArr = [];
+                let monthTrendArr = [];
+
+                 axios.get('/api/sensors')
+                    .then(response => {
+                        console.log('all data', response.data);
+                        response.data.forEach(item => {
+                            if (item.type === 1) {
+                                dayTrendArr.push(item);
+                            } else if (item.type === 2) {
+                                monthTrendArr.push(item);
+                            };
+                        })
+                    })
+                    .then(() => {
+                        console.log('check Arr', monthTrendArr)
+                        if (dayTrendArr.length > 0) {
+                            this.$store.commit('dayTrend', dayTrendArr);
+                        }
+                        if (monthTrendArr.length > 0) {
+                              this.$store.commit('monthTrend', monthTrendArr);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            },
+
+            compressPastData() {
+
+                const formData = new FormData();
+                formData.append('_method', 'PATCH');
+
+                axios.post('/api/sensors/compress', formData)
+                    .then(response => {
+                        console.log('check', response.data);
+                    }).then(() => {
+                        this.pullSensorData();
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            },
+
             storeAverageValues() {
                 //average store sensor data
 
@@ -46,16 +91,13 @@
                 formData.append('light', light);
                 formData.append('temp', temp);
                 formData.append('gas', gas);
-                formData.append('user_id', this.user.id);
                 // formData.append('plant_id', 1); leave this out for now, ask marco what approach is best for generating different data for different plants
                 //method 1 -> can just use a transformer to change the data when it is being retrieved based on plant id provided
                 //method
 
                  axios.post('/api/sensors', formData)
                     .then(response => {
-                        return response.data;
-                    }).then(data => {
-                        this.$store.commit('currentReading', data);
+                        console.log(response.data);
                     }).catch(error => {
                         console.log(error);
                     });
@@ -77,6 +119,8 @@
         mounted() {
 
             this.$store.commit('user', this.user);
+
+            this.compressPastData();
 
             let t = this;
 
@@ -101,7 +145,7 @@
                 //temp
                 let val =  snapshot.val().temp.value;
                 let tempF = val.replace(/\D/g, '');
-                let tempC = Math.round(tempF * 9 / 5 + 32);
+                let tempC = Math.round((tempF-32)/1.8);
                 sensorSnap.temp = tempC;
 
                 //moisture

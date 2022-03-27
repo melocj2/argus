@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateSensorsTable extends Migration
 {
+
     /**
      * Run the migrations.
      *
@@ -16,11 +17,11 @@ class CreateSensorsTable extends Migration
         Schema::create('sensors', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            $table->string('user_id');
             $table->integer('moisture');
             $table->integer('light');
             $table->integer('temp');
             $table->integer('gas');
+            $table->integer('type')->default(1);
             $table->timestamp('recorded_at')->useCurrent();
         });
     }

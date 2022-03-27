@@ -1861,9 +1861,50 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    storeAverageValues: function storeAverageValues() {
+    pullSensorData: function pullSensorData() {
       var _this = this;
 
+      var dayTrendArr = [];
+      var monthTrendArr = [];
+      axios.get('/api/sensors').then(function (response) {
+        console.log('all data', response.data);
+        response.data.forEach(function (item) {
+          if (item.type === 1) {
+            dayTrendArr.push(item);
+          } else if (item.type === 2) {
+            monthTrendArr.push(item);
+          }
+
+          ;
+        });
+      }).then(function () {
+        console.log('check Arr', monthTrendArr);
+
+        if (dayTrendArr.length > 0) {
+          _this.$store.commit('dayTrend', dayTrendArr);
+        }
+
+        if (monthTrendArr.length > 0) {
+          _this.$store.commit('monthTrend', monthTrendArr);
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    compressPastData: function compressPastData() {
+      var _this2 = this;
+
+      var formData = new FormData();
+      formData.append('_method', 'PATCH');
+      axios.post('/api/sensors/compress', formData).then(function (response) {
+        console.log('check', response.data);
+      }).then(function () {
+        _this2.pullSensorData();
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    storeAverageValues: function storeAverageValues() {
       //average store sensor data
       var sensorObj = this.$store.state.sensorValues;
       var moisture = this.getAvg(sensorObj.moisture);
@@ -1876,15 +1917,12 @@ __webpack_require__.r(__webpack_exports__);
       formData.append('moisture', moisture);
       formData.append('light', light);
       formData.append('temp', temp);
-      formData.append('gas', gas);
-      formData.append('user_id', this.user.id); // formData.append('plant_id', 1); leave this out for now, ask marco what approach is best for generating different data for different plants
+      formData.append('gas', gas); // formData.append('plant_id', 1); leave this out for now, ask marco what approach is best for generating different data for different plants
       //method 1 -> can just use a transformer to change the data when it is being retrieved based on plant id provided
       //method
 
       axios.post('/api/sensors', formData).then(function (response) {
-        return response.data;
-      }).then(function (data) {
-        _this.$store.commit('currentReading', data);
+        console.log(response.data);
       })["catch"](function (error) {
         console.log(error);
       }); //display current reading and history on screen;
@@ -1902,6 +1940,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     this.$store.commit('user', this.user);
+    this.compressPastData();
     var t = this;
     console.log("IIFE fired!");
     var sensorData = firebase.database().ref('sensors');
@@ -1919,7 +1958,7 @@ __webpack_require__.r(__webpack_exports__);
 
       var val = snapshot.val().temp.value;
       var tempF = val.replace(/\D/g, '');
-      var tempC = Math.round(tempF * 9 / 5 + 32);
+      var tempC = Math.round((tempF - 32) / 1.8);
       sensorSnap.temp = tempC; //moisture
 
       sensorSnap.moisture = Math.round(snapshot.val().moisture.value);
@@ -1997,6 +2036,30 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2007,6 +2070,24 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     sensor: function sensor() {
       return this.$store.state.currentReading;
+    },
+    dayTrend: function dayTrend() {
+      var dayTrendData = this.$store.state.dayTrend;
+
+      if (dayTrendData.length > 0) {
+        return dayTrendData;
+      } else {
+        return false;
+      }
+    },
+    monthTrend: function monthTrend() {
+      var monthTrendData = this.$store.state.monthTrend;
+
+      if (monthTrendData.length > 0) {
+        return monthTrendData;
+      } else {
+        return false;
+      }
     }
   },
   components: {
@@ -38436,6 +38517,72 @@ var render = function() {
       _vm._v(" "),
       _c("button", { on: { click: _vm.togglePlantInfo } }, [
         _vm._v("More Plant Info")
+      ]),
+      _vm._v(" "),
+      _c("div", { staticStyle: { float: "left" } }, [
+        _c("h2", [_vm._v("24 HOUR TREND")]),
+        _vm._v(" "),
+        _vm.dayTrend
+          ? _c(
+              "ul",
+              _vm._l(_vm.dayTrend, function(data) {
+                return _c("li", { key: data.id }, [
+                  _c("p", [_vm._v("Light: " + _vm._s(data.light))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Moisture: " + _vm._s(data.moisture))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Gas: " + _vm._s(data.gas))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [
+                    _vm._v(
+                      "Temperature: " + _vm._s(data.temp) + " degrees celcius"
+                    )
+                  ]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Time: " + _vm._s(data.recorded_at))]),
+                  _c("br")
+                ])
+              }),
+              0
+            )
+          : _vm._e()
+      ]),
+      _vm._v(" "),
+      _c("div", { staticStyle: { float: "right" } }, [
+        _c("h2", [_vm._v("30 DAY TREND")]),
+        _vm._v(" "),
+        _vm.monthTrend
+          ? _c(
+              "ul",
+              _vm._l(_vm.monthTrend, function(data) {
+                return _c("li", { key: data.id }, [
+                  _c("p", [_vm._v("Light: " + _vm._s(data.light))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Moisture: " + _vm._s(data.moisture))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Gas: " + _vm._s(data.gas))]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [
+                    _vm._v(
+                      "Temperature: " + _vm._s(data.temp) + " degrees celcius"
+                    )
+                  ]),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("Time: " + _vm._s(data.recorded_at))]),
+                  _c("br")
+                ])
+              }),
+              0
+            )
+          : _vm._e()
       ])
     ],
     1
@@ -55162,6 +55309,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _components_App_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/App.vue */ "./resources/js/components/App.vue");
 /* harmony import */ var _router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./router */ "./resources/js/router/index.js");
+var _state;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
@@ -55180,7 +55331,7 @@ firebase.initializeApp(config);
 console.log(firebase);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
-  state: {
+  state: (_state = {
     user: null,
     sensorValues: {
       increment: 0,
@@ -55189,13 +55340,20 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       gas: [],
       temp: []
     },
-    currentReading: {
-      light: 'reading data..',
-      moisture: 'reading data..',
-      gas: 'reading data..',
-      temp: 'reading data..'
-    }
-  },
+    dayTrend: [],
+    monthTrend: []
+  }, _defineProperty(_state, "sensorValues", {
+    increment: 0,
+    light: [],
+    moisture: [],
+    gas: [],
+    temp: []
+  }), _defineProperty(_state, "currentReading", {
+    light: 'reading data..',
+    moisture: 'reading data..',
+    gas: 'reading data..',
+    temp: 'reading data..'
+  }), _state),
   mutations: {
     user: function user(state, myCustomData) {
       state.user = myCustomData;
@@ -55206,6 +55364,7 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       state.sensorValues.moisture.push(myCustomData.moisture);
       state.sensorValues.gas.push(myCustomData.gas);
       state.sensorValues.temp.push(myCustomData.temp);
+      state.currentReading = myCustomData;
     },
     sensorValueReset: function sensorValueReset(state) {
       state.sensorValues.increment = 0;
@@ -55214,8 +55373,11 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       state.sensorValues.gas = [];
       state.sensorValues.temp = [];
     },
-    currentReading: function currentReading(state, myCustomData) {
-      state.currentReading = myCustomData;
+    dayTrend: function dayTrend(state, myCustomData) {
+      state.dayTrend = myCustomData;
+    },
+    monthTrend: function monthTrend(state, myCustomData) {
+      state.monthTrend = myCustomData;
     }
   }
 });
@@ -55817,6 +55979,9 @@ __webpack_require__.r(__webpack_exports__);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]);
 /* harmony default export */ __webpack_exports__["default"] = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   routes: [{
+    path: '/',
+    redirect: '/home'
+  }, {
     path: '/home',
     name: 'home',
     component: _components_Home_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
