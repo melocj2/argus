@@ -1993,12 +1993,31 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      addPlantOpen: false
+      addPlantOpen: false,
+      weather: {
+        current: {},
+        location: {}
+      }
     };
+  },
+  created: function created() {
+    var vm = this;
+    fetch("http://api.weatherapi.com/v1/current.json?key=0012db7a6ba941cbb04194526222603&q=42.9849,-81.2453&aqi=no").then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      vm.weather = data;
+      console.log(data);
+    });
   },
   components: {
     AddPlantModal: _partials_home_AddPlantModal_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
@@ -38462,6 +38481,14 @@ var render = function() {
       _c("br"),
       _c("br"),
       _c("br"),
+      _vm._v(" "),
+      _c("div", [
+        _c("p", [_vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")]),
+        _vm._v(" "),
+        _c("p", [_vm._v(_vm._s(_vm.weather.location.name))]),
+        _vm._v(" "),
+        _c("p", [_vm._v(_vm._s(_vm.weather.location.localtime))])
+      ]),
       _vm._v(" "),
       _c("router-link", { attrs: { to: "/plant" } }, [
         _vm._v("\n        view plant 1\n    ")
