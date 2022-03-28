@@ -1,6 +1,4 @@
-html,
-body,
-main {
+html, body, main {
   margin: 0 auto;
   font-family: "Comfortaa", cursive;
   min-height: 100vh;
@@ -23,22 +21,12 @@ input {
   font-family: "Comfortaa", cursive;
 }
 
-::-webkit-input-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
 ::-moz-placeholder {
   font-family: "Comfortaa", cursive;
   color: #d1d1d1;
 }
 
 :-ms-input-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-::-ms-input-placeholder {
   font-family: "Comfortaa", cursive;
   color: #d1d1d1;
 }
@@ -75,8 +63,7 @@ a {
   height: 100%;
   width: 150px;
   margin: auto;
-  -webkit-transition: all .5s ease-in-out;
-  transition: all .5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 .authlink {
@@ -86,14 +73,10 @@ a {
 }
 
 .linkFlex {
-  display: -webkit-box;
   display: flex;
   max-width: 400px;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-          flex-direction: row;
-  -webkit-box-pack: justify;
-          justify-content: space-between;
+  flex-direction: row;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 
@@ -110,15 +93,13 @@ a {
   border-radius: 10px;
   background: #624972;
   cursor: pointer;
-  -webkit-transition: all .5s ease-in-out;
-  transition: all .5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 .authbtn:hover {
   background: #fff;
   color: #624972;
-  -webkit-transition: all .5s ease-in-out;
-  transition: all .5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 @media (min-width: 500px) {
@@ -126,8 +107,6 @@ a {
     height: 100%;
     width: 200px;
     margin: auto;
-    -webkit-transition: all .5s ease-in-out;
-    transition: all .5s ease-in-out;
+    transition: all 0.5s ease-in-out;
   }
-}
-
+}/*# sourceMappingURL=app.css.map */

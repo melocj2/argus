@@ -2204,6 +2204,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({});
 
 /***/ }),
@@ -38712,6 +38715,10 @@ var render = function() {
       _vm._v(" "),
       _c("router-link", { attrs: { to: "/profile" } }, [
         _vm._v("\n        Profile\n    ")
+      ]),
+      _vm._v(" "),
+      _c("a", { attrs: { href: "/logout" } }, [
+        _vm._v("\n        Logout\n    ")
       ])
     ],
     1

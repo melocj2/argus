@@ -1,0 +1,35 @@
+
+
+
+html, body, main {
+    margin: 0 auto;
+    font-family: $font;
+    min-height: 100vh;
+}
+
+
+form {
+    margin: auto;
+    max-width: 400px;
+}
+
+input {
+    border: none;
+    text-decoration: none;
+    background: $white;
+    padding: 15px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 20px;
+    font-family: $font;
+}
+
+::placeholder {
+    font-family: $font;
+    color: $grey;
+}
+
+a {
+    text-decoration: none;
+}
