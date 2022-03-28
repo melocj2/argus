@@ -6,6 +6,9 @@
         <router-link to="/profile">
             Profile
         </router-link>
+        <a href="/logout">
+            Logout
+        </a>
     </div>
 </template>
 

@@ -39,7 +39,7 @@
                             <a class="authlink" href="{{ route('password.request') }}">
                                 {{ __('forgot password') }}
                             </a>
-                            
+
                             <a class="authlink" href="{{ route('register') }}">
                                 {{ __('new user') }}
                             </a>
