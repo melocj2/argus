@@ -1,0 +1,70 @@
+.darken {
+  background: rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.background {
+  background-image: url("/images/bg.jpg");
+  background-size: cover;
+  background-position: 50% 20%;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 120px 30px;
+  text-align: center;
+}
+
+.logo {
+  height: 100%;
+  width: 150px;
+  margin: auto;
+  transition: all .5s ease-in-out;
+}
+
+.authlink {
+  color: $white;
+  text-decoration: underline;
+  margin-top: 20px;
+}
+
+.linkFlex {
+  display: flex;
+  max-width: 400px;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.authbtn {
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 30px;
+  font-family: $font;
+  color: $white;
+  padding: 15px;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 10px;
+  background: $purple;
+  cursor: pointer;
+  transition: all .5s ease-in-out;
+}
+
+.authbtn:hover {
+  background: $white;
+  color: $purple;
+  transition: all .5s ease-in-out;
+}
+
+@media (min-width: $breakpoint-mobile) {
+  .logo {
+      height: 100%;
+      width: 200px;
+      margin: auto;
+      transition: all .5s ease-in-out;
+  }
+}

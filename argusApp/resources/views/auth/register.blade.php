@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="background" src="{{ asset('images/bg.jpg')}}"><div class="darken">
+<div class="background"><div class="darken">
     <div class="container">
         <div class="col-md-8">
             <div class="card">

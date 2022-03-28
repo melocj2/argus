@@ -6,33 +6,6 @@ main {
   min-height: 100vh;
 }
 
-.darken {
-  background: rgba(0, 0, 0, 0.5);
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
-.background {
-  background-image: url("/images/bg.jpg");
-  background-size: cover;
-  background-position: 50% 20%;
-  margin: 0 auto;
-  max-height: 100vh;
-}
-
-.container {
-  padding: 120px 30px;
-  text-align: center;
-}
-
-.logo {
-  height: 100%;
-  width: 200px;
-  margin: auto;
-  -webkit-transition: all .5s ease-in-out;
-  transition: all .5s ease-in-out;
-}
-
 form {
   margin: auto;
   max-width: 400px;
@@ -77,6 +50,33 @@ input {
 
 a {
   text-decoration: none;
+}
+
+.darken {
+  background: rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.background {
+  background-image: url("/images/bg.jpg");
+  background-size: cover;
+  background-position: 50% 20%;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 120px 30px;
+  text-align: center;
+}
+
+.logo {
+  height: 100%;
+  width: 150px;
+  margin: auto;
+  -webkit-transition: all .5s ease-in-out;
+  transition: all .5s ease-in-out;
 }
 
 .authlink {
@@ -124,7 +124,7 @@ a {
 @media (min-width: 500px) {
   .logo {
     height: 100%;
-    width: 150px;
+    width: 200px;
     margin: auto;
     -webkit-transition: all .5s ease-in-out;
     transition: all .5s ease-in-out;
