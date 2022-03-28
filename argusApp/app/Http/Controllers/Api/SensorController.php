@@ -100,6 +100,14 @@ class SensorController extends Controller
      */
     public function compress()
     {
+
+        $sensorDataDays = Sensor::where('type', 2)->get();
+        foreach ($sensorDataDays as $day) {
+            if (time() - strtotime($day->recorded_at) < 86400*2) {
+                $day->delete();
+            }
+        }
+
         $sensorData = Sensor::where('type', 1)->get();
 
         $datesArr = [];
@@ -185,7 +193,7 @@ class SensorController extends Controller
         } else {
             $compression = false;
         }
-
+            $compression->fresh();
 
         return response()->json($compression);
     }
