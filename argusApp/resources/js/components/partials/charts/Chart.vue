@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <h2>{{chartData.options.title}}</h2>
-    <GChart
+  <div id="chart">
+
+    <GChart class="chart"
       :type="chartType"
       :options="chartData.options"
       :data="chartData.chartData"
@@ -21,6 +21,28 @@ export default {
     return {
       chartData: this.chartData
     };
+  },
+
+  mounted() {
+    console.log('look for data here', this.chartData);
   }
 };
 </script>
+
+<style lang="scss">
+
+@import "../../../.././sass/variables/breakpoints.scss";
+
+@import "../../../.././sass/variables/fonts.scss";
+@import "../../../.././sass/variables/colors.scss";
+
+  #chart {
+    .chart{
+       * {
+        font-family: $font !important;
+        font-size: 20px !important;
+        font-style: normal !important;
+      }
+    }
+  }
+</style>

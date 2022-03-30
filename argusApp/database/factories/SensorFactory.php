@@ -12,7 +12,7 @@ $factory->define(Sensor::class, function (Faker $faker) {
     $today = Carbon::now()->timestamp;
 
     return [
-        'moisture' => random_int(85, 99),
+        'moisture' => random_int(70, 99),
         'light'=> random_int(50, 99),
         'temp' => random_int(15, 30), //for ease of use, I have pre-converted the fake data to already be in degrees celcius
         'gas' => random_int(35, 55),
