@@ -65,7 +65,7 @@
 
                 axios.post('/api/sensors/compress', formData)
                     .then(response => {
-                        console.log('check', response.data);
+                        console.log('check THIS HERE', response.data);
                     }).then(() => {
                         this.pullSensorData();
                     }).catch(error => {

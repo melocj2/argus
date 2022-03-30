@@ -1897,7 +1897,7 @@ __webpack_require__.r(__webpack_exports__);
       var formData = new FormData();
       formData.append('_method', 'PATCH');
       axios.post('/api/sensors/compress', formData).then(function (response) {
-        console.log('check', response.data);
+        console.log('check THIS HERE', response.data);
       }).then(function () {
         _this2.pullSensorData();
       })["catch"](function (error) {
@@ -2042,32 +2042,14 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _partials_plantView_PlantInfoModal_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./partials/plantView/PlantInfoModal.vue */ "./resources/js/components/partials/plantView/PlantInfoModal.vue");
 /* harmony import */ var _partials_charts_Chart_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/charts/Chart.vue */ "./resources/js/components/partials/charts/Chart.vue");
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 //
 //
 //
@@ -2095,14 +2077,33 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      plantInfoOpen: false,
-      chartData: false,
-      chartDataMonth: false
+      plantInfoOpen: false
     };
   },
   computed: {
     sensor: function sensor() {
       return this.$store.state.currentReading;
+    },
+    chartData: function chartData() {
+      //check what the current chartShown property is
+      var dayTrendData = this.$store.state.dayTrend;
+      var monthTrendData = this.$store.state.monthTrend;
+      var dayData = this.getHealthAvgs(dayTrendData);
+      var monthData = this.getHealthAvgs(monthTrendData);
+
+      if (!(dayData || monthData)) {
+        return false;
+      }
+
+      var info = [dayData, monthData];
+      var data = {};
+      data.sensors = this.convertToChartData(dayData, monthData); //should return 1 array, with both one day and one 30 day data, each with chart data for broken up gas, temp, light, and moisture;
+
+      data.summary = this.getHealthSummary(dayData, monthData); //should return 2 arrays, one day and one 30 day, each with chart data for summary of 30 day and one day;
+
+      data.info = info;
+      console.log('into Chart', data);
+      return data;
     },
     dayTrend: function dayTrend() {
       var dayTrendData = this.$store.state.dayTrend;
@@ -2131,68 +2132,183 @@ __webpack_require__.r(__webpack_exports__);
     togglePlantInfo: function togglePlantInfo() {
       this.plantInfoOpen = !this.plantInfoOpen;
     },
-    getChartData: function getChartData(sensorType) {
-      var dayReadings = this.$store.state.dayTrend;
-      var monthReadings = this.$store.state.monthTrend;
-      var unit;
-      var sensorName = sensorType[0].toUpperCase() + sensorType.slice(1).toLowerCase();
+    getHealthAvgs: function getHealthAvgs(arr) {
+      var _this = this;
 
-      if (sensorType != "temp") {
-        unit = "Percent";
+      var names = _toConsumableArray(Object.keys(this.$store.state.currentReading));
+
+      var healthValues = [];
+      var finalObj = {};
+      names.forEach(function (item) {
+        healthValues.push([]);
+      });
+
+      if (arr.length > 0) {
+        //return single object with average of sensor values as health value
+        arr.forEach(function (item) {
+          names.forEach(function (name) {
+            if (item[name]) {
+              healthValues[names.indexOf(name)].push(item[name]);
+            }
+          });
+        });
+        healthValues.forEach(function (item, index) {
+          finalObj[names[index]] = _this.getHealthScore(item.reduce(function (b, a) {
+            return b + a;
+          }, 0) / item.length, names[index]);
+        });
       } else {
-        unit = "Temperature (°C)";
+        return false;
       }
 
-      var dayChartData = [[unit, sensorName, 'Average']];
-      var dayAvg = [];
-      dayReadings.forEach(function (item) {
-        dayAvg.push(item[sensorType]);
-        var point = [item.recorded_at, item[sensorType]];
-        dayChartData.push(point);
-      });
-      dayAvg = dayAvg.reduce(function (b, a) {
-        return b + a;
-      }, 0) / dayAvg.length;
-      dayChartData.forEach(function (item) {
-        if (item.length < dayChartData[0].length) {
-          item.push(dayAvg);
+      console.log('getHealthAvgs Output', finalObj);
+      return finalObj;
+    },
+    getHealthScore: function getHealthScore(raw, name) {
+      var score;
+
+      if (name == 'temp') {
+        if (raw <= 24 && raw >= 15) {
+          score = 100;
+        } else if (raw > 24) {
+          score = 100 - Math.round(100 * (raw - 24) / (45 - 24));
+        } else if (raw < 15) {
+          score = 100 - Math.round(100 * raw / 15);
+        } else {
+          return false;
         }
-      });
-      var monthChartData = [[unit, sensorName]];
-      monthReadings.forEach(function (item) {
-        var point = [item.recorded_at, item[sensorType]];
-        monthChartData.push(point);
-      });
+      } else if (name == 'gas') {
+        if (raw <= 30) {
+          score = 100;
+        } else if (raw <= 50) {
+          score = 90;
+        } else if (raw > 80) {
+          score = 0;
+        } else if (raw > 50) {
+          score = Math.round((100 - 100 * (raw - 50) / (80 - 50)) / 100 * 80);
+        } else {
+          return false;
+        }
+      } else if (name == 'light') {
+        if (raw >= 20 && raw <= 70) {
+          score = 100;
+        } else if (raw >= 4 && raw <= 86) {
+          score = 90;
+        } else if (raw < 4) {
+          score = Math.round((100 - 100 * raw / 4) / 100 * 90);
+        } else if (raw > 86) {
+          score = Math.round((100 - 100 * (raw - 86) / (100 - 86)) / 100 * 90);
+        } else {
+          return false;
+        }
+      } else if (name === 'moisture') {
+        if (raw >= 50 && raw <= 80) {
+          score = 100;
+        } else if (raw >= 60 && raw <= 90) {
+          score = 90;
+        } else if (raw < 40) {
+          score = 0;
+        } else if (raw < 60) {
+          score = Math.round((100 - 100 * (raw - 40) / (100 - 60)) / 100 * 90);
+        } else if (raw > 90) {
+          score = Math.round((100 - 100 * (raw - 90) / (100 - 90)) / 100 * 90);
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+
+      console.log('getHealthScore Output', score);
+      return score;
+    },
+    convertToChartData: function convertToChartData(objA, objB) {
+      var chartData = [['plant health', 'gas', {
+        role: 'style'
+      }, {
+        role: 'annotation'
+      }, 'temperature', {
+        role: 'style'
+      }, {
+        role: 'annotation'
+      }, 'light', {
+        role: 'style'
+      }, {
+        role: 'annotation'
+      }, 'moisture', {
+        role: 'style'
+      }, {
+        role: 'annotation'
+      }], ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temperature', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'], ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temperature', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']];
       var options = {};
-      options.title = "".concat(sensorName, " Readings: 24 Hour Trend");
+      options.width = 600;
+      options.height = 900;
+      options.legend = 'none';
       options.vAxis = {
-        title: 'Time of Reading'
+        gridlines: {
+          color: 'black'
+        }
+      };
+      options.bar = {
+        gap: '10%',
+        groupWidth: '40%'
       };
       options.hAxis = {
-        title: unit
+        title: 'health rating',
+        color: "#000",
+        viewWindow: {
+          max: 100,
+          min: 0
+        } // gridlines: {
+        //     color: 'transparent'
+        //  }
+
       };
-      options.colors = ['green', 'orange'];
-      options.width = 1200, options.height = 700;
-      var monthOptions = {};
-      monthOptions.title = "".concat(sensorName, " Readings: 30 Day Trend");
-      monthOptions.hAxis = {
-        title: 'Date of Reading'
+      options.vAxis = {
+        title: 'time frame'
       };
-      monthOptions.vAxis = {
-        title: unit
-      };
-      monthOptions.colors = ['green', 'orange'];
-      monthOptions.width = 1200, monthOptions.height = 700;
-      var dayData = {
-        chartData: dayChartData,
+      var finalProduct = {
+        chartData: chartData,
         options: options
       };
-      var monthData = {
-        chartData: monthChartData,
-        options: monthOptions
+      console.log("chartDataHere", finalProduct);
+      return finalProduct;
+    },
+    //takes a sensors object and sums all values
+    quickSum: function quickSum(arr) {
+      var sum = arr.reduce(function (a, b) {
+        return a + b;
+      }, 0);
+      return sum;
+    },
+    getHealthSummary: function getHealthSummary(objA, objB) {
+      var obj = {};
+      var daySum = this.quickSum([objA.moisture, objA.light, objA.temp, objA.gas]);
+      var monthSum = this.quickSum([objB.moisture, objB.light, objB.temp, objB.gas]);
+      obj.day = 100 * daySum / 400;
+      obj.month = 100 * monthSum / 400;
+      var chartData = [['plant health', 'summary', {
+        role: 'style'
+      }], ['24 hrs', obj.day, 'color: #624972; opacity: 0.9'], ['30 days', obj.month, 'color: #597249; opacity: 0.9']];
+      var options = {};
+      options.width = 700, options.height = 900, options.bar = {
+        width: '40%'
       };
-      this.chartData = dayData;
-      this.chartDataMonth = monthData;
+      options.legend = 'none', options.vAxis = {
+        title: 'health rating',
+        viewWindow: {
+          max: 100,
+          min: 0
+        }
+      }, options.hAxis = {
+        title: 'time frame'
+      };
+      var finalProduct = {
+        chartData: chartData,
+        options: options
+      };
+      console.log("chartDataHere MONTHLY", finalProduct);
+      return finalProduct;
     }
   }
 });
@@ -2265,6 +2381,9 @@ __webpack_require__.r(__webpack_exports__);
     return {
       chartData: this.chartData
     };
+  },
+  mounted: function mounted() {
+    console.log('look for data here', this.chartData);
   }
 });
 
@@ -2289,11 +2408,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   methods: {
     closeAddPlant: function closeAddPlant() {
       return this.$emit('closeAddPlant');
-    }
+    },
+    sendSMS: function sendSMS() {}
   }
 });
 
@@ -6718,6 +6839,44 @@ __webpack_require__.r(__webpack_exports__);
 
 }));
 //# sourceMappingURL=bootstrap.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#chart .chart * {\n  font-family: \"Comfortaa\", cursive !important;\n  font-size: 20px !important;\n  font-style: normal !important;\n}", ""]);
+
+// exports
 
 
 /***/ }),
@@ -37901,6 +38060,66 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./PlantView.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Chart.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/home/AddPlantModal.vue?vue&type=style&index=0&lang=scss&":
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/home/AddPlantModal.vue?vue&type=style&index=0&lang=scss& ***!
@@ -38701,134 +38920,24 @@ var render = function() {
       _c("br"),
       _vm._v(" "),
       _c(
-        "a",
-        {
-          attrs: { href: "#" },
-          on: {
-            click: function($event) {
-              return _vm.getChartData("gas")
+        "div",
+        { attrs: { id: "chartContainer" } },
+        [
+          _c("Chart", {
+            staticClass: "barChart",
+            attrs: { chartData: _vm.chartData.sensors, chartType: "BarChart" }
+          }),
+          _vm._v(" "),
+          _c("Chart", {
+            staticClass: "columnChart",
+            attrs: {
+              chartData: _vm.chartData.summary,
+              chartType: "ColumnChart"
             }
-          }
-        },
-        [_vm._v("Gas Readings")]
-      ),
-      _vm._v(" "),
-      _c(
-        "a",
-        {
-          attrs: { href: "#" },
-          on: {
-            click: function($event) {
-              return _vm.getChartData("light")
-            }
-          }
-        },
-        [_vm._v("Light Readings")]
-      ),
-      _vm._v(" "),
-      _c(
-        "a",
-        {
-          attrs: { href: "#" },
-          on: {
-            click: function($event) {
-              return _vm.getChartData("temp")
-            }
-          }
-        },
-        [_vm._v("Temperature Readings")]
-      ),
-      _vm._v(" "),
-      _c(
-        "a",
-        {
-          attrs: { href: "#" },
-          on: {
-            click: function($event) {
-              return _vm.getChartData("moisture")
-            }
-          }
-        },
-        [_vm._v("Moisture Readings")]
-      ),
-      _vm._v(" "),
-      _vm.chartData
-        ? _c("Chart", {
-            attrs: { chartData: _vm.chartData, chartType: "LineChart" }
           })
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.chartDataMonth
-        ? _c("Chart", {
-            attrs: { chartData: _vm.chartDataMonth, chartType: "ColumnChart" }
-          })
-        : _vm._e(),
-      _vm._v(" "),
-      _c("div", { staticStyle: { float: "left" } }, [
-        _c("h2", [_vm._v("24 HOUR TREND")]),
-        _vm._v(" "),
-        _vm.dayTrend
-          ? _c(
-              "ul",
-              _vm._l(_vm.dayTrend, function(data) {
-                return _c("li", { key: data.id }, [
-                  _c("p", [_vm._v("Light: " + _vm._s(data.light))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Moisture: " + _vm._s(data.moisture))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Gas: " + _vm._s(data.gas))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [
-                    _vm._v(
-                      "Temperature: " + _vm._s(data.temp) + " degrees celcius"
-                    )
-                  ]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Time: " + _vm._s(data.recorded_at))]),
-                  _c("br")
-                ])
-              }),
-              0
-            )
-          : _vm._e()
-      ]),
-      _vm._v(" "),
-      _c("div", { staticStyle: { float: "right" } }, [
-        _c("h2", [_vm._v("30 DAY TREND")]),
-        _vm._v(" "),
-        _vm.monthTrend
-          ? _c(
-              "ul",
-              _vm._l(_vm.monthTrend, function(data) {
-                return _c("li", { key: data.id }, [
-                  _c("p", [_vm._v("Light: " + _vm._s(data.light))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Moisture: " + _vm._s(data.moisture))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Gas: " + _vm._s(data.gas))]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [
-                    _vm._v(
-                      "Temperature: " + _vm._s(data.temp) + " degrees celcius"
-                    )
-                  ]),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("p", [_vm._v("Time: " + _vm._s(data.recorded_at))]),
-                  _c("br")
-                ])
-              }),
-              0
-            )
-          : _vm._e()
-      ])
+        ],
+        1
+      )
     ],
     1
   )
@@ -38891,10 +39000,10 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
+    { attrs: { id: "chart" } },
     [
-      _c("h2", [_vm._v(_vm._s(_vm.chartData.options.title))]),
-      _vm._v(" "),
       _c("GChart", {
+        staticClass: "chart",
         attrs: {
           type: _vm.chartType,
           options: _vm.chartData.options,
@@ -38933,7 +39042,9 @@ var render = function() {
       _vm._v(" "),
       _c("p", [_vm._v("ADD NEW PLANT INFO FORM HERE")]),
       _vm._v(" "),
-      _c("button", { on: { click: _vm.closeAddPlant } }, [_vm._v("close")])
+      _c("button", { on: { click: _vm.closeAddPlant } }, [_vm._v("close")]),
+      _vm._v(" "),
+      _c("button", { on: { click: _vm.sendSMS } }, [_vm._v("send SMS message")])
     ])
   ])
 }
@@ -55873,7 +55984,9 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _PlantView_vue_vue_type_template_id_bb4ca456___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PlantView.vue?vue&type=template&id=bb4ca456& */ "./resources/js/components/PlantView.vue?vue&type=template&id=bb4ca456&");
 /* harmony import */ var _PlantView_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PlantView.vue?vue&type=script&lang=js& */ "./resources/js/components/PlantView.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PlantView.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -55881,7 +55994,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _PlantView_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _PlantView_vue_vue_type_template_id_bb4ca456___WEBPACK_IMPORTED_MODULE_0__["render"],
   _PlantView_vue_vue_type_template_id_bb4ca456___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -55910,6 +56023,22 @@ component.options.__file = "resources/js/components/PlantView.vue"
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./PlantView.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./PlantView.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantView_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
@@ -56011,7 +56140,9 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Chart_vue_vue_type_template_id_49c6c8b4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Chart.vue?vue&type=template&id=49c6c8b4& */ "./resources/js/components/partials/charts/Chart.vue?vue&type=template&id=49c6c8b4&");
 /* harmony import */ var _Chart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Chart.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/charts/Chart.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Chart.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -56019,7 +56150,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _Chart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _Chart_vue_vue_type_template_id_49c6c8b4___WEBPACK_IMPORTED_MODULE_0__["render"],
   _Chart_vue_vue_type_template_id_49c6c8b4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -56048,6 +56179,22 @@ component.options.__file = "resources/js/components/partials/charts/Chart.vue"
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Chart.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/charts/Chart.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************!*\
+  !*** ./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader!../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Chart.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/charts/Chart.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Chart_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 

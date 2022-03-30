@@ -4,6 +4,7 @@
             <h1>ADD PLANT MODAL</h1>
             <p>ADD NEW PLANT INFO FORM HERE</p>
             <button @click="closeAddPlant">close</button>
+             <button @click="sendSMS">send SMS message</button>
         </div>
     </div>
 </template>
@@ -14,6 +15,9 @@
     methods: {
         closeAddPlant() {
             return this.$emit('closeAddPlant');
+        },
+        sendSMS() {
+
         }
     }
 }

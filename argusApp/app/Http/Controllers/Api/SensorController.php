@@ -15,7 +15,7 @@ class SensorController extends Controller
      */
     public function index()
     {
-        $sensorData = Sensor::all();
+        $sensorData = Sensor::orderBy('recorded_at', 'ASC')->get();
 
         return response()->json($sensorData);
     }
@@ -103,7 +103,7 @@ class SensorController extends Controller
 
         $sensorDataDays = Sensor::where('type', 2)->get();
         foreach ($sensorDataDays as $day) {
-            if (time() - strtotime($day->recorded_at) < 86400*2) {
+            if (time() - strtotime($day->recorded_at) < 86400 * 2) {
                 $day->delete();
             }
         }
@@ -189,13 +189,17 @@ class SensorController extends Controller
             ]);
 
             $compression->save();
-        }
-        } else {
-            $compression = false;
-        }
-            $compression->fresh();
 
-        return response()->json($compression);
+
+        }
+            $sensorData = Sensor::orderBy('recorded_at', 'ASC')->get();
+
+        } else {
+            $sensorData = false;
+        }
+
+
+        return response()->json($sensorData);
     }
 
 
