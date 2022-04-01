@@ -23,7 +23,7 @@ export default new Router({
             component: Profile
         },
         {
-            path: '/plant/:id?',
+            path: '/plant/:id',
             name: 'plant',
             component: PlantView
         }

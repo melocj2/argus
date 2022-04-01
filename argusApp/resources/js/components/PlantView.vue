@@ -1,19 +1,30 @@
 <template>
     <div>
         <h1>PLANT VIEW</h1>
-        <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo"/>
+        <PlantListMenu />
 
-            <p>Light: {{sensor.light}}</p><br/>
-            <p>Moisture: {{sensor.moisture}}</p><br/>
-            <p>Gas: {{sensor.gas}}</p><br/>
-            <p>Temperature: {{sensor.temp}} degrees celcius</p><br/>
+        <div class="mainPlantViewContainer">
+            <div v-if="currentPlant">
+                <PlantProfileCard :currentPlant="currentPlant" />
+                <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
+                <SensorCardDealer :cardHealthScores="cardHealthScores"/>
+            </div>
 
-        <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
 
-        <div id="chartContainer">
-            <Chart class="barChart" :chartData="chartData.sensors" chartType="BarChart"/>
 
-            <Chart class="columnChart" :chartData="chartData.summary" chartType="ColumnChart"/>
+
+
+
+            <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo" />
+
+
+            <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
+
+            <div id="chartContainer">
+                <Chart class="barChart" :chartData="chartData.sensors" chartType="BarChart"/>
+
+                <Chart class="columnChart" :chartData="chartData.summary" chartType="ColumnChart"/>
+            </div>
         </div>
 
 
@@ -24,8 +35,19 @@
 
     import PlantInfoModal from './partials/plantView/PlantInfoModal.vue';
     import Chart from './partials/charts/Chart.vue';
+    import PlantProfileCard from './partials/plantView/PlantProfileCard.vue';
+    import PlantListMenu from './partials/plantView/PlantListMenu.vue';
+    import SensorCardDealer from './partials/plantView/SensorCardDealer.vue';
 
     export default {
+
+         components: {
+            PlantInfoModal,
+            Chart,
+            PlantProfileCard,
+            PlantListMenu,
+            SensorCardDealer
+        },
 
         data() {
             return {
@@ -34,6 +56,45 @@
         },
 
         computed: {
+
+            currentPlant() {
+
+                if(this.$store.state.userPlants) {
+
+                    let allPlants = this.$store.state.userPlants;
+
+                    let currentPlant = allPlants.filter(item => {
+                        return item.id == this.$route.params.id;
+                    });
+
+                    return currentPlant[0];
+
+                }
+
+                return false
+
+            },
+
+            cardHealthScores() {
+
+                let readings = this.$store.state.currentReading;
+
+                if (!readings) {
+                    return false;
+                }
+
+                let currentHealth = {};
+
+                currentHealth.temp = this.getHealthScore(readings.temp, 'temp');
+
+                currentHealth.light = this.getHealthScore(readings.light, 'light');
+
+                currentHealth.gas = this.getHealthScore(readings.gas, 'gas');
+
+                currentHealth.moisture = this.getHealthScore(readings.moisture, 'moisture');
+
+                return currentHealth;
+            },
 
 
             sensor() {
@@ -57,6 +118,7 @@
                 }
 
                 let info = [dayData, monthData];
+
                 let data = {};
 
                 data.sensors = this.convertToChartData(dayData, monthData); //should return 1 array, with both one day and one 30 day data, each with chart data for broken up gas, temp, light, and moisture;
@@ -65,8 +127,7 @@
 
                 data.info = info;
 
-                console.log('into Chart', data);
-               return data;
+                return data;
 
             },
 
@@ -86,11 +147,6 @@
                     return false;
                 }
             }
-        },
-
-        components: {
-            PlantInfoModal,
-            Chart
         },
 
         methods: {
@@ -127,7 +183,6 @@
                     return false;
                 }
 
-                console.log('getHealthAvgs Output', finalObj);
                 return finalObj;
 
             },
@@ -135,6 +190,8 @@
             getHealthScore(raw, name) {
 
                 let score;
+
+                //thinking we could get a percentage score for this, and send alerts
 
                 if (name == 'temp') {
                     if (raw <= 24 && raw >= 15) {
@@ -202,7 +259,7 @@
                     ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temperature', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'],
                     ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temperature', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']
 
-                    ];
+                ];
 
                 let options = {};
 
@@ -289,8 +346,7 @@
                 console.log("chartDataHere MONTHLY", finalProduct);
 
                 return finalProduct;
-            }
-
+            },
 
         }
 
@@ -301,6 +357,21 @@
 @import "../.././sass/variables/breakpoints.scss";
 @import "../.././sass/variables/fonts.scss";
 @import "../.././sass/variables/colors.scss";
+
+.plantProfileImage {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 20rem;
+    width: 20rem;
+    border-radius: 1rem;
+}
+
+.mainPlantViewContainer {
+    margin-left: 12rem;
+}
+
+
 #chartContainer {
     width: 100%;
     display: flex;

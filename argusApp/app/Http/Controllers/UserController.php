@@ -27,7 +27,6 @@ class UserController extends Controller
 
         if ($request->has('upload_avatar')) {
             $avatarName = Storage::putFile('public/thumbnail', $request->avatar);
-
             $user->thumbnail = $avatarName;
             $user->save();
         }

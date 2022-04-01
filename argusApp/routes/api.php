@@ -26,3 +26,21 @@ Route::post('sensors', 'Api\SensorController@store')->name('sensors.store');
 Route::get('sensors', 'Api\SensorController@index')->name('sensors.index');
 
 Route::patch('sensors/compress', 'Api\SensorController@compress')->name('sensors.compress');
+
+Route::get('sensors/addNew', 'Api\SensorController@addNew')->name('sensors.addNew');
+
+//plant data
+Route::get('plants/{user}', 'Api\PlantController@getPlantList')->name('plants.getPlantList');
+
+Route::post('plants', 'Api\PlantController@store')->name('plants.store');
+
+Route::patch('plants/{id}', 'Api\PlantController@update')->name('plants.update');
+
+Route::delete('plants/{id}', 'Api\PlantController@destroy')->name('plants.destory');
+
+//message data
+Route::get('messages/{user}', 'Api\MessageController@getMessageList')->name('messages.getMessageList');
+
+Route::patch('messages/{id}', 'Api\MessageController@update')->name('messages.update');
+
+Route::post('messages/sendAlert', 'Api\MessageController@sendAlert')->name('messages.sendAlert');
