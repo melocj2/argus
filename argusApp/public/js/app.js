@@ -2846,7 +2846,7 @@ __webpack_require__.r(__webpack_exports__);
 
     var check = this.plant.type.toLowerCase().split(' ');
 
-    if (check[check.length] != 'plant') {
+    if (check[check.length - 1] != 'plant') {
       check.push('plant');
     }
 
