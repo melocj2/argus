@@ -52,6 +52,14 @@ a {
   text-decoration: none;
 }
 
+.icon {
+  background-size: cover !important;
+  background-position: 50% 50% !important;
+  height: 200px;
+  width: 200px;
+  border-radius: 20px;
+}
+
 .darken {
   background: rgba(0, 0, 0, 0.5);
   margin: 0 auto;

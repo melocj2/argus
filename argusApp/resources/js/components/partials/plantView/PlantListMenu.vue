@@ -1,5 +1,8 @@
 <template>
     <div class="plantListSideMenu" v-if="sideNavUserPlants">
+      <router-link class="routerLink sideNavPlants" :to="{ name: 'home' }">
+            HOME
+        </router-link>
       <div v-for="plant in sideNavUserPlants" :key="plant.id">
         <router-link class="routerLink sideNavPlants" :to="{ name: 'plant', params: { id: `${plant.id}`}}">
             {{plant.name}}
