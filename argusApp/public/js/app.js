@@ -2174,6 +2174,16 @@ __webpack_require__.r(__webpack_exports__);
       });
       return plants;
     },
+    isHealthy: function isHealthy() {
+      var msgs = this.userMessages;
+      var health = 'healthy';
+      msgs.forEach(function (item) {
+        if (item.message != 'loading data...' || item.message != null) {
+          health = 'needs attention';
+        }
+      });
+      return health;
+    },
     userMessages: function userMessages() {
       var messages = this.$store.state.userMessages.filter(function (item) {
         return item.message;
@@ -39726,7 +39736,7 @@ var render = function() {
               _vm._v(" "),
               _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
               _vm._v(" "),
-              _c("p", [_vm._v("status: healthy")]),
+              _c("p", [_vm._v("status: " + _vm._s(_vm.isHealthy))]),
               _vm._v(" "),
               _c(
                 "router-link",
