@@ -1,5 +1,5 @@
 <template>
-  <div id="chart">
+  <div id="chart" v-if="chartData">
 
     <GChart class="chart"
       :type="chartType"
@@ -16,15 +16,6 @@ export default {
   name: "App",
   components: {
     GChart
-  },
-  data() {
-    return {
-      chartData: this.chartData
-    };
-  },
-
-  mounted() {
-    console.log('look for data here', this.chartData);
   }
 };
 </script>
@@ -32,7 +23,6 @@ export default {
 <style lang="scss">
 
 @import "../../../.././sass/variables/breakpoints.scss";
-
 @import "../../../.././sass/variables/fonts.scss";
 @import "../../../.././sass/variables/colors.scss";
 

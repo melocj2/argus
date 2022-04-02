@@ -1860,14 +1860,66 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     }
   },
+  computed: {},
   methods: {
+    generateAlerts: function generateAlerts() {
+      var messages = this.getMessagesFromReadings();
+      var userMessages = this.$store.state.userMessages;
+      var userMsgObj = {};
+      userMessages.forEach(function (item) {
+        userMsgObj[item.type] = {
+          message: item.message,
+          id: item.id
+        };
+      });
+
+      if (messages.gas != userMsgObj.gas.message) {
+        //update the db and the store
+        this.updateAppUserMessages('gas', messages.gas, userMsgObj.gas.id); // this.sendSMSAlert('gas', messages.gas);
+        //cascade check messages to determine if you should send an sms update or not
+      }
+
+      if (messages.light != userMsgObj.light.message) {
+        //update the db and the store
+        this.updateAppUserMessages('light', messages.light, userMsgObj.light.id); // this.sendSMSAlert('light', messages.light);
+        //cascade check messages to determine if you should send an sms update or not
+      }
+
+      if (messages.moisture != userMsgObj.moisture.message) {
+        //update the db and the store
+        this.updateAppUserMessages('moisture', messages.moisture, userMsgObj.moisture.id); // this.sendSMSAlert('moisture', messages.moisture);
+        //cascade check messages to determine if you should send an sms update or not
+      }
+
+      if (messages.temp != userMsgObj.temp.message) {
+        //update the db and the store
+        this.updateAppUserMessages('temp', messages.temp, userMsgObj.temp.id); // this.sendSMSAlert('temperature', messages.temp);
+        //cascade check messages to determine if you should send an sms update or not
+      }
+    },
+    sendSMSAlert: function sendSMSAlert(sensor, message) {
+      console.log("handed to sms alerts BEFORE", sensor, message);
+
+      if (message == null) {
+        message = "".concat(sensor, " has returned to optimal levels.");
+      }
+
+      console.log("handed to sms alerts AFTER", sensor, message);
+      axios.post("/api/messages/sendAlert", {
+        message: message,
+        _method: 'POST'
+      }).then(function () {
+        console.log('nice, front end handled');
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
     pullSensorData: function pullSensorData() {
       var _this = this;
 
       var dayTrendArr = [];
       var monthTrendArr = [];
       axios.get('/api/sensors').then(function (response) {
-        console.log('all data', response.data);
         response.data.forEach(function (item) {
           if (item.type === 1) {
             dayTrendArr.push(item);
@@ -1878,8 +1930,6 @@ __webpack_require__.r(__webpack_exports__);
           ;
         });
       }).then(function () {
-        console.log('check Arr', monthTrendArr);
-
         if (dayTrendArr.length > 0) {
           _this.$store.commit('dayTrend', dayTrendArr);
         }
@@ -1891,18 +1941,92 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error);
       });
     },
-    compressPastData: function compressPastData() {
+    updateAppUserMessages: function updateAppUserMessages(sensor, message, id) {
       var _this2 = this;
+
+      axios.post("/api/messages/".concat(id), {
+        type: sensor,
+        message: message,
+        _method: 'PATCH'
+      }).then(function (response) {
+        var userMessages = _this2.$store.state.userMessages;
+        var newMessages = [];
+        userMessages.forEach(function (item) {
+          if (item.id == response.data.id) {
+            item = response.data;
+          }
+
+          newMessages.push(item);
+        });
+
+        _this2.$store.commit('userMessages', newMessages);
+
+        return response.data;
+      }).then(function (item) {
+        var name = item.type == 'temp' ? 'temperature' : item.type;
+
+        _this2.sendSMSAlert(name, item.message);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    compressPastData: function compressPastData() {
+      var _this3 = this;
 
       var formData = new FormData();
       formData.append('_method', 'PATCH');
       axios.post('/api/sensors/compress', formData).then(function (response) {
         console.log('check THIS HERE', response.data);
       }).then(function () {
-        _this2.pullSensorData();
+        _this3.pullSensorData();
       })["catch"](function (error) {
         console.log(error);
       });
+    },
+    //generates an object with messages based on current sensor readings
+    getMessagesFromReadings: function getMessagesFromReadings() {
+      var readings = this.$store.state.currentReading;
+      var messages = {};
+
+      if (readings.gas > 50 && readings.gas <= 60) {
+        messages.gas = "warning: currently detecting high levels of carbon monoxide, please move plant.";
+      } else if (readings.gas > 60 && readings.gas <= 90) {
+        messages.gas = "warning: currently detecting high levels of carbon monoxide and hydrogen gas, please move plant.";
+      } else if (readings.gas > 90) {
+        messages.gas = "warning: currently detecting high levels of carbon monoxide, hydrogen gas, and alcohol, please move plant.";
+      } else {
+        messages.gas = null;
+      }
+
+      if (readings.light > 86) {
+        messages.light = "plant is currently not getting enough light, please move plant to a better lit area.";
+      } else if (readings.light < 5) {
+        messages.light = "plant is currently getting too much direct light, please move plant into a shadier area.";
+      } else {
+        messages.light = null;
+      }
+
+      if (readings.moisture > 90) {
+        messages.moisture = "plant is currently too dry, please water.";
+      } else if (readings.moisture < 50) {
+        messages.moisture = "plant is currently too damp, please drain.";
+      } else {
+        messages.moisture = null;
+      }
+
+      if (readings.temp > 35) {
+        messages.temp = "warning: plant is currently far too hot, please move to a cooler area.";
+      } else if (readings.temp > 24) {
+        messages.temp = "plant is currently too hot, please move to a cooler area.";
+      } else if (readings.temp < 5) {
+        messages.temp = "warning: plant is currently far too cold, please move to a warmer area.";
+      } else if (readings.temp < 15) {
+        messages.temp = "plant is currently too cold, please move to a warmer area.";
+      } else {
+        messages.temp = null;
+      }
+
+      return messages;
     },
     storeAverageValues: function storeAverageValues() {
       //average store sensor data
@@ -1910,25 +2034,38 @@ __webpack_require__.r(__webpack_exports__);
       var moisture = this.getAvg(sensorObj.moisture);
       var light = this.getAvg(sensorObj.light);
       var temp = this.getAvg(sensorObj.temp);
-      var gas = this.getAvg(sensorObj.gas); //save averages to the database (will require a controller, model, migration, etc...)
-
+      var gas = this.getAvg(sensorObj.gas);
       var formData = new FormData();
       formData.append('_method', 'POST');
       formData.append('moisture', moisture);
       formData.append('light', light);
       formData.append('temp', temp);
-      formData.append('gas', gas); // formData.append('plant_id', 1); leave this out for now, ask marco what approach is best for generating different data for different plants
-      //method 1 -> can just use a transformer to change the data when it is being retrieved based on plant id provided
-      //method
-
+      formData.append('gas', gas);
       axios.post('/api/sensors', formData).then(function (response) {
         console.log(response.data);
       })["catch"](function (error) {
         console.log(error);
-      }); //display current reading and history on screen;
-      //reset sensorValues
-
+      });
       this.$store.commit('sensorValueReset');
+      this.generateAlerts();
+    },
+    getUserPlantList: function getUserPlantList() {
+      var _this4 = this;
+
+      axios.get("/api/plants/".concat(this.user.id)).then(function (response) {
+        _this4.$store.commit('userPlants', response.data);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    getUserMessageList: function getUserMessageList() {
+      var _this5 = this;
+
+      axios.get("/api/messages/".concat(this.user.id)).then(function (response) {
+        _this5.$store.commit('userMessages', response.data);
+      })["catch"](function (error) {
+        console.log(error);
+      });
     },
     getAvg: function getAvg(arr) {
       var total = arr.reduce(function (a, b) {
@@ -1941,8 +2078,9 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     this.$store.commit('user', this.user);
     this.compressPastData();
+    this.getUserPlantList();
+    this.getUserMessageList();
     var t = this;
-    console.log("IIFE fired!");
     var sensorData = firebase.database().ref('sensors');
     sensorData.on('value', function (snapshot) {
       var sensorSnap = {};
@@ -1961,9 +2099,10 @@ __webpack_require__.r(__webpack_exports__);
       var tempC = Math.round((tempF - 32) / 1.8);
       sensorSnap.temp = tempC; //moisture
 
-      sensorSnap.moisture = Math.round(snapshot.val().moisture.value);
+      sensorSnap.moisture = Math.round(snapshot.val().moisture.value); //inside store, this also adjusts current readings as well, split to allow more easy to read access to the current readings,
+      //instead of fetching the last item in the list of constantly changing arrays
+
       t.$store.commit('sensorValues', sensorSnap);
-      console.log(t.$store.state.sensorValues);
     });
   }
 });
@@ -1999,6 +2138,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2007,8 +2160,34 @@ __webpack_require__.r(__webpack_exports__);
       weather: {
         current: {},
         location: {}
-      }
+      },
+      myPlantFilter: ''
     };
+  },
+  computed: {
+    //NOTE WHEN ADDING A USER PLANT YOU MUST UPDATE BOTH STORE AND DB!!!!
+    userPlants: function userPlants() {
+      var _this = this;
+
+      var plants = this.$store.state.userPlants.filter(function (item) {
+        return item.name.includes(_this.myPlantFilter);
+      });
+      return plants;
+    },
+    userMessages: function userMessages() {
+      var messages = this.$store.state.userMessages.filter(function (item) {
+        return item.message;
+      });
+      console.log("SEE HOME MESSAGES HERE", messages);
+      return messages;
+    } // messages() {
+    //     //check values of 'current readings'
+    //     //if any values are high or low, generate a message and tie it to a post request to messages
+    //     //NOTE: get all plants
+    //     //send the message to update the db, and then receive an array back of all messages associated with the user
+    //     //
+    // }
+
   },
   created: function created() {
     var vm = this;
@@ -2042,6 +2221,9 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _partials_plantView_PlantInfoModal_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./partials/plantView/PlantInfoModal.vue */ "./resources/js/components/partials/plantView/PlantInfoModal.vue");
 /* harmony import */ var _partials_charts_Chart_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./partials/charts/Chart.vue */ "./resources/js/components/partials/charts/Chart.vue");
+/* harmony import */ var _partials_plantView_PlantProfileCard_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./partials/plantView/PlantProfileCard.vue */ "./resources/js/components/partials/plantView/PlantProfileCard.vue");
+/* harmony import */ var _partials_plantView_PlantListMenu_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./partials/plantView/PlantListMenu.vue */ "./resources/js/components/partials/plantView/PlantListMenu.vue");
+/* harmony import */ var _partials_plantView_SensorCardDealer_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./partials/plantView/SensorCardDealer.vue */ "./resources/js/components/partials/plantView/SensorCardDealer.vue");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -2072,15 +2254,63 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+  components: {
+    PlantInfoModal: _partials_plantView_PlantInfoModal_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
+    Chart: _partials_charts_Chart_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    PlantProfileCard: _partials_plantView_PlantProfileCard_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
+    PlantListMenu: _partials_plantView_PlantListMenu_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    SensorCardDealer: _partials_plantView_SensorCardDealer_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
+  },
   data: function data() {
     return {
       plantInfoOpen: false
     };
   },
   computed: {
+    currentPlant: function currentPlant() {
+      var _this = this;
+
+      if (this.$store.state.userPlants) {
+        var allPlants = this.$store.state.userPlants;
+        var currentPlant = allPlants.filter(function (item) {
+          return item.id == _this.$route.params.id;
+        });
+        return currentPlant[0];
+      }
+
+      return false;
+    },
+    cardHealthScores: function cardHealthScores() {
+      var readings = this.$store.state.currentReading;
+
+      if (!readings) {
+        return false;
+      }
+
+      var currentHealth = {};
+      currentHealth.temp = this.getHealthScore(readings.temp, 'temp');
+      currentHealth.light = this.getHealthScore(readings.light, 'light');
+      currentHealth.gas = this.getHealthScore(readings.gas, 'gas');
+      currentHealth.moisture = this.getHealthScore(readings.moisture, 'moisture');
+      return currentHealth;
+    },
     sensor: function sensor() {
       return this.$store.state.currentReading;
     },
@@ -2102,7 +2332,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       data.summary = this.getHealthSummary(dayData, monthData); //should return 2 arrays, one day and one 30 day, each with chart data for summary of 30 day and one day;
 
       data.info = info;
-      console.log('into Chart', data);
       return data;
     },
     dayTrend: function dayTrend() {
@@ -2124,16 +2353,12 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       }
     }
   },
-  components: {
-    PlantInfoModal: _partials_plantView_PlantInfoModal_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-    Chart: _partials_charts_Chart_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
-  },
   methods: {
     togglePlantInfo: function togglePlantInfo() {
       this.plantInfoOpen = !this.plantInfoOpen;
     },
     getHealthAvgs: function getHealthAvgs(arr) {
-      var _this = this;
+      var _this2 = this;
 
       var names = _toConsumableArray(Object.keys(this.$store.state.currentReading));
 
@@ -2153,7 +2378,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
           });
         });
         healthValues.forEach(function (item, index) {
-          finalObj[names[index]] = _this.getHealthScore(item.reduce(function (b, a) {
+          finalObj[names[index]] = _this2.getHealthScore(item.reduce(function (b, a) {
             return b + a;
           }, 0) / item.length, names[index]);
         });
@@ -2161,11 +2386,10 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         return false;
       }
 
-      console.log('getHealthAvgs Output', finalObj);
       return finalObj;
     },
     getHealthScore: function getHealthScore(raw, name) {
-      var score;
+      var score; //thinking we could get a percentage score for this, and send alerts
 
       if (name == 'temp') {
         if (raw <= 24 && raw >= 15) {
@@ -2376,14 +2600,6 @@ __webpack_require__.r(__webpack_exports__);
   name: "App",
   components: {
     GChart: vue_google_charts__WEBPACK_IMPORTED_MODULE_0__["GChart"]
-  },
-  data: function data() {
-    return {
-      chartData: this.chartData
-    };
-  },
-  mounted: function mounted() {
-    console.log('look for data here', this.chartData);
   }
 });
 
@@ -2409,12 +2625,71 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      currentDate: new Date().toISOString().slice(0, 10),
+      disabledAdd: null,
+      errors: null
+    };
+  },
   methods: {
     closeAddPlant: function closeAddPlant() {
       return this.$emit('closeAddPlant');
     },
-    sendSMS: function sendSMS() {}
+    addPlant: function addPlant() {
+      var _this = this;
+
+      this.disabledAdd = true;
+      this.errors = null;
+      var PlantFormData = new FormData(this.$refs.plantForm);
+      PlantFormData.append('_method', 'POST');
+      PlantFormData.append('user_id', this.$store.state.user.id);
+      axios.post("/api/plants", PlantFormData).then(function (response) {
+        return response.data;
+      }).then(function () {
+        return axios.get("/api/plants/".concat(_this.$store.state.user.id));
+      }).then(function (response) {
+        // the second call is made to pull ALL plants fresh from the db (with updated plant) and commit them to the store
+        _this.$store.commit('userPlants', response.data);
+      }).then(function () {
+        _this.closeAddPlant(); //you were here
+
+      })["catch"](function (error) {
+        _this.errors = 'the data you provided was invalid';
+      }).then(function () {
+        _this.disabledAdd = false; //you were here
+      });
+    },
+    sendSMS: function sendSMS() {
+      axios.get('/api/sensors/sendAlert').then(function (response) {
+        console.log('ALERT SENT', response.data);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
   }
 });
 
@@ -2470,6 +2745,226 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     closePlantInfo: function closePlantInfo() {
       return this.$emit('closePlantInfo');
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  computed: {
+    sideNavUserPlants: function sideNavUserPlants() {
+      return this.$store.state.userPlants;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["currentPlant"],
+  data: function data() {
+    return {
+      editingPlant: false,
+      showDeletePlant: false
+    };
+  },
+  methods: {
+    toggleEdit: function toggleEdit() {
+      this.editingPlant = !this.editingPlant;
+    },
+    editPlant: function editPlant() {
+      var _this = this;
+
+      var PlantEditFormData = new FormData(this.$refs.plantEditForm);
+      PlantEditFormData.append('_method', 'PATCH');
+      PlantEditFormData.append('edit_profile_card', true);
+      PlantEditFormData.append('locationB', this.currentPlant.location);
+      axios.post("/api/plants/".concat(this.currentPlant.id), PlantEditFormData).then(function (response) {
+        return response.data;
+      }).then(function () {
+        return axios.get("/api/plants/".concat(_this.$store.state.user.id));
+      }).then(function (response) {
+        // the second call is made to pull ALL plants fresh from the db (with updated plant) and commit them to the store
+        _this.$store.commit('userPlants', response.data);
+      })["catch"](function (error) {
+        console.log(error);
+      }).then(function () {
+        _this.editingPlant = false; //you were here
+      });
+    },
+    showDeleteToggle: function showDeleteToggle() {
+      this.showDeletePlant = !this.showDeletePlant;
+    },
+    deletePlant: function deletePlant() {
+      var _this2 = this;
+
+      var PlantDelete = new FormData();
+      PlantDelete.append('_method', 'DELETE');
+      axios.post("/api/plants/".concat(this.currentPlant.id), PlantDelete).then(function (response) {
+        return response.data;
+      }).then(function () {
+        return axios.get("/api/plants/".concat(_this2.$store.state.user.id));
+      }).then(function (response) {
+        // the second call is made to pull ALL plants fresh from the db (with updated plant) and commit them to the store
+        _this2.$store.commit('userPlants', response.data);
+
+        _this2.$router.push({
+          name: 'home'
+        });
+
+        _this2.showDeleteToggle();
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["cardHealthScores"],
+  // data() {
+  //   return {
+  //     meters: {
+  //     }
+  //   }
+  // },
+  computed: {
+    sensors: function sensors() {
+      var readings = this.$store.state.currentReading;
+
+      if (!readings) {
+        return false;
+      }
+
+      var arr = [];
+      var gasComment = readings.gas < 50 ? 'ideal' : readings.gas < 60 ? 'toxic' : readings.gas < 90 ? 'highly toxic' : 'deadly';
+      var lightComment = readings.light > 86 ? 'too dark' : readings.light < 5 ? 'too bright' : 'ideal';
+      var tempComment = readings.temp < 5 ? 'too cold' : readings.temp < 15 ? 'cold' : readings.temp < 24 ? 'ideal' : readings.temp < 35 ? 'hot' : 'too hot';
+      var moistureComment = readings.moisture < 50 ? 'too dry' : readings.moisture > 90 ? 'too damp' : 'ideal'; //need images for these
+
+      arr.push({
+        name: 'temp',
+        displayName: 'temperature',
+        reading: readings.temp,
+        unit: '°C',
+        comment: tempComment
+      });
+      arr.push({
+        name: 'light',
+        displayName: 'light',
+        reading: readings.light,
+        unit: '%',
+        comment: lightComment
+      });
+      arr.push({
+        name: 'moisture',
+        displayName: 'moisture',
+        reading: readings.moisture,
+        unit: '%',
+        comment: moistureComment
+      });
+      arr.push({
+        name: 'gas',
+        displayName: 'gas',
+        reading: readings.gas,
+        unit: '%',
+        comment: gasComment
+      });
+      return arr;
     }
   }
 });
@@ -6843,6 +7338,25 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".plantSideImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&":
 /*!*******************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss& ***!
@@ -6855,7 +7369,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
+exports.push([module.i, ".plantProfileImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 20rem;\n  width: 20rem;\n  border-radius: 1rem;\n}\n.mainPlantViewContainer {\n  margin-left: 12rem;\n}\n#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
 
 // exports
 
@@ -6893,7 +7407,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".addPlantBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+exports.push([module.i, ".addPlantBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 90%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
 
 // exports
 
@@ -6913,6 +7427,63 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 // module
 exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".plantListSideMenu {\n  float: left;\n  width: 10rem;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  height: 100%;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  height: 100vh;\n  text-align: center;\n  font-size: 1.5rem;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".plantProfileCard {\n  display: inline-block;\n  width: 30rem;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".sensorViewCard {\n  display: -webkit-box;\n  display: flex;\n  width: 40rem;\n  -webkit-box-pack: justify;\n          justify-content: space-between;\n  flex-wrap: wrap;\n  margin-top: 5rem;\n  gap: 2rem;\n}\n.sensorViewCard .sensorCardChild {\n  display: -webkit-box;\n  display: flex;\n  border: 1px solid whitesmoke;\n  border-radius: 1rem;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n.sensorViewCard .sensorCardChild * {\n  justify-self: center;\n  text-align: center;\n}\n.meterContainer {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: justify;\n          justify-content: space-between;\n  width: 15rem;\n}\n.activeCell, .inactiveCell {\n  display: inline-block;\n  width: 2rem;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n}\n.activeCell {\n  background-color: #758B66;\n}\n.inactiveCell {\n  background: transparent;\n  border: 1px solid gray;\n}\n.cardImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
 
 // exports
 
@@ -38060,6 +38631,36 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./Home.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss&":
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/PlantView.vue?vue&type=style&index=0&lang=scss& ***!
@@ -38159,6 +38760,96 @@ if(false) {}
 
 
 var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantInfoModal.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantInfoModal.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss& ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantListMenu.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantProfileCard.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./SensorCardDealer.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&");
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -38844,13 +39535,6 @@ var render = function() {
         ? _c("AddPlantModal", { on: { closeAddPlant: _vm.toggleAddPlant } })
         : _vm._e(),
       _vm._v(" "),
-      _c("button", { on: { click: _vm.toggleAddPlant } }, [
-        _vm._v("Add Plant")
-      ]),
-      _c("br"),
-      _c("br"),
-      _c("br"),
-      _vm._v(" "),
       _c("div", [
         _c("p", [_vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")]),
         _vm._v(" "),
@@ -38859,9 +39543,84 @@ var render = function() {
         _c("p", [_vm._v(_vm._s(_vm.weather.location.localtime))])
       ]),
       _vm._v(" "),
-      _c("router-link", { attrs: { to: "/plant" } }, [
-        _vm._v("\n        view plant 1\n    ")
-      ])
+      _c(
+        "ul",
+        { staticClass: "messageList" },
+        _vm._l(_vm.userMessages, function(message) {
+          return _c("li", { key: message.id }, [
+            _c("p", [_vm._v("message: " + _vm._s(message.message))]),
+            _vm._v(" "),
+            _c("p", [
+              _vm._v("alert generated at: " + _vm._s(message.generatedAt))
+            ])
+          ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.myPlantFilter,
+            expression: "myPlantFilter"
+          }
+        ],
+        attrs: { placeholder: "search plants", id: "myPlantFilter" },
+        domProps: { value: _vm.myPlantFilter },
+        on: {
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.myPlantFilter = $event.target.value
+          }
+        }
+      }),
+      _vm._v(" "),
+      _c("button", { on: { click: _vm.toggleAddPlant } }, [
+        _vm._v("Add Plant")
+      ]),
+      _c("br"),
+      _c("br"),
+      _c("br"),
+      _vm._v(" "),
+      _c(
+        "ul",
+        { staticClass: "plantList" },
+        _vm._l(_vm.userPlants, function(plant) {
+          return _c(
+            "li",
+            { key: plant.id },
+            [
+              _c("div", {
+                staticClass: "plantSideImage",
+                style: { "background-image": "url(" + plant.image + ")" }
+              }),
+              _vm._v(" "),
+              _c("p", [_vm._v("name: " + _vm._s(plant.name))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("status: healthy")]),
+              _vm._v(" "),
+              _c(
+                "router-link",
+                {
+                  staticClass: "routerLink",
+                  attrs: {
+                    to: { name: "plant", params: { id: "" + plant.id } }
+                  }
+                },
+                [_vm._v("view plant")]
+              )
+            ],
+            1
+          )
+        }),
+        0
+      )
     ],
     1
   )
@@ -38893,48 +39652,72 @@ var render = function() {
     [
       _c("h1", [_vm._v("PLANT VIEW")]),
       _vm._v(" "),
-      _vm.plantInfoOpen
-        ? _c("PlantInfoModal", { on: { closePlantInfo: _vm.togglePlantInfo } })
-        : _vm._e(),
-      _vm._v(" "),
-      _c("p", [_vm._v("Light: " + _vm._s(_vm.sensor.light))]),
-      _c("br"),
-      _vm._v(" "),
-      _c("p", [_vm._v("Moisture: " + _vm._s(_vm.sensor.moisture))]),
-      _c("br"),
-      _vm._v(" "),
-      _c("p", [_vm._v("Gas: " + _vm._s(_vm.sensor.gas))]),
-      _c("br"),
-      _vm._v(" "),
-      _c("p", [
-        _vm._v("Temperature: " + _vm._s(_vm.sensor.temp) + " degrees celcius")
-      ]),
-      _c("br"),
-      _vm._v(" "),
-      _c("button", { on: { click: _vm.togglePlantInfo } }, [
-        _vm._v("More Plant Info")
-      ]),
-      _c("br"),
-      _c("br"),
-      _c("br"),
-      _c("br"),
+      _c("PlantListMenu"),
       _vm._v(" "),
       _c(
         "div",
-        { attrs: { id: "chartContainer" } },
+        { staticClass: "mainPlantViewContainer" },
         [
-          _c("Chart", {
-            staticClass: "barChart",
-            attrs: { chartData: _vm.chartData.sensors, chartType: "BarChart" }
-          }),
+          _vm.currentPlant
+            ? _c(
+                "div",
+                [
+                  _c("PlantProfileCard", {
+                    attrs: { currentPlant: _vm.currentPlant }
+                  }),
+                  _vm._v(" "),
+                  _c("button", { on: { click: _vm.togglePlantInfo } }, [
+                    _vm._v("More Plant Info")
+                  ]),
+                  _c("br"),
+                  _c("br"),
+                  _c("br"),
+                  _c("br"),
+                  _vm._v(" "),
+                  _c("SensorCardDealer", {
+                    attrs: { cardHealthScores: _vm.cardHealthScores }
+                  })
+                ],
+                1
+              )
+            : _vm._e(),
           _vm._v(" "),
-          _c("Chart", {
-            staticClass: "columnChart",
-            attrs: {
-              chartData: _vm.chartData.summary,
-              chartType: "ColumnChart"
-            }
-          })
+          _vm.plantInfoOpen
+            ? _c("PlantInfoModal", {
+                on: { closePlantInfo: _vm.togglePlantInfo }
+              })
+            : _vm._e(),
+          _vm._v(" "),
+          _c("button", { on: { click: _vm.togglePlantInfo } }, [
+            _vm._v("More Plant Info")
+          ]),
+          _c("br"),
+          _c("br"),
+          _c("br"),
+          _c("br"),
+          _vm._v(" "),
+          _c(
+            "div",
+            { attrs: { id: "chartContainer" } },
+            [
+              _c("Chart", {
+                staticClass: "barChart",
+                attrs: {
+                  chartData: _vm.chartData.sensors,
+                  chartType: "BarChart"
+                }
+              }),
+              _vm._v(" "),
+              _c("Chart", {
+                staticClass: "columnChart",
+                attrs: {
+                  chartData: _vm.chartData.summary,
+                  chartType: "ColumnChart"
+                }
+              })
+            ],
+            1
+          )
         ],
         1
       )
@@ -38998,21 +39781,23 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { attrs: { id: "chart" } },
-    [
-      _c("GChart", {
-        staticClass: "chart",
-        attrs: {
-          type: _vm.chartType,
-          options: _vm.chartData.options,
-          data: _vm.chartData.chartData
-        }
-      })
-    ],
-    1
-  )
+  return _vm.chartData
+    ? _c(
+        "div",
+        { attrs: { id: "chart" } },
+        [
+          _c("GChart", {
+            staticClass: "chart",
+            attrs: {
+              type: _vm.chartType,
+              options: _vm.chartData.options,
+              data: _vm.chartData.chartData
+            }
+          })
+        ],
+        1
+      )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -39044,7 +39829,70 @@ var render = function() {
       _vm._v(" "),
       _c("button", { on: { click: _vm.closeAddPlant } }, [_vm._v("close")]),
       _vm._v(" "),
-      _c("button", { on: { click: _vm.sendSMS } }, [_vm._v("send SMS message")])
+      _c(
+        "form",
+        { ref: "plantForm", attrs: { enctype: "multipart/form-data" } },
+        [
+          _c("input", {
+            attrs: { type: "hidden", name: "upload_plant", value: "1" }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v("name: ")]),
+          _vm._v(" "),
+          _c("input", {
+            staticClass: "form-control",
+            attrs: { type: "text", name: "name", id: "name" }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v("type: ")]),
+          _vm._v(" "),
+          _c("input", {
+            staticClass: "form-control",
+            attrs: { type: "text", name: "type", id: "type" }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v("image: ")]),
+          _vm._v(" "),
+          _c("input", {
+            staticClass: "form-control",
+            attrs: { type: "file", name: "image", id: "image" }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v("date planted (estimates are fine): ")]),
+          _vm._v(" "),
+          _c("input", {
+            staticClass: "form-control",
+            attrs: {
+              type: "date",
+              name: "date_planted",
+              id: "datePlanted",
+              min: "2000-01-01",
+              max: _vm.currentDate
+            },
+            domProps: { value: _vm.currentDate }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v("location: ")]),
+          _vm._v(" "),
+          _c("input", {
+            staticClass: "form-control",
+            attrs: { type: "text", name: "location", id: "location" }
+          }),
+          _vm._v(" "),
+          _vm.errors
+            ? _c("div", [_c("p", [_vm._v(_vm._s(_vm.errors))])])
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              attrs: { id: "addPlantButton", disabled: _vm.disabledAdd },
+              on: { click: _vm.addPlant }
+            },
+            [_vm._v("\n            add plant\n        ")]
+          )
+        ]
+      )
     ])
   ])
 }
@@ -39119,6 +39967,245 @@ var render = function() {
       _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
     ])
   ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7&":
+/*!***********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7& ***!
+  \***********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.sideNavUserPlants
+    ? _c(
+        "div",
+        { staticClass: "plantListSideMenu" },
+        _vm._l(_vm.sideNavUserPlants, function(plant) {
+          return _c(
+            "div",
+            { key: plant.id },
+            [
+              _c(
+                "router-link",
+                {
+                  staticClass: "routerLink sideNavPlants",
+                  attrs: {
+                    to: { name: "plant", params: { id: "" + plant.id } }
+                  }
+                },
+                [_vm._v("\n        " + _vm._s(plant.name) + "\n    ")]
+              )
+            ],
+            1
+          )
+        }),
+        0
+      )
+    : _vm._e()
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af&":
+/*!**************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af& ***!
+  \**************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "plantProfileCard" }, [
+    _vm.editingPlant
+      ? _c("div", [
+          _c(
+            "form",
+            { ref: "plantEditForm", attrs: { enctype: "multipart/form-data" } },
+            [
+              _c(
+                "button",
+                {
+                  attrs: { id: "editPlantButton" },
+                  on: { click: _vm.editPlant }
+                },
+                [_vm._v("\n                save edits to plant\n            ")]
+              ),
+              _vm._v(" "),
+              _c("button", { on: { click: _vm.toggleEdit } }, [_vm._v("Back")]),
+              _vm._v(" "),
+              _c("div", {
+                staticClass: "plantProfileImage",
+                style: {
+                  "background-image": "url(" + _vm.currentPlant.image + ")"
+                }
+              }),
+              _vm._v(" "),
+              _c("p", [_vm._v("upload new image:")]),
+              _vm._v(" "),
+              _c("input", {
+                staticClass: "form-control",
+                attrs: { type: "file", name: "image", id: "plantViewImage" }
+              }),
+              _vm._v(" "),
+              _c("p", [_vm._v("location:")]),
+              _vm._v(" "),
+              _c("input", {
+                attrs: {
+                  type: "text",
+                  name: "location",
+                  id: "plantLocationPlantView",
+                  placeholder: _vm.currentPlant.location
+                }
+              }),
+              _vm._v(" "),
+              _c("p", [_vm._v("plant type: " + _vm._s(_vm.currentPlant.type))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("age: " + _vm._s(_vm.currentPlant.age))])
+            ]
+          )
+        ])
+      : _c("div", { staticClass: "sideBlock" }, [
+          !_vm.showDeletePlant
+            ? _c("button", { on: { click: _vm.showDeleteToggle } }, [
+                _vm._v("Delete Plant")
+              ])
+            : _c("div", [
+                _c("p", [_vm._v("Are you sure?")]),
+                _vm._v(" "),
+                _c("button", { on: { click: _vm.deletePlant } }, [
+                  _vm._v("Confirm Delete")
+                ]),
+                _vm._v(" "),
+                _c("button", { on: { click: _vm.showDeleteToggle } }, [
+                  _vm._v("Keep Plant")
+                ])
+              ]),
+          _vm._v(" "),
+          _c("button", { on: { click: _vm.toggleEdit } }, [_vm._v("Edit")]),
+          _vm._v(" "),
+          _c("div", {
+            staticClass: "plantProfileImage",
+            style: { "background-image": "url(" + _vm.currentPlant.image + ")" }
+          }),
+          _vm._v(" "),
+          _c("p", [_vm._v(_vm._s(_vm.currentPlant.name))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("location: " + _vm._s(_vm.currentPlant.location))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("plant type: " + _vm._s(_vm.currentPlant.type))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("age: " + _vm._s(_vm.currentPlant.age))])
+        ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238&":
+/*!**************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238& ***!
+  \**************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.sensors
+    ? _c(
+        "div",
+        { staticClass: "sensorViewCard" },
+        _vm._l(_vm.sensors, function(data) {
+          return _c("div", { key: data.name, staticClass: "sensorCardChild" }, [
+            _c("div", {
+              staticClass: "cardImage",
+              style: {
+                "background-image": "url(/images/" + data.name + ".png)"
+              }
+            }),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(data.reading) + _vm._s(data.unit))]),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(_vm.cardHealthScores[data.name]))]),
+            _vm._v(" "),
+            _c("div", { staticClass: "meterContainer" }, [
+              _c("div", {
+                class:
+                  _vm.cardHealthScores[data.name] > 20
+                    ? "activeCell"
+                    : "inactiveCell"
+              }),
+              _vm._v(" "),
+              _c("div", {
+                class:
+                  _vm.cardHealthScores[data.name] > 40
+                    ? "activeCell"
+                    : "inactiveCell"
+              }),
+              _vm._v(" "),
+              _c("div", {
+                class:
+                  _vm.cardHealthScores[data.name] > 60
+                    ? "activeCell"
+                    : "inactiveCell"
+              }),
+              _vm._v(" "),
+              _c("div", {
+                class:
+                  _vm.cardHealthScores[data.name] > 80
+                    ? "activeCell"
+                    : "inactiveCell"
+              }),
+              _vm._v(" "),
+              _c("div", {
+                class:
+                  _vm.cardHealthScores[data.name] > 99
+                    ? "activeCell"
+                    : "inactiveCell"
+              })
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(data.comment))]),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(data.displayName))])
+          ])
+        }),
+        0
+      )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -55751,7 +56838,21 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
     moisture: 'reading data..',
     gas: 'reading data..',
     temp: 'reading data..'
-  }), _state),
+  }), _defineProperty(_state, "userPlants", [{
+    userId: 'loading data...',
+    name: 'loading data...',
+    id: 'loading data...',
+    image: 'loading data...',
+    type: 'loading data...',
+    age: 'loading data...',
+    location: 'loading data...'
+  }]), _defineProperty(_state, "userMessages", [{
+    userId: 'loading data...',
+    id: 'loading data...',
+    message: 'loading data...',
+    generatedAt: 'loading data...',
+    type: 'loading data...'
+  }]), _state),
   mutations: {
     user: function user(state, myCustomData) {
       state.user = myCustomData;
@@ -55776,6 +56877,12 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
     },
     monthTrend: function monthTrend(state, myCustomData) {
       state.monthTrend = myCustomData;
+    },
+    userPlants: function userPlants(state, myCustomData) {
+      state.userPlants = myCustomData;
+    },
+    userMessages: function userMessages(state, myCustomData) {
+      state.userMessages = myCustomData;
     }
   }
 });
@@ -55915,7 +57022,9 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Home.vue?vue&type=template&id=f2b6376c& */ "./resources/js/components/Home.vue?vue&type=template&id=f2b6376c&");
 /* harmony import */ var _Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Home.vue?vue&type=script&lang=js& */ "./resources/js/components/Home.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Home.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -55923,7 +57032,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__["render"],
   _Home_vue_vue_type_template_id_f2b6376c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -55952,6 +57061,22 @@ component.options.__file = "resources/js/components/Home.vue"
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./Home.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&":
+/*!****************************************************************************!*\
+  !*** ./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss& ***!
+  \****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./Home.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
@@ -56459,6 +57584,267 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/partials/plantView/PlantListMenu.vue":
+/*!**********************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantListMenu.vue ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PlantListMenu.vue?vue&type=template&id=351748b7& */ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7&");
+/* harmony import */ var _PlantListMenu_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PlantListMenu.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PlantListMenu.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _PlantListMenu_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/partials/plantView/PlantListMenu.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantListMenu.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&":
+/*!********************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss& ***!
+  \********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader!../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantListMenu.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7& ***!
+  \*****************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantListMenu.vue?vue&type=template&id=351748b7& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantListMenu.vue?vue&type=template&id=351748b7&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantListMenu_vue_vue_type_template_id_351748b7___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantProfileCard.vue":
+/*!*************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantProfileCard.vue ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PlantProfileCard.vue?vue&type=template&id=6bb421af& */ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af&");
+/* harmony import */ var _PlantProfileCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PlantProfileCard.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PlantProfileCard.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _PlantProfileCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/partials/plantView/PlantProfileCard.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantProfileCard.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader!../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantProfileCard.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af&":
+/*!********************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af& ***!
+  \********************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./PlantProfileCard.vue?vue&type=template&id=6bb421af& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantProfileCard.vue?vue&type=template&id=6bb421af&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PlantProfileCard_vue_vue_type_template_id_6bb421af___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/SensorCardDealer.vue":
+/*!*************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/SensorCardDealer.vue ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SensorCardDealer.vue?vue&type=template&id=89584238& */ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238&");
+/* harmony import */ var _SensorCardDealer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SensorCardDealer.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SensorCardDealer.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _SensorCardDealer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/partials/plantView/SensorCardDealer.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./SensorCardDealer.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader!../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./SensorCardDealer.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238&":
+/*!********************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238& ***!
+  \********************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./SensorCardDealer.vue?vue&type=template&id=89584238& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/SensorCardDealer.vue?vue&type=template&id=89584238&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SensorCardDealer_vue_vue_type_template_id_89584238___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/router/index.js":
 /*!**************************************!*\
   !*** ./resources/js/router/index.js ***!
@@ -56493,7 +57879,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_router__WEBPACK_IMPORTED_MODU
     name: 'profile',
     component: _components_Profile_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
   }, {
-    path: '/plant/:id?',
+    path: '/plant/:id',
     name: 'plant',
     component: _components_PlantView_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   }]

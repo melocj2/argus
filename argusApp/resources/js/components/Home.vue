@@ -3,17 +3,31 @@
         <h1>HOME</h1>
 
         <AddPlantModal v-if="addPlantOpen" @closeAddPlant="toggleAddPlant" />
-        <button @click="toggleAddPlant">Add Plant</button><br/><br/><br/>
 
         <div>
             <p>{{weather.current.temp_c}}°C</p>
             <p>{{weather.location.name}}</p>
             <p>{{weather.location.localtime}}</p>
         </div>
+        <ul class="messageList">
+            <li v-for="message in userMessages" :key="message.id">
+                <p>message: {{message.message}}</p>
+                <p>alert generated at: {{message.generatedAt}}</p>
 
-        <router-link to="/plant">
-            view plant 1
-        </router-link>
+            </li>
+        </ul>
+
+        <input placeholder="search plants" v-model="myPlantFilter" id="myPlantFilter">
+        <button @click="toggleAddPlant">Add Plant</button><br/><br/><br/>
+        <ul class="plantList">
+            <li v-for="plant in userPlants" :key="plant.id">
+                <div class="plantSideImage" :style="{'background-image': `url(${plant.image})`}"></div>
+                <p>name: {{plant.name}}</p>
+                <p>location: {{plant.location}}</p>
+                <p>status: healthy</p>
+                <router-link class="routerLink" :to="{ name: 'plant', params: { id: `${plant.id}`}}">view plant</router-link>
+            </li>
+        </ul>
     </div>
 </template>
 
@@ -28,8 +42,40 @@
                 weather: {
                     current: {},
                     location: {}
-                }
+                },
+                myPlantFilter: '',
             }
+        },
+
+        computed: {
+            //NOTE WHEN ADDING A USER PLANT YOU MUST UPDATE BOTH STORE AND DB!!!!
+            userPlants() {
+
+                let plants = this.$store.state.userPlants.filter(item => {
+                    return item.name.includes(this.myPlantFilter);
+                })
+                return plants;
+            },
+
+            userMessages() {
+
+                let messages = this.$store.state.userMessages.filter(item => {
+                    return item.message;
+                })
+                console.log("SEE HOME MESSAGES HERE", messages)
+                return messages;
+            }
+
+            // messages() {
+            //     //check values of 'current readings'
+
+            //     //if any values are high or low, generate a message and tie it to a post request to messages
+            //     //NOTE: get all plants
+
+            //     //send the message to update the db, and then receive an array back of all messages associated with the user
+
+            //     //
+            // }
         },
 
         created: function () {
@@ -38,10 +84,10 @@
             .then(function(response){
                 return response.json();
             })
-            .then(function(data) { 
+            .then(function(data) {
             vm.weather = data;
             console.log(data);
-		    });        
+		    });
         },
 
         components: {
@@ -56,3 +102,17 @@
 
     };
 </script>
+<style lang="scss">
+@import "../.././sass/variables/breakpoints.scss";
+@import "../.././sass/variables/fonts.scss";
+@import "../.././sass/variables/colors.scss";
+
+.plantSideImage {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 15rem;
+    width: 15rem;
+    border-radius: 1rem;
+}
+</style>

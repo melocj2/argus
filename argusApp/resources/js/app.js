@@ -44,7 +44,23 @@ const store = new Vuex.Store({
             moisture: 'reading data..',
             gas: 'reading data..',
             temp: 'reading data..',
-        }
+        },
+        userPlants: [{
+            userId: 'loading data...',
+            name: 'loading data...',
+            id: 'loading data...',
+            image: 'loading data...',
+            type: 'loading data...',
+            age: 'loading data...',
+            location: 'loading data...'
+        }],
+        userMessages: [{
+            userId: 'loading data...',
+            id: 'loading data...',
+            message: 'loading data...',
+            generatedAt: 'loading data...',
+            type: 'loading data...',
+        }],
     },
     mutations: {
         user (state, myCustomData) {
@@ -58,6 +74,7 @@ const store = new Vuex.Store({
             state.sensorValues.temp.push(myCustomData.temp);
 
             state.currentReading = myCustomData;
+
         },
         sensorValueReset (state) {
             state.sensorValues.increment = 0;
@@ -71,6 +88,12 @@ const store = new Vuex.Store({
         },
         monthTrend (state, myCustomData) {
             state.monthTrend = myCustomData;
+        },
+        userPlants (state, myCustomData) {
+            state.userPlants = myCustomData;
+        },
+        userMessages (state, myCustomData) {
+            state.userMessages = myCustomData;
         }
     }
 });

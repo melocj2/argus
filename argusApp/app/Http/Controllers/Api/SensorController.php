@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Sensor;
 
+
 class SensorController extends Controller
 {
     /**
@@ -203,4 +204,8 @@ class SensorController extends Controller
     }
 
 
+
 }
+
+
+// "messagingServiceSid" => "MG5b9f4cf8f6c202257346ede1808d497e"
