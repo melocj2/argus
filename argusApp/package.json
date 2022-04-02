@@ -25,7 +25,6 @@
     },
     "dependencies": {
         "node-sass": "^4.13.0",
-        "vue-google-charts": "^0.3.3",
         "vue-router": "^3.5.3",
         "vuex": "^3.6.2"
     }

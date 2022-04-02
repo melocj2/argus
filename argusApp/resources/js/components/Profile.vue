@@ -2,19 +2,13 @@
     <div>
         <h1>PROFILE</h1>
         <div v-if="userInfo">
-          <div class="icon" :style="{'background': `url(${userInfo.avatar_uri})`}"></div>
           <p>name: {{userInfo.name}}</p>
           <p>email: {{userInfo.email}}</p>
         </div>
-        <router-link to="/edit">
-            edit profile
-        </router-link>
     </div>
-
 </template>
 
 <script>
-
     export default {
 
       computed: {
@@ -26,7 +20,6 @@
             return false;
           }
         }
-      },
-
+      }
     };
 </script>
