@@ -3,7 +3,6 @@ import Router from 'vue-router';
 import Home from '../components/Home.vue';
 import PlantView from '../components/PlantView.vue';
 import Profile from '../components/Profile.vue';
-import EditProfile from '../components/EditProfile.vue';
 
 Vue.use(Router);
 
@@ -27,11 +26,6 @@ export default new Router({
             path: '/plant/:id?',
             name: 'plant',
             component: PlantView
-        },
-        {
-            path: '/edit',
-            name: 'edit',
-            component: EditProfile
         }
     ]
 });
