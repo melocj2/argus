@@ -7,6 +7,7 @@ use App\Transformers\UserTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -29,6 +30,21 @@ class UserController extends Controller
             $avatarName = Storage::putFile('public/thumbnail', $request->avatar);
 
             $user->thumbnail = $avatarName;
+            $user->save();
+        }
+
+        if ($request->has('old_password')) {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+        }
+
+        if ($request->has('new_name')) {
+            $user->name = $request->new_name;
+            $user->save();
+        }
+
+        if ($request->has('new_email')) {
+            $user->email = $request->new_email;
             $user->save();
         }
 

@@ -1,19 +1,15 @@
 <template>
     <div>
-        <h1>PROFILE</h1>
+        <h1>EDIT PROFILE</h1>
         <div v-if="userInfo">
-          <div class="icon" :style="{'background': `url(${userInfo.avatar_uri})`}"></div>
-          <p>name: {{userInfo.name}}</p>
-          <p>email: {{userInfo.email}}</p>
+          <EditForm />
         </div>
-        <router-link to="/edit">
-            edit profile
-        </router-link>
     </div>
-
 </template>
 
 <script>
+
+    import EditForm from './partials/profile/EditForm.vue';
 
     export default {
 
@@ -27,6 +23,10 @@
           }
         }
       },
+
+      components: {
+            EditForm
+        }
 
     };
 </script>

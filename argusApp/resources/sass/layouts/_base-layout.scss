@@ -5,6 +5,7 @@ html, body, main {
     margin: 0 auto;
     font-family: $font;
     min-height: 100vh;
+    background: $bg;
 }
 
 
@@ -18,11 +19,12 @@ input {
     text-decoration: none;
     background: $white;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 15px;
     box-sizing: border-box;
     width: 100%;
     margin-top: 20px;
     font-family: $font;
+    border: 1px solid $grey;
 }
 
 ::placeholder {
@@ -32,4 +34,12 @@ input {
 
 a {
     text-decoration: none;
+}
+
+.icon {
+    background-size: cover !important;
+    background-position: 50% 50% !important;
+    height: 200px;
+    width: 200px;
+    border-radius: 20px;
 }

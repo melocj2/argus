@@ -4,6 +4,7 @@ main {
   margin: 0 auto;
   font-family: "Comfortaa", cursive;
   min-height: 100vh;
+  background: #f7f7f7;
 }
 
 form {
@@ -16,11 +17,12 @@ input {
   text-decoration: none;
   background: #fff;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 15px;
   box-sizing: border-box;
   width: 100%;
   margin-top: 20px;
   font-family: "Comfortaa", cursive;
+  border: 1px solid #d1d1d1;
 }
 
 ::-webkit-input-placeholder {
@@ -50,6 +52,14 @@ input {
 
 a {
   text-decoration: none;
+}
+
+.icon {
+  background-size: cover !important;
+  background-position: 50% 50% !important;
+  height: 200px;
+  width: 200px;
+  border-radius: 20px;
 }
 
 .darken {
