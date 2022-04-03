@@ -2152,6 +2152,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -39691,29 +39693,33 @@ var render = function() {
         0
       ),
       _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.myPlantFilter,
-            expression: "myPlantFilter"
-          }
-        ],
-        attrs: { placeholder: "search plants", id: "myPlantFilter" },
-        domProps: { value: _vm.myPlantFilter },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
+      _c("div", { staticClass: "searchBar" }, [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.myPlantFilter,
+              expression: "myPlantFilter"
             }
-            _vm.myPlantFilter = $event.target.value
+          ],
+          attrs: { placeholder: "search plants", id: "myPlantFilter" },
+          domProps: { value: _vm.myPlantFilter },
+          on: {
+            input: function($event) {
+              if ($event.target.composing) {
+                return
+              }
+              _vm.myPlantFilter = $event.target.value
+            }
           }
-        }
-      }),
+        }),
+        _c("span", { staticClass: "font-awesome-icons search" })
+      ]),
       _vm._v(" "),
       _c("button", { on: { click: _vm.toggleAddPlant } }, [
-        _vm._v("Add Plant")
+        _c("span", { staticClass: "font-awesome-icons add" }),
+        _vm._v(" add")
       ]),
       _c("br"),
       _c("br"),
@@ -39732,7 +39738,10 @@ var render = function() {
                 style: { "background-image": "url(" + plant.image + ")" }
               }),
               _vm._v(" "),
-              _c("p", [_vm._v("name: " + _vm._s(plant.name))]),
+              _c("p", [
+                _c("span", { staticClass: "font-awesome-icons plant" }),
+                _vm._v(" " + _vm._s(plant.name))
+              ]),
               _vm._v(" "),
               _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
               _vm._v(" "),
@@ -39800,7 +39809,8 @@ var render = function() {
                   }),
                   _vm._v(" "),
                   _c("button", { on: { click: _vm.togglePlantInfo } }, [
-                    _vm._v("More Plant Info")
+                    _c("span", { staticClass: "font-awesome-icons info" }),
+                    _vm._v(" More Plant Info")
                   ]),
                   _c("br"),
                   _c("br"),
@@ -40146,7 +40156,9 @@ var render = function() {
       _vm._v(" "),
       _c("p", [_vm._v("ADD NEW PLANT INFO FORM HERE")]),
       _vm._v(" "),
-      _c("button", { on: { click: _vm.closeAddPlant } }, [_vm._v("close")]),
+      _c("button", { on: { click: _vm.closeAddPlant } }, [
+        _c("span", { staticClass: "font-awesome-icons close" })
+      ]),
       _vm._v(" "),
       _c(
         "form",
@@ -40208,7 +40220,10 @@ var render = function() {
               attrs: { id: "addPlantButton", disabled: _vm.disabledAdd },
               on: { click: _vm.addPlant }
             },
-            [_vm._v("\n            add plant\n        ")]
+            [
+              _c("span", { staticClass: "font-awesome-icons add-alt" }),
+              _vm._v(" add plant\n        ")
+            ]
           )
         ]
       )
@@ -40241,21 +40256,31 @@ var render = function() {
     "div",
     [
       _c("router-link", { attrs: { to: "/home" } }, [
-        _vm._v("\n        Home\n    ")
+        _c("span", { staticClass: "font-awesome-icons home" }),
+        _vm._v(" Home\n    ")
       ]),
       _vm._v(" "),
       _c("router-link", { attrs: { to: "/profile" } }, [
-        _vm._v("\n        Profile\n    ")
+        _c("span", { staticClass: "font-awesome-icons profile" }),
+        _vm._v(" Profile\n    ")
       ]),
       _vm._v(" "),
-      _c("a", { attrs: { href: "/logout" } }, [
-        _vm._v("\n        Logout\n    ")
-      ])
+      _vm._m(0)
     ],
     1
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("a", { attrs: { href: "/logout" } }, [
+      _c("span", { staticClass: "font-awesome-icons logout" }),
+      _vm._v(" Logout\n    ")
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -40290,7 +40315,9 @@ var render = function() {
           _vm._v(" "),
           _c("p", [_vm._v("description: " + _vm._s(this.addedPlantInfo.info))]),
           _vm._v(" "),
-          _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
+          _c("button", { on: { click: _vm.closePlantInfo } }, [
+            _c("span", { staticClass: "font-awesome-icons close" })
+          ])
         ])
       : _vm._e()
   ])
@@ -40390,12 +40417,12 @@ var render = function() {
                   attrs: { type: "button", id: "editPlantButton" },
                   on: { click: _vm.editPlant }
                 },
-                [_vm._v("\n                save edits to plant\n            ")]
+                [_c("span", { staticClass: "font-awesome-icons save" })]
               )
             : _c(
                 "button",
                 { attrs: { type: "button" }, on: { click: _vm.toggleEdit } },
-                [_vm._v("Edit")]
+                [_c("span", { staticClass: "font-awesome-icons edit" })]
               ),
           _vm._v(" "),
           _vm.editingPlant
@@ -40413,7 +40440,7 @@ var render = function() {
                   attrs: { type: "button" },
                   on: { click: _vm.showDeleteToggle }
                 },
-                [_vm._v("Delete Plant")]
+                [_c("span", { staticClass: "font-awesome-icons delete" })]
               )
             : _c("div", [
                 _c("p", [_vm._v("Are you sure?")]),
@@ -40443,7 +40470,10 @@ var render = function() {
               ])
             : _vm._e(),
           _vm._v(" "),
-          _c("p", [_vm._v("location:")]),
+          _c("p", [
+            _c("span", { staticClass: "font-awesome-icons plant" }),
+            _vm._v(" " + _vm._s(_vm.currentPlant.name))
+          ]),
           _vm._v(" "),
           _vm.editingPlant
             ? _c("input", {

@@ -3,11 +3,11 @@
         <div>
             <form ref="plantEditForm" enctype="multipart/form-data">
                 <button type="button" v-if="editingPlant" id="editPlantButton" @click="editPlant">
-                    save edits to plant
+                    <span class="font-awesome-icons save"></span>
                 </button>
-                <button type="button" v-else @click="toggleEdit">Edit</button>
+                <button type="button" v-else @click="toggleEdit"><span class="font-awesome-icons edit"></span></button>
                 <button type="button" v-if="editingPlant" @click="toggleEdit">Back</button>
-                <button type="button" v-if="!showDeletePlant" @click="showDeleteToggle">Delete Plant</button>
+                <button type="button" v-if="!showDeletePlant" @click="showDeleteToggle"><span class="font-awesome-icons delete"></span></button>
                 <div v-else>
                     <p>Are you sure?</p>
                     <button @click="deletePlant">Confirm Delete</button>
@@ -18,7 +18,7 @@
                     <p>upload new image:</p>
                     <input type="file" class="form-control" name="image" id="plantViewImage"/>
                 </div>
-                   <p>location:</p>
+                   <p><span class="font-awesome-icons plant"></span> {{currentPlant.name}}</p>
                     <input v-if="editingPlant" type="text" name="location" id="plantLocationPlantView" :placeholder="currentPlant.location"/>
                     <p v-else>location: {{currentPlant.location}}</p>
                 <p>plant type: {{currentPlant.type}}</p>

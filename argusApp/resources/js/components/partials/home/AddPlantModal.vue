@@ -3,7 +3,7 @@
         <div class="addPlantModalForm">
             <h1>ADD PLANT MODAL</h1>
             <p>ADD NEW PLANT INFO FORM HERE</p>
-            <button @click="closeAddPlant">close</button>
+            <button @click="closeAddPlant"><span class="font-awesome-icons close"></span></button>
             <form ref="plantForm" enctype="multipart/form-data">
             <input type="hidden" name="upload_plant" value="1" />
             <p>name: </p>
@@ -23,7 +23,7 @@
 
             </div>
             <button id="addPlantButton" @click="addPlant" :disabled="disabledAdd">
-                add plant
+                <span class="font-awesome-icons add-alt"></span> add plant
             </button>
           </form>
 

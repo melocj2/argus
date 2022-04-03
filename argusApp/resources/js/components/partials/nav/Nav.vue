@@ -1,13 +1,13 @@
 <template>
     <div>
         <router-link to="/home">
-            Home
+            <span class="font-awesome-icons home"></span> Home
         </router-link>
         <router-link to="/profile">
-            Profile
+            <span class="font-awesome-icons profile"></span> Profile
         </router-link>
         <a href="/logout">
-            Logout
+            <span class="font-awesome-icons logout"></span> Logout
         </a>
     </div>
 </template>

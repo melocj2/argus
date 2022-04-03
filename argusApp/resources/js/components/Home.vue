@@ -17,12 +17,14 @@
             </li>
         </ul>
 
-        <input placeholder="search plants" v-model="myPlantFilter" id="myPlantFilter">
-        <button @click="toggleAddPlant">Add Plant</button><br/><br/><br/>
+        <div class="searchBar">
+            <input placeholder="search plants" v-model="myPlantFilter" id="myPlantFilter"><span class="font-awesome-icons search"></span>
+        </div>
+        <button @click="toggleAddPlant"><span class="font-awesome-icons add"></span> add</button><br/><br/><br/>
         <ul class="plantList">
             <li v-for="plant in userPlants" :key="plant.id">
                 <div class="plantSideImage" :style="{'background-image': `url(${plant.image})`}"></div>
-                <p>name: {{plant.name}}</p>
+                <p><span class="font-awesome-icons plant"></span> {{plant.name}}</p>
                 <p>location: {{plant.location}}</p>
                 <p>status: {{isHealthy}}</p>
                 <router-link class="routerLink" :to="{ name: 'plant', params: { id: `${plant.id}`}}">view plant</router-link>

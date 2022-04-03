@@ -1,21 +1,23 @@
-
-
-
 html, body, main {
     margin: 0 auto;
     font-family: $font;
     min-height: 100vh;
+    background: $bg;
 }
-
 
 form {
     margin: auto;
     max-width: 400px;
 }
 
-input {
+button {
+    font-family: $font;
+}
+
+.auth {
     border: none;
     text-decoration: none;
+    border: 1px solid $grey;
     background: $white;
     padding: 15px;
     border-radius: 10px;
@@ -39,5 +41,110 @@ a {
     background-position: 50% 50% !important;
     height: 200px;
     width: 200px;
-    border-radius: 20px;
+    border-radius: 1rem;
+    border: 1px solid $grey;
+}
+
+.searchBar {
+    position: relative;
+}
+
+.search::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    position: absolute;
+    left: 15px;
+    top: 35px;
+    color: $grey;
+	content: "\f002";
+}
+
+#myPlantFilter {
+    border: none;
+    text-decoration: none;
+    border: 1px solid $grey;
+    background: $white;
+    padding: 15px 15px 15px 40px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 20px;
+    font-family: $font;
+}
+
+.add::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $grey;
+	content: "\f055";
+}
+
+.add-alt::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $grey;
+	content: "\f067";
+}
+
+.plant::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f4d8";
+}
+
+.home::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f015";
+}
+
+.profile::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f007";
+}
+
+.logout::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f060";
+}
+
+.close::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f00d";
+}
+
+.edit::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f304";
+}
+
+.delete::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f1f8";
+}
+
+.info::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f05a";
+}
+
+.save::before {
+    font-family: "Font Awesome 5 Free"; 
+	font-weight: 900;
+    color: $black;
+	content: "\f0c7";
 }

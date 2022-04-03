@@ -5,7 +5,7 @@
             <p>scientific name: {{this.addedPlantInfo.species}}</p>
             <p>age: {{this.plant.age}}</p>
             <p>description: {{this.addedPlantInfo.info}}</p>
-            <button @click="closePlantInfo">close</button>
+            <button @click="closePlantInfo"><span class="font-awesome-icons close"></span></button>
         </div>
     </div>
 </template>

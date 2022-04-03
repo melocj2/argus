@@ -6,7 +6,7 @@
         <div class="mainPlantViewContainer">
             <div v-if="currentPlant">
                 <PlantProfileCard :currentPlant="currentPlant" />
-                <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
+                <button @click="togglePlantInfo"><span class="font-awesome-icons info"></span> More Plant Info</button><br/><br/><br/><br/>
                 <SensorCardDealer :cardHealthScores="cardHealthScores"/>
             </div>
 
