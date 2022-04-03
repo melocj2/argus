@@ -1,17 +1,162 @@
-html,
-body,
-main {
-  margin: 0 auto;
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   font-family: "Comfortaa", cursive;
+  background-color: #f7f7f7;
+}
+
+body .invisibleHeader {
+  display: none;
+}
+
+body ::-webkit-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+body ::-moz-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+body :-ms-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+body ::-ms-input-placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+body ::placeholder {
+  font-family: "Comfortaa", cursive;
+  color: #d1d1d1;
+}
+
+body input {
+  border: 1px solid #DDDDDD;
+  text-decoration: none;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-family: "Comfortaa", cursive;
+}
+
+body input:focus {
+  outline: 1px solid #c4ddb2;
+}
+
+body a {
+  text-decoration: none;
+}
+
+body p {
+  font-size: 0.9rem;
+}
+
+body h2 {
+  font-size: 1.9rem;
+}
+
+body h3 {
+  font-size: 1.7rem;
+}
+
+body h4 {
+  font-size: 1.5rem;
+}
+
+body h5 {
+  font-size: 1.2rem;
+}
+
+@media (min-width: 1200px) {
+  body p {
+    font-size: 1rem;
+  }
+
+  body h2 {
+    font-size: 2.4rem;
+  }
+
+  body h3 {
+    font-size: 1.8rem;
+  }
+
+  body h4 {
+    font-size: 1.6rem;
+  }
+
+  body h5 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  body p {
+    font-size: 1.1rem;
+  }
+
+  body h2 {
+    font-size: 3.4rem;
+  }
+
+  body h3 {
+    font-size: 1.9rem;
+  }
+
+  body h4 {
+    font-size: 1.7rem;
+  }
+
+  body h5 {
+    font-size: 1.4rem;
+  }
+}
+
+body .auth {
+  background-image: url("/images/bg.jpg");
+  background-size: cover;
+  background-position: 50% 20%;
+  margin: 0 auto;
   min-height: 100vh;
 }
 
-form {
+body .auth .darken {
+  background: rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+body .auth .darken .container {
+  padding: 120px 30px;
+  text-align: center;
+}
+
+body .auth .darken .container form {
   margin: auto;
   max-width: 400px;
 }
 
-input {
+body .auth .darken .container .invalid-feedback {
+  color: #fff;
+  height: 1.25rem;
+  margin-top: 1.5rem;
+  display: inline-block;
+}
+
+body .auth .darken .container input {
   border: none;
   text-decoration: none;
   background: #fff;
@@ -23,77 +168,21 @@ input {
   font-family: "Comfortaa", cursive;
 }
 
-::-webkit-input-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-::-moz-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-:-ms-input-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-::-ms-input-placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-::placeholder {
-  font-family: "Comfortaa", cursive;
-  color: #d1d1d1;
-}
-
-a {
-  text-decoration: none;
-}
-
-.icon {
-  background-size: cover !important;
-  background-position: 50% 50% !important;
-  height: 200px;
-  width: 200px;
-  border-radius: 20px;
-}
-
-.darken {
-  background: rgba(0, 0, 0, 0.5);
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
-.background {
-  background-image: url("/images/bg.jpg");
-  background-size: cover;
-  background-position: 50% 20%;
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
-.container {
-  padding: 120px 30px;
-  text-align: center;
-}
-
-.logo {
+body .auth .darken .container .logo {
   height: 100%;
-  width: 150px;
+  width: 200px;
   margin: auto;
   -webkit-transition: all .5s ease-in-out;
   transition: all .5s ease-in-out;
 }
 
-.authlink {
+body .auth .darken .container .authlink {
   color: #fff;
   text-decoration: underline;
   margin-top: 20px;
 }
 
-.linkFlex {
+body .auth .darken .container .linkFlex {
   display: -webkit-box;
   display: flex;
   max-width: 400px;
@@ -105,7 +194,7 @@ a {
   flex-wrap: wrap;
 }
 
-.authbtn {
+body .auth .darken .container .authbtn {
   border: none;
   text-decoration: none;
   display: inline-block;
@@ -122,15 +211,15 @@ a {
   transition: all .5s ease-in-out;
 }
 
-.authbtn:hover {
+body .auth .darken .container .authbtn:hover {
   background: #fff;
   color: #624972;
   -webkit-transition: all .5s ease-in-out;
   transition: all .5s ease-in-out;
 }
 
-@media (min-width: 500px) {
-  .logo {
+@media (min-width: 600px) {
+  body .logo {
     height: 100%;
     width: 200px;
     margin: auto;

@@ -1,9 +1,10 @@
 <template>
     <div>
 
-        <Nav />
 
         <router-view />
+
+        <Nav />
     </div>
 </template>
 
@@ -335,5 +336,7 @@
 </script>
 
 <style lang="scss" scoped>
+
+
 
 </style>

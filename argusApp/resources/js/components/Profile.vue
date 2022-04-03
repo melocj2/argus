@@ -4,7 +4,7 @@
     <div v-if="userInfo">
       <form ref="userForm" enctype="multipart/form-data">
         <div>
-          <div class="icon" :style="{'background': `url(${userInfo.thumbnail})`}"></div>
+          <div class="userImage" :style="{'background-image': `url(${userInfo.thumbnail})`}"></div>
           <button type="button" @click="toggleEditUser">{{editingUser ? 'revert without saving' : 'edit user details'}}</button>
           <div v-if="editingUser">
             <label for="avatar">new profile image</label>
@@ -119,3 +119,18 @@
       }
     };
 </script>
+
+<style lang="scss">
+@import "../.././sass/variables/breakpoints.scss";
+@import "../.././sass/variables/fonts.scss";
+@import "../.././sass/variables/colors.scss";
+
+.userImage {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 15rem;
+    width: 15rem;
+    border-radius: 1rem;
+}
+</style>
