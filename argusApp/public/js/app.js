@@ -2174,6 +2174,16 @@ __webpack_require__.r(__webpack_exports__);
       });
       return plants;
     },
+    isHealthy: function isHealthy() {
+      var msgs = this.userMessages;
+      var health = 'healthy';
+      msgs.forEach(function (item) {
+        if (item.message != 'loading data...' || item.message != null) {
+          health = 'needs attention';
+        }
+      });
+      return health;
+    },
     userMessages: function userMessages() {
       var messages = this.$store.state.userMessages.filter(function (item) {
         return item.message;
@@ -2232,12 +2242,6 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -2558,7 +2562,76 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      editingUser: false,
+      showPasswords: false,
+      processing: false
+    };
+  },
   computed: {
     userInfo: function userInfo() {
       if (this.$store.state.user) {
@@ -2567,6 +2640,27 @@ __webpack_require__.r(__webpack_exports__);
       } else {
         return false;
       }
+    }
+  },
+  methods: {
+    toggleEditUser: function toggleEditUser() {
+      this.editingUser = !this.editingUser;
+    },
+    submit: function submit() {
+      var _this = this;
+
+      this.processing = true;
+      var editUserFormData = new FormData(this.$refs.userForm);
+      editUserFormData.append('_method', 'PATCH');
+      axios.post("/api/users/".concat(this.userInfo.id), editUserFormData).then(function (response) {
+        _this.$store.commit('user', response.data);
+      }).then(function (response) {
+        _this.toggleEditUser();
+      })["catch"](function (error) {
+        console.log(error);
+      }).then(function () {
+        _this.processing = false;
+      });
     }
   }
 });
@@ -2741,11 +2835,52 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["currentPlant"],
+  data: function data() {
+    return {
+      plant: this.currentPlant,
+      addedPlantInfo: false
+    };
+  },
   methods: {
     closePlantInfo: function closePlantInfo() {
       return this.$emit('closePlantInfo');
+    } // findPlant() {}
+
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    var check = this.plant.type.toLowerCase().split(' ');
+
+    if (check[check.length - 1] != 'plant') {
+      check.push('plant');
     }
+
+    var query = check.join(' ');
+    var t = this;
+    fetch("https://api.gbif.org/v1/species/search?q=".concat(query)).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      var result = {};
+
+      if (data.results.length > 0 && data.results[0].descriptions && data.results[0].descriptions.length > 0 && data.results[0].species) {
+        result.species = data.results[0].species;
+        result.info = data.results[0].descriptions[0].description;
+      } else {
+        // t.secondCheck(query); call with plant added at the end
+        result.species = 'not found';
+        result.info = 'not found, please ensure the plant type is spelled correctly';
+      }
+
+      _this.addedPlantInfo = result;
+      console.log("API CALL", data);
+    })["catch"](function (error) {
+      console.log(error);
+    });
   }
 });
 
@@ -2760,6 +2895,9 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
 //
 //
 //
@@ -2789,11 +2927,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
 //
 //
 //
@@ -7426,7 +7559,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 5vh;\n  width: 80vw;\n  left: 5vw;\n  max-height: 90vh;\n  overflow-y: scroll;\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
 
 // exports
 
@@ -39603,7 +39736,7 @@ var render = function() {
               _vm._v(" "),
               _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
               _vm._v(" "),
-              _c("p", [_vm._v("status: healthy")]),
+              _c("p", [_vm._v("status: " + _vm._s(_vm.isHealthy))]),
               _vm._v(" "),
               _c(
                 "router-link",
@@ -39684,17 +39817,10 @@ var render = function() {
           _vm._v(" "),
           _vm.plantInfoOpen
             ? _c("PlantInfoModal", {
+                attrs: { currentPlant: _vm.currentPlant },
                 on: { closePlantInfo: _vm.togglePlantInfo }
               })
             : _vm._e(),
-          _vm._v(" "),
-          _c("button", { on: { click: _vm.togglePlantInfo } }, [
-            _vm._v("More Plant Info")
-          ]),
-          _c("br"),
-          _c("br"),
-          _c("br"),
-          _c("br"),
           _vm._v(" "),
           _c(
             "div",
@@ -39752,9 +39878,202 @@ var render = function() {
     _vm._v(" "),
     _vm.userInfo
       ? _c("div", [
-          _c("p", [_vm._v("name: " + _vm._s(_vm.userInfo.name))]),
-          _vm._v(" "),
-          _c("p", [_vm._v("email: " + _vm._s(_vm.userInfo.email))])
+          _c(
+            "form",
+            { ref: "userForm", attrs: { enctype: "multipart/form-data" } },
+            [
+              _c("div", [
+                _c("div", {
+                  staticClass: "icon",
+                  style: { background: "url(" + _vm.userInfo.thumbnail + ")" }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    attrs: { type: "button" },
+                    on: { click: _vm.toggleEditUser }
+                  },
+                  [
+                    _vm._v(
+                      _vm._s(
+                        _vm.editingUser
+                          ? "revert without saving"
+                          : "edit user details"
+                      )
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("div", [
+                      _c("label", { attrs: { for: "avatar" } }, [
+                        _vm._v("new profile image")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        attrs: {
+                          type: "file",
+                          name: "thumbnail",
+                          id: "thumbnail"
+                        }
+                      })
+                    ])
+                  : _vm._e()
+              ]),
+              _vm._v(" "),
+              _c("div", [
+                _c("label", { attrs: { for: "new_name" } }, [_vm._v("name")]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_name",
+                        name: "new_name",
+                        placeholder: _vm.userInfo.name
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.name))]),
+                _vm._v(" "),
+                _c("label", { attrs: { for: "new_email" } }, [_vm._v("email")]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_email",
+                        name: "new_email",
+                        placeholder: _vm.userInfo.email
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.email))]),
+                _vm._v(" "),
+                _c("label", { attrs: { for: "new_phone" } }, [_vm._v("phone")]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_phone",
+                        name: "new_phone",
+                        placeholder: _vm.userInfo.phone
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.phone))]),
+                _vm._v(" "),
+                _c("label", { attrs: { for: "new_location" } }, [
+                  _vm._v("location")
+                ]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_location",
+                        name: "new_location",
+                        placeholder: _vm.userInfo.location
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.location))]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("div", [
+                      _c("div", [
+                        _c("p", [_vm._v("Change Password")]),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                _vm.showPasswords = !_vm.showPasswords
+                              }
+                            }
+                          },
+                          [
+                            _vm.showPasswords
+                              ? [
+                                  _vm._v(
+                                    "\n                  hide passwords\n              "
+                                  )
+                                ]
+                              : [
+                                  _vm._v(
+                                    "\n                  show passwords\n              "
+                                  )
+                                ]
+                          ],
+                          2
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", [
+                        _c("label", { attrs: { for: "password" } }, [
+                          _vm._v("current password")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          attrs: {
+                            type: _vm.showPasswords ? "text" : "password",
+                            id: "password",
+                            name: "password"
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", [
+                        _c("label", { attrs: { for: "new_password" } }, [
+                          _vm._v("new password")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          attrs: {
+                            type: _vm.showPasswords ? "text" : "password",
+                            id: "new_password",
+                            name: "new_password"
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", [
+                        _c(
+                          "label",
+                          { attrs: { for: "new_password_confirm" } },
+                          [_vm._v("confirm new password")]
+                        ),
+                        _vm._v(" "),
+                        _c("input", {
+                          attrs: {
+                            type: _vm.showPasswords ? "text" : "password",
+                            id: "new_password_confirm",
+                            name: "new_password_confirm"
+                          }
+                        })
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c(
+                      "button",
+                      {
+                        attrs: { type: "button", disabled: _vm.processing },
+                        on: { click: _vm.submit }
+                      },
+                      [
+                        _vm._v(
+                          "\n          " +
+                            _vm._s(_vm.processing ? "Processing..." : "save") +
+                            "\n        "
+                        )
+                      ]
+                    )
+                  : _vm._e()
+              ])
+            ]
+          )
         ])
       : _vm._e()
   ])
@@ -39959,13 +40278,21 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "plantInfoBlanket" }, [
-    _c("div", { staticClass: "plantInfoDetail" }, [
-      _c("h1", [_vm._v("PLANT INFO MODAL")]),
-      _vm._v(" "),
-      _c("p", [_vm._v("ALL PLANT DATA GOES HERE")]),
-      _vm._v(" "),
-      _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
-    ])
+    _vm.addedPlantInfo
+      ? _c("div", { staticClass: "plantInfoDetail" }, [
+          _c("h1", [_vm._v("PLANT INFO MODAL")]),
+          _vm._v(" "),
+          _c("p", [
+            _vm._v("scientific name: " + _vm._s(this.addedPlantInfo.species))
+          ]),
+          _vm._v(" "),
+          _c("p", [_vm._v("age: " + _vm._s(this.plant.age))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("description: " + _vm._s(this.addedPlantInfo.info))]),
+          _vm._v(" "),
+          _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
+        ])
+      : _vm._e()
   ])
 }
 var staticRenderFns = []
@@ -39994,26 +40321,37 @@ var render = function() {
     ? _c(
         "div",
         { staticClass: "plantListSideMenu" },
-        _vm._l(_vm.sideNavUserPlants, function(plant) {
-          return _c(
-            "div",
-            { key: plant.id },
-            [
-              _c(
-                "router-link",
-                {
-                  staticClass: "routerLink sideNavPlants",
-                  attrs: {
-                    to: { name: "plant", params: { id: "" + plant.id } }
-                  }
-                },
-                [_vm._v("\n        " + _vm._s(plant.name) + "\n    ")]
-              )
-            ],
-            1
-          )
-        }),
-        0
+        [
+          _c(
+            "router-link",
+            {
+              staticClass: "routerLink sideNavPlants",
+              attrs: { to: { name: "home" } }
+            },
+            [_vm._v("\n        HOME\n    ")]
+          ),
+          _vm._v(" "),
+          _vm._l(_vm.sideNavUserPlants, function(plant) {
+            return _c(
+              "div",
+              { key: plant.id },
+              [
+                _c(
+                  "router-link",
+                  {
+                    staticClass: "routerLink sideNavPlants",
+                    attrs: {
+                      to: { name: "plant", params: { id: "" + plant.id } }
+                    }
+                  },
+                  [_vm._v("\n        " + _vm._s(plant.name) + "\n    ")]
+                )
+              ],
+              1
+            )
+          })
+        ],
+        2
       )
     : _vm._e()
 }
@@ -40040,59 +40378,43 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "plantProfileCard" }, [
-    _vm.editingPlant
-      ? _c("div", [
-          _c(
-            "form",
-            { ref: "plantEditForm", attrs: { enctype: "multipart/form-data" } },
-            [
-              _c(
+    _c("div", [
+      _c(
+        "form",
+        { ref: "plantEditForm", attrs: { enctype: "multipart/form-data" } },
+        [
+          _vm.editingPlant
+            ? _c(
                 "button",
                 {
-                  attrs: { id: "editPlantButton" },
+                  attrs: { type: "button", id: "editPlantButton" },
                   on: { click: _vm.editPlant }
                 },
                 [_vm._v("\n                save edits to plant\n            ")]
+              )
+            : _c(
+                "button",
+                { attrs: { type: "button" }, on: { click: _vm.toggleEdit } },
+                [_vm._v("Edit")]
               ),
-              _vm._v(" "),
-              _c("button", { on: { click: _vm.toggleEdit } }, [_vm._v("Back")]),
-              _vm._v(" "),
-              _c("div", {
-                staticClass: "plantProfileImage",
-                style: {
-                  "background-image": "url(" + _vm.currentPlant.image + ")"
-                }
-              }),
-              _vm._v(" "),
-              _c("p", [_vm._v("upload new image:")]),
-              _vm._v(" "),
-              _c("input", {
-                staticClass: "form-control",
-                attrs: { type: "file", name: "image", id: "plantViewImage" }
-              }),
-              _vm._v(" "),
-              _c("p", [_vm._v("location:")]),
-              _vm._v(" "),
-              _c("input", {
-                attrs: {
-                  type: "text",
-                  name: "location",
-                  id: "plantLocationPlantView",
-                  placeholder: _vm.currentPlant.location
-                }
-              }),
-              _vm._v(" "),
-              _c("p", [_vm._v("plant type: " + _vm._s(_vm.currentPlant.type))]),
-              _vm._v(" "),
-              _c("p", [_vm._v("age: " + _vm._s(_vm.currentPlant.age))])
-            ]
-          )
-        ])
-      : _c("div", { staticClass: "sideBlock" }, [
+          _vm._v(" "),
+          _vm.editingPlant
+            ? _c(
+                "button",
+                { attrs: { type: "button" }, on: { click: _vm.toggleEdit } },
+                [_vm._v("Back")]
+              )
+            : _vm._e(),
+          _vm._v(" "),
           !_vm.showDeletePlant
-            ? _c("button", { on: { click: _vm.showDeleteToggle } }, [
-                _vm._v("Delete Plant")
-              ])
+            ? _c(
+                "button",
+                {
+                  attrs: { type: "button" },
+                  on: { click: _vm.showDeleteToggle }
+                },
+                [_vm._v("Delete Plant")]
+              )
             : _c("div", [
                 _c("p", [_vm._v("Are you sure?")]),
                 _vm._v(" "),
@@ -40105,21 +40427,43 @@ var render = function() {
                 ])
               ]),
           _vm._v(" "),
-          _c("button", { on: { click: _vm.toggleEdit } }, [_vm._v("Edit")]),
-          _vm._v(" "),
           _c("div", {
             staticClass: "plantProfileImage",
             style: { "background-image": "url(" + _vm.currentPlant.image + ")" }
           }),
           _vm._v(" "),
-          _c("p", [_vm._v(_vm._s(_vm.currentPlant.name))]),
+          _vm.editingPlant
+            ? _c("div", [
+                _c("p", [_vm._v("upload new image:")]),
+                _vm._v(" "),
+                _c("input", {
+                  staticClass: "form-control",
+                  attrs: { type: "file", name: "image", id: "plantViewImage" }
+                })
+              ])
+            : _vm._e(),
           _vm._v(" "),
-          _c("p", [_vm._v("location: " + _vm._s(_vm.currentPlant.location))]),
+          _c("p", [_vm._v("location:")]),
+          _vm._v(" "),
+          _vm.editingPlant
+            ? _c("input", {
+                attrs: {
+                  type: "text",
+                  name: "location",
+                  id: "plantLocationPlantView",
+                  placeholder: _vm.currentPlant.location
+                }
+              })
+            : _c("p", [
+                _vm._v("location: " + _vm._s(_vm.currentPlant.location))
+              ]),
           _vm._v(" "),
           _c("p", [_vm._v("plant type: " + _vm._s(_vm.currentPlant.type))]),
           _vm._v(" "),
           _c("p", [_vm._v("age: " + _vm._s(_vm.currentPlant.age))])
-        ])
+        ]
+      )
+    ])
   ])
 }
 var staticRenderFns = []

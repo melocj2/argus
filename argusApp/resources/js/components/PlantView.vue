@@ -11,14 +11,8 @@
             </div>
 
 
+            <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo" :currentPlant="currentPlant"/>
 
-
-
-
-            <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo" />
-
-
-            <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
 
             <div id="chartContainer">
                 <Chart class="barChart" :chartData="chartData.sensors" chartType="BarChart"/>

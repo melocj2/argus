@@ -17,8 +17,6 @@ class MessageTransformer extends Transformer
       //gets timestamp age
       $date_and_time = date('m/d/Y H:i:s', $message->generated_at);
 
-
-
       return [
         'userId' => $message->user_id,
         'id' => $message->id,

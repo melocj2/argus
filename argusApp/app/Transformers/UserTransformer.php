@@ -16,8 +16,10 @@ class UserTransformer extends Transformer
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'has_avatar' => $user->hasAvatar,
-            'avatar_uri' => $user->avatarUri
+            'hasAvatar' => $user->has_avatar,
+            'thumbnail' => $user->thumbnail,
+            'location' => $user->location,
+            'phone' => $user->phone,
         ];
     }
 }

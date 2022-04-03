@@ -24,7 +24,7 @@
                 <div class="plantSideImage" :style="{'background-image': `url(${plant.image})`}"></div>
                 <p>name: {{plant.name}}</p>
                 <p>location: {{plant.location}}</p>
-                <p>status: healthy</p>
+                <p>status: {{isHealthy}}</p>
                 <router-link class="routerLink" :to="{ name: 'plant', params: { id: `${plant.id}`}}">view plant</router-link>
             </li>
         </ul>
@@ -55,6 +55,20 @@
                     return item.name.includes(this.myPlantFilter);
                 })
                 return plants;
+            },
+
+            isHealthy() {
+                let msgs = this.userMessages;
+
+                let health = 'healthy';
+
+                msgs.forEach(item => {
+                    if (item.message != 'loading data...' || item.message != null) {
+                        health = 'needs attention';
+                    }
+                })
+
+                return health;
             },
 
             userMessages() {

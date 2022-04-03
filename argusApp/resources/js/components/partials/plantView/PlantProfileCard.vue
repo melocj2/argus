@@ -1,34 +1,29 @@
 <template>
     <div class="plantProfileCard">
-     <div v-if="editingPlant">
+        <div>
             <form ref="plantEditForm" enctype="multipart/form-data">
-                <button id="editPlantButton" @click="editPlant">
+                <button type="button" v-if="editingPlant" id="editPlantButton" @click="editPlant">
                     save edits to plant
                 </button>
-                <button @click="toggleEdit">Back</button>
+                <button type="button" v-else @click="toggleEdit">Edit</button>
+                <button type="button" v-if="editingPlant" @click="toggleEdit">Back</button>
+                <button type="button" v-if="!showDeletePlant" @click="showDeleteToggle">Delete Plant</button>
+                <div v-else>
+                    <p>Are you sure?</p>
+                    <button @click="deletePlant">Confirm Delete</button>
+                    <button @click="showDeleteToggle">Keep Plant</button>
+                </div>
                 <div class="plantProfileImage" :style="{'background-image': `url(${currentPlant.image})`}"></div>
-                <p>upload new image:</p>
-                <input type="file" class="form-control" name="image" id="plantViewImage"/>
-                <p>location:</p>
-                <input type="text" name="location" id="plantLocationPlantView" :placeholder="currentPlant.location"/>
+                <div v-if="editingPlant">
+                    <p>upload new image:</p>
+                    <input type="file" class="form-control" name="image" id="plantViewImage"/>
+                </div>
+                   <p>location:</p>
+                    <input v-if="editingPlant" type="text" name="location" id="plantLocationPlantView" :placeholder="currentPlant.location"/>
+                    <p v-else>location: {{currentPlant.location}}</p>
                 <p>plant type: {{currentPlant.type}}</p>
                 <p>age: {{currentPlant.age}}</p>
             </form>
-        </div>
-
-        <div v-else class="sideBlock">
-            <button v-if="!showDeletePlant" @click="showDeleteToggle">Delete Plant</button>
-            <div v-else>
-              <p>Are you sure?</p>
-              <button @click="deletePlant">Confirm Delete</button>
-              <button @click="showDeleteToggle">Keep Plant</button>
-            </div>
-            <button @click="toggleEdit">Edit</button>
-            <div class="plantProfileImage" :style="{'background-image': `url(${currentPlant.image})`}"></div>
-            <p>{{currentPlant.name}}</p>
-            <p>location: {{currentPlant.location}}</p>
-            <p>plant type: {{currentPlant.type}}</p>
-            <p>age: {{currentPlant.age}}</p>
         </div>
     </div>
 </template>
