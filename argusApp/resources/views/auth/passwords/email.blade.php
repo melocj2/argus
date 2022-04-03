@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="background"><div class="darken">
+<div class="auth"><div class="darken">
     <div class="container">
         <div class="col-md-8">
             <div class="card">
@@ -27,6 +27,12 @@
                                     </span>
                                 @enderror
                             </div>
+                        </div>
+
+                        <div class="linkFlex">
+                            <a class="authlink" href="{{ route('login') }}">
+                                {{ __('back to login') }}
+                            </a>
                         </div>
 
                         <div class="form-group row mb-0">
