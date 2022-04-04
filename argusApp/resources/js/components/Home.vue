@@ -17,12 +17,14 @@
             </li>
         </ul>
 
-        <input placeholder="search plants" v-model="myPlantFilter" id="myPlantFilter">
-        <button @click="toggleAddPlant">Add Plant</button><br/><br/><br/>
+        <div class="searchBar">
+            <input placeholder="search plants" v-model="myPlantFilter" class="myPlantFilter"><span class="font-awesome-icons search"></span>
+        </div>
+        <a class="addNewPlant" @click="toggleAddPlant"><span class="font-awesome-icons add"></span> add</a><br/><br/><br/>
         <ul class="plantList">
             <li v-for="plant in userPlants" :key="plant.id">
                 <div class="plantSideImage" :style="{'background-image': `url(${plant.image})`}"></div>
-                <p>name: {{plant.name}}</p>
+                <p class="plantName"><span class="font-awesome-icons plant"></span> {{plant.name}}</p>
                 <p>location: {{plant.location}}</p>
                 <p>status: {{isHealthy}}</p>
                 <router-link class="routerLink" :to="{ name: 'plant', params: { id: `${plant.id}`}}">view plant</router-link>
@@ -120,6 +122,39 @@
 @import "../.././sass/variables/breakpoints.scss";
 @import "../.././sass/variables/fonts.scss";
 @import "../.././sass/variables/colors.scss";
+@import "../.././sass/mixins/all-mixins.scss";
+
+.searchBar {
+    position: relative;
+    .search::before {
+        @include awesomeIcon($grey, 'search');
+        position: absolute;
+        left: 15px;
+        top: 1em;
+    }
+    .myPlantFilter {
+        text-decoration: none;
+        background: $white;
+        padding: 15px 15px 15px 40px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        width: 20em;
+        font-family: $font;
+    }
+}
+
+.addNewPlant {
+    cursor: pointer;
+    .add::before {
+         @include awesomeIcon($purple, 'add');
+    }
+}
+
+.plantName {
+    .plant::before {
+         @include awesomeIcon($purple, 'plant');
+    }
+}
 
 .plantSideImage {
     background-position: center;
@@ -129,4 +164,5 @@
     width: 15rem;
     border-radius: 1rem;
 }
+
 </style>

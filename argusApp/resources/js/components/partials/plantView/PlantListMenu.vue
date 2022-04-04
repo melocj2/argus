@@ -23,6 +23,11 @@
 </script>
 
 <style lang="scss">
+ @import "../../../.././sass/variables/breakpoints.scss";
+    @import "../../../.././sass/variables/fonts.scss";
+    @import "../../../.././sass/variables/colors.scss";
+    @import "../../../.././sass/mixins/all-mixins.scss";
+
 
 .plantListSideMenu {
   float: left;

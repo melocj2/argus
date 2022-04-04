@@ -8,12 +8,15 @@
         </div>
         <div class="nav">
             <router-link class="router-link navLink" to="/home">
+            <span class="font-awesome-icons home"></span>
                 home
             </router-link>
             <router-link class="router-link navLink" to="/profile">
+            <span class="font-awesome-icons profile"></span>
                 profile
             </router-link>
             <a class="navLink" href="/logout">
+            <span class="font-awesome-icons logout"></span>
                 logout
             </a>
         </div>
@@ -43,6 +46,7 @@
     @import "../../../.././sass/variables/breakpoints.scss";
     @import "../../../.././sass/variables/fonts.scss";
     @import "../../../.././sass/variables/colors.scss";
+    @import "../../../.././sass/mixins/all-mixins.scss";
 
     .mainNav {
         .hamburg {
@@ -56,7 +60,7 @@
             .hamBar {
                 height: 0.4em;
                 width: 2.5em;
-                background-color:$purple;
+                background-color: $purple;
                 border-radius: 10px;
                 margin-bottom: 0.25em;
             }
@@ -103,6 +107,15 @@
                     text-decoration: none;
                     color: $purple;
                     font-size: $nav-tablet;
+                    .home::before {
+                        @include awesomeIcon($purple, 'home');
+                    }
+                    .profile::before {
+                        @include awesomeIcon($purple, 'profile');
+                    }
+                    .logout::before {
+                        @include awesomeIcon($purple, 'logout');
+                    }
                 }
             }
         }
