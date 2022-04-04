@@ -6,7 +6,7 @@
         <div class="mainPlantViewContainer">
             <div v-if="currentPlant">
                 <PlantProfileCard :currentPlant="currentPlant" />
-                <button @click="togglePlantInfo">More Plant Info</button><br/><br/><br/><br/>
+               <button class="morePlantInfoBtn" @click="togglePlantInfo"><span class="font-awesome-icons info"></span> More Plant Info</button><br/><br/><br/><br/>
                 <SensorCardDealer :cardHealthScores="cardHealthScores"/>
             </div>
 
@@ -351,6 +351,7 @@
 @import "../.././sass/variables/breakpoints.scss";
 @import "../.././sass/variables/fonts.scss";
 @import "../.././sass/variables/colors.scss";
+@import "../.././sass/mixins/all-mixins.scss";
 
 .plantProfileImage {
     background-position: center;
@@ -363,6 +364,12 @@
 
 .mainPlantViewContainer {
     margin-left: 12rem;
+}
+
+.morePlantInfoBtn {
+    .info::before {
+         @include awesomeIcon($black, 'info');
+    }
 }
 
 

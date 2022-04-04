@@ -3,7 +3,7 @@
         <div class="addPlantModalForm">
             <h1>ADD PLANT MODAL</h1>
             <p>ADD NEW PLANT INFO FORM HERE</p>
-            <button @click="closeAddPlant">close</button>
+            <button class="closeAddPlantModal" @click="closeAddPlant"><span class="font-awesome-icons close"></span></button>
             <form ref="plantForm" enctype="multipart/form-data">
             <input type="hidden" name="upload_plant" value="1" />
             <p>name: </p>
@@ -98,22 +98,35 @@
 </script>
 
 <style lang="scss">
+
+    @import "../../../.././sass/variables/breakpoints.scss";
+    @import "../../../.././sass/variables/fonts.scss";
+    @import "../../../.././sass/variables/colors.scss";
+    @import "../../../.././sass/mixins/all-mixins.scss";
+
+
+
     .addPlantBlanket {
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
         width: 100vw;
-        background-color: rgba(255, 255, 255, 0.644);
+        background-color: $grey;
         z-index: 100;
         .addPlantModalForm {
             position: fixed;
             top: 90%;
             left: 50%;
             transform: translate(-50%, -90%);
-            background-color: rgb(216, 216, 216);
+            background-color: $grey;
             padding: 2em 5em;
             z-index: 1000;
+        }
+        .closeAddPlantModal {
+            .close::before {
+                @include awesomeIcon($purple, 'close');
+            }
         }
     }
 </style>

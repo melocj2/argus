@@ -2153,6 +2153,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2821,6 +2823,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2947,6 +2952,13 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -7503,7 +7515,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, ".plantSideImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.searchBar {\n  position: relative;\n}\n.searchBar .search::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #d1d1d1;\n  content: \"\\F002\";\n  position: absolute;\n  left: 15px;\n  top: 1em;\n}\n.searchBar .myPlantFilter {\n  text-decoration: none;\n  background: #fff;\n  padding: 15px 15px 15px 40px;\n  border-radius: 10px;\n  box-sizing: border-box;\n  width: 20em;\n  font-family: \"Comfortaa\", cursive;\n}\n.addNewPlant {\n  cursor: pointer;\n}\n.addNewPlant .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.plantName .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n.plantSideImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
 
 // exports
 
@@ -7522,7 +7534,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, ".plantProfileImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 20rem;\n  width: 20rem;\n  border-radius: 1rem;\n}\n.mainPlantViewContainer {\n  margin-left: 12rem;\n}\n#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.plantProfileImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 20rem;\n  width: 20rem;\n  border-radius: 1rem;\n}\n.mainPlantViewContainer {\n  margin-left: 12rem;\n}\n.morePlantInfoBtn .info::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F05A\";\n}\n#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
 
 // exports
 
@@ -7579,7 +7591,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".addPlantBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 90%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.addPlantBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: #d1d1d1;\n  z-index: 100;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 90%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d1d1d1;\n  padding: 2em 5em;\n  z-index: 1000;\n}\n.addPlantBlanket .closeAddPlantModal .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}", ""]);
 
 // exports
 
@@ -7598,7 +7610,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".mainNav .hamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n.mainNav .hamburg .hamBar {\n  height: 0.4em;\n  width: 2.5em;\n  background-color: #624972;\n  border-radius: 10px;\n  margin-bottom: 0.25em;\n}\n.mainNav .openHamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n}\n.mainNav .openHamburg .Abar {\n  -webkit-transform: rotate(45deg);\n          transform: rotate(45deg);\n}\n.mainNav .openHamburg .Bbar {\n  display: none;\n}\n.mainNav .openHamburg .Cbar {\n  -webkit-transform: rotate(-45deg);\n          transform: rotate(-45deg);\n}\n@media (min-width: 600px) {\n.mainNav .hamburg {\n    display: none;\n}\n.mainNav .nav {\n    position: fixed;\n    background-color: #fff;\n    width: 50rem;\n    height: 5rem;\n    bottom: 0%;\n    left: 50%;\n    margin-left: -25rem;\n    border: 1px solid #DDDDDD;\n    border-radius: 10em 10em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.mainNav .hamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n.mainNav .hamburg .hamBar {\n  height: 0.4em;\n  width: 2.5em;\n  background-color: #624972;\n  border-radius: 10px;\n  margin-bottom: 0.25em;\n}\n.mainNav .openHamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n}\n.mainNav .openHamburg .Abar {\n  -webkit-transform: rotate(45deg);\n          transform: rotate(45deg);\n}\n.mainNav .openHamburg .Bbar {\n  display: none;\n}\n.mainNav .openHamburg .Cbar {\n  -webkit-transform: rotate(-45deg);\n          transform: rotate(-45deg);\n}\n@media (min-width: 600px) {\n.mainNav .hamburg {\n    display: none;\n}\n.mainNav .nav {\n    position: fixed;\n    background-color: #fff;\n    width: 50rem;\n    height: 5rem;\n    bottom: 0%;\n    left: 50%;\n    margin-left: -25rem;\n    border: 1px solid #DDDDDD;\n    border-radius: 10em 10em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n}\n.mainNav .nav .navLink .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F060\";\n}\n}", ""]);
 
 // exports
 
@@ -7617,7 +7629,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(255, 255, 255, 0.644);\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 5vh;\n  width: 80vw;\n  left: 5vw;\n  max-height: 90vh;\n  overflow-y: scroll;\n  background-color: #d8d8d8;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: #fff;\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 5vh;\n  width: 80vw;\n  left: 5vw;\n  max-height: 90vh;\n  overflow-y: scroll;\n  background-color: #d1d1d1;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
 
 // exports
 
@@ -7655,7 +7667,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".plantProfileCard {\n  display: inline-block;\n  width: 30rem;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.plantProfileCard {\n  display: inline-block;\n  width: 30rem;\n}\n.plantProfileCard .savePlantButton .save::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C7\";\n}\n.plantProfileCard .editPlantButton .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n.plantProfileCard .deletePlantButton .delete::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F1F8\";\n}\n.plantProfileCard .plantNameProfCard .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}", ""]);
 
 // exports
 
@@ -39809,30 +39821,36 @@ var render = function() {
         0
       ),
       _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.myPlantFilter,
-            expression: "myPlantFilter"
-          }
-        ],
-        attrs: { placeholder: "search plants", id: "myPlantFilter" },
-        domProps: { value: _vm.myPlantFilter },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
+      _c("div", { staticClass: "searchBar" }, [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.myPlantFilter,
+              expression: "myPlantFilter"
             }
-            _vm.myPlantFilter = $event.target.value
+          ],
+          staticClass: "myPlantFilter",
+          attrs: { placeholder: "search plants" },
+          domProps: { value: _vm.myPlantFilter },
+          on: {
+            input: function($event) {
+              if ($event.target.composing) {
+                return
+              }
+              _vm.myPlantFilter = $event.target.value
+            }
           }
-        }
-      }),
-      _vm._v(" "),
-      _c("button", { on: { click: _vm.toggleAddPlant } }, [
-        _vm._v("Add Plant")
+        }),
+        _c("span", { staticClass: "font-awesome-icons search" })
       ]),
+      _vm._v(" "),
+      _c(
+        "a",
+        { staticClass: "addNewPlant", on: { click: _vm.toggleAddPlant } },
+        [_c("span", { staticClass: "font-awesome-icons add" }), _vm._v(" add")]
+      ),
       _c("br"),
       _c("br"),
       _c("br"),
@@ -39850,7 +39868,10 @@ var render = function() {
                 style: { "background-image": "url(" + plant.image + ")" }
               }),
               _vm._v(" "),
-              _c("p", [_vm._v("name: " + _vm._s(plant.name))]),
+              _c("p", { staticClass: "plantName" }, [
+                _c("span", { staticClass: "font-awesome-icons plant" }),
+                _vm._v(" " + _vm._s(plant.name))
+              ]),
               _vm._v(" "),
               _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
               _vm._v(" "),
@@ -39917,9 +39938,17 @@ var render = function() {
                     attrs: { currentPlant: _vm.currentPlant }
                   }),
                   _vm._v(" "),
-                  _c("button", { on: { click: _vm.togglePlantInfo } }, [
-                    _vm._v("More Plant Info")
-                  ]),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "morePlantInfoBtn",
+                      on: { click: _vm.togglePlantInfo }
+                    },
+                    [
+                      _c("span", { staticClass: "font-awesome-icons info" }),
+                      _vm._v(" More Plant Info")
+                    ]
+                  ),
                   _c("br"),
                   _c("br"),
                   _c("br"),
@@ -40266,7 +40295,11 @@ var render = function() {
       _vm._v(" "),
       _c("p", [_vm._v("ADD NEW PLANT INFO FORM HERE")]),
       _vm._v(" "),
-      _c("button", { on: { click: _vm.closeAddPlant } }, [_vm._v("close")]),
+      _c(
+        "button",
+        { staticClass: "closeAddPlantModal", on: { click: _vm.closeAddPlant } },
+        [_c("span", { staticClass: "font-awesome-icons close" })]
+      ),
       _vm._v(" "),
       _c(
         "form",
@@ -40382,24 +40415,38 @@ var render = function() {
         _c(
           "router-link",
           { staticClass: "router-link navLink", attrs: { to: "/home" } },
-          [_vm._v("\n            home\n        ")]
+          [
+            _c("span", { staticClass: "font-awesome-icons home" }),
+            _vm._v("\n            home\n        ")
+          ]
         ),
         _vm._v(" "),
         _c(
           "router-link",
           { staticClass: "router-link navLink", attrs: { to: "/profile" } },
-          [_vm._v("\n            profile\n        ")]
+          [
+            _c("span", { staticClass: "font-awesome-icons profile" }),
+            _vm._v("\n            profile\n        ")
+          ]
         ),
         _vm._v(" "),
-        _c("a", { staticClass: "navLink", attrs: { href: "/logout" } }, [
-          _vm._v("\n            logout\n        ")
-        ])
+        _vm._m(0)
       ],
       1
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("a", { staticClass: "navLink", attrs: { href: "/logout" } }, [
+      _c("span", { staticClass: "font-awesome-icons logout" }),
+      _vm._v("\n            logout\n        ")
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -40531,15 +40578,20 @@ var render = function() {
             ? _c(
                 "button",
                 {
-                  attrs: { type: "button", id: "editPlantButton" },
+                  staticClass: "savePlantButton",
+                  attrs: { type: "button" },
                   on: { click: _vm.editPlant }
                 },
-                [_vm._v("\n                save edits to plant\n            ")]
+                [_c("span", { staticClass: "font-awesome-icons save" })]
               )
             : _c(
                 "button",
-                { attrs: { type: "button" }, on: { click: _vm.toggleEdit } },
-                [_vm._v("Edit")]
+                {
+                  staticClass: "editPlantButton",
+                  attrs: { type: "button" },
+                  on: { click: _vm.toggleEdit }
+                },
+                [_c("span", { staticClass: "font-awesome-icons edit" })]
               ),
           _vm._v(" "),
           _vm.editingPlant
@@ -40554,10 +40606,11 @@ var render = function() {
             ? _c(
                 "button",
                 {
+                  staticClass: "deletePlantButton",
                   attrs: { type: "button" },
                   on: { click: _vm.showDeleteToggle }
                 },
-                [_vm._v("Delete Plant")]
+                [_c("span", { staticClass: "font-awesome-icons delete" })]
               )
             : _c("div", [
                 _c("p", [_vm._v("Are you sure?")]),
@@ -40587,17 +40640,24 @@ var render = function() {
               ])
             : _vm._e(),
           _vm._v(" "),
-          _c("p", [_vm._v("location:")]),
+          _c("p", { staticClass: "plantNameProfCard" }, [
+            _c("span", { staticClass: "font-awesome-icons plant" }),
+            _vm._v(" " + _vm._s(_vm.currentPlant.name))
+          ]),
           _vm._v(" "),
           _vm.editingPlant
-            ? _c("input", {
-                attrs: {
-                  type: "text",
-                  name: "location",
-                  id: "plantLocationPlantView",
-                  placeholder: _vm.currentPlant.location
-                }
-              })
+            ? _c("div", [
+                _c("p", [_vm._v("location:")]),
+                _vm._v(" "),
+                _c("input", {
+                  attrs: {
+                    type: "text",
+                    name: "location",
+                    id: "plantLocationPlantView",
+                    placeholder: _vm.currentPlant.location
+                  }
+                })
+              ])
             : _c("p", [
                 _vm._v("location: " + _vm._s(_vm.currentPlant.location))
               ]),

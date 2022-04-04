@@ -78,13 +78,18 @@
 </script>
 
 <style lang="scss">
+    @import "../../../.././sass/variables/breakpoints.scss";
+    @import "../../../.././sass/variables/fonts.scss";
+    @import "../../../.././sass/variables/colors.scss";
+    @import "../../../.././sass/mixins/all-mixins.scss";
+
     .plantInfoBlanket {
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
         width: 100vw;
-        background-color: rgba(255, 255, 255, 0.644);
+        background-color: $white;
         z-index: 100;
         .plantInfoDetail {
             position: fixed;
@@ -94,7 +99,7 @@
             max-height: 90vh;
             overflow-y: scroll;
             // transform: translate(-50%, -90%);
-            background-color: rgb(216, 216, 216);
+            background-color: $grey;
             padding: 2em 5em;
             z-index: 1000;
         }

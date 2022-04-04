@@ -1,0 +1,31 @@
+//inserts font awesome icon
+@mixin awesomeIcon ($color, $name) {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: $color;
+
+  @if $name == search {
+    content: "\f002";
+  } @else if $name == add {
+    content: "\f055";
+  } @else if $name == plant {
+    content: "\f4D8";
+  } @else if $name == info {
+    content: "\f05A";
+  } @else if $name == close {
+    content: "\f00D";
+  } @else if $name == home {
+    content: "\f015";
+  } @else if $name == profile {
+    content: "\f007";
+  } @else if $name == logout {
+    content: "\f060";
+  } @else if $name == save {
+    content: "\f0C7";
+  } @else if $name == edit {
+    content: "\f304";
+  } @else if $name == delete {
+    content: "\f1f8";
+  }
+
+}

@@ -2,12 +2,16 @@
     <div class="plantProfileCard">
         <div>
             <form ref="plantEditForm" enctype="multipart/form-data">
-                <button type="button" v-if="editingPlant" id="editPlantButton" @click="editPlant">
-                    save edits to plant
+                <button type="button" v-if="editingPlant" class="savePlantButton" @click="editPlant">
+                    <span class="font-awesome-icons save"></span>
                 </button>
-                <button type="button" v-else @click="toggleEdit">Edit</button>
+                <button type="button" v-else class="editPlantButton" @click="toggleEdit">
+                    <span class="font-awesome-icons edit"></span>
+                </button>
                 <button type="button" v-if="editingPlant" @click="toggleEdit">Back</button>
-                <button type="button" v-if="!showDeletePlant" @click="showDeleteToggle">Delete Plant</button>
+                <button type="button" v-if="!showDeletePlant" class="deletePlantButton" @click="showDeleteToggle">
+                    <span class="font-awesome-icons delete"></span>
+                </button>
                 <div v-else>
                     <p>Are you sure?</p>
                     <button @click="deletePlant">Confirm Delete</button>
@@ -18,8 +22,11 @@
                     <p>upload new image:</p>
                     <input type="file" class="form-control" name="image" id="plantViewImage"/>
                 </div>
-                   <p>location:</p>
-                    <input v-if="editingPlant" type="text" name="location" id="plantLocationPlantView" :placeholder="currentPlant.location"/>
+                   <p class="plantNameProfCard"><span class="font-awesome-icons plant"></span> {{currentPlant.name}}</p>
+                   <div v-if="editingPlant">
+                        <p>location:</p>
+                        <input type="text" name="location" id="plantLocationPlantView" :placeholder="currentPlant.location"/>
+                    </div>
                     <p v-else>location: {{currentPlant.location}}</p>
                 <p>plant type: {{currentPlant.type}}</p>
                 <p>age: {{currentPlant.age}}</p>
@@ -104,8 +111,33 @@
 </script>
 
 <style lang="scss">
+ @import "../../../.././sass/variables/breakpoints.scss";
+    @import "../../../.././sass/variables/fonts.scss";
+    @import "../../../.././sass/variables/colors.scss";
+    @import "../../../.././sass/mixins/all-mixins.scss";
+
   .plantProfileCard {
     display: inline-block;
     width: 30rem;
+    .savePlantButton {
+        .save::before {
+            @include awesomeIcon($purple, 'save');
+        }
+    }
+    .editPlantButton {
+        .edit::before {
+            @include awesomeIcon($purple, 'edit');
+        }
+    }
+    .deletePlantButton {
+        .delete::before {
+            @include awesomeIcon($purple, 'delete');
+        }
+    }
+    .plantNameProfCard {
+        .plant::before {
+            @include awesomeIcon($purple, 'plant');
+        }
+    }
   }
 </style>
