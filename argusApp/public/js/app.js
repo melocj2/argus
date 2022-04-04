@@ -2155,6 +2155,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2627,6 +2629,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2826,15 +2829,47 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      hamburgOpen: false
+      hamburgOpen: false,
+      windowWidth: false
     };
   },
   methods: {
     openMenu: function openMenu() {
       this.hamburgOpen = !this.hamburgOpen;
+    }
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    this.windowWidth = window.innerWidth;
+    window.addEventListener('resize', function () {
+      _this.windowWidth = window.innerWidth;
+    });
+  },
+  computed: {
+    isNotMobileScreen: function isNotMobileScreen() {
+      var isNotMobile = this.windowWidth >= 600;
+
+      if (isNotMobile) {
+        this.hamburgOpen = false;
+      }
+
+      return isNotMobile;
     }
   }
 });
@@ -7553,7 +7588,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, ".userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+exports.push([module.i, ".white {\n  color: white;\n}\n.userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
 
 // exports
 
@@ -7572,7 +7607,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "#chart .chart * {\n  font-family: \"Comfortaa\", cursive !important;\n  font-size: 20px !important;\n  font-style: normal !important;\n}", ""]);
+exports.push([module.i, "#chart {\n  z-index: 10;\n}\n#chart .chart * {\n  font-family: \"Comfortaa\", cursive !important;\n  font-size: 20px !important;\n  font-style: normal !important;\n}", ""]);
 
 // exports
 
@@ -7610,7 +7645,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.mainNav .hamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n.mainNav .hamburg .hamBar {\n  height: 0.4em;\n  width: 2.5em;\n  background-color: #624972;\n  border-radius: 10px;\n  margin-bottom: 0.25em;\n}\n.mainNav .openHamburg {\n  position: fixed;\n  width: 2.5em;\n  top: 0.5em;\n  left: 0.5em;\n}\n.mainNav .openHamburg .Abar {\n  -webkit-transform: rotate(45deg);\n          transform: rotate(45deg);\n}\n.mainNav .openHamburg .Bbar {\n  display: none;\n}\n.mainNav .openHamburg .Cbar {\n  -webkit-transform: rotate(-45deg);\n          transform: rotate(-45deg);\n}\n@media (min-width: 600px) {\n.mainNav .hamburg {\n    display: none;\n}\n.mainNav .nav {\n    position: fixed;\n    background-color: #fff;\n    width: 50rem;\n    height: 5rem;\n    bottom: 0%;\n    left: 50%;\n    margin-left: -25rem;\n    border: 1px solid #DDDDDD;\n    border-radius: 10em 10em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n}\n.mainNav .nav .navLink .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F060\";\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.mainNav {\n  z-index: 500;\n}\n.mainNav .shifter {\n  z-index: 502;\n  font-size: 2.4rem;\n  position: fixed;\n  top: -5px;\n  left: -5px;\n}\n.mainNav .shifter .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .shifter .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.mainNav .shifter .faWrapper .bars::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C9\";\n}\n.mainNav .shifter .faWrapper .close::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.mainNav .mobNav {\n  z-index: 501;\n  position: fixed;\n  padding: 5em 2em;\n  gap: 2em;\n  left: 0;\n  top: 0;\n  width: 12em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  background-color: #fff;\n  border: 1px solid #DDDDDD;\n  border-radius: 0px 3em 3em 0px;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .mobNav .navLink {\n  text-decoration: none;\n  text-align: center;\n  color: #624972;\n  font-size: 1.7rem;\n  font-weight: bold;\n}\n.mainNav .mobNav .navLink .faWrapper {\n  font-size: 1rem;\n}\n.mainNav .mobNav .navLink .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F111\";\n}\n.mainNav .mobNav .navLink .faWrapper .home::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F015\";\n}\n.mainNav .mobNav .navLink .faWrapper .profile::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F007\";\n}\n.mainNav .mobNav .navLink .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F060\";\n}\n.mainNav .mobNav .router-link-active {\n  color: #597249;\n}\n.mainNav .mobNav .router-link-active .link-title {\n  text-decoration: underline;\n}\n.mainNav .mobNav .router-link-active .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #597249;\n  content: \"\\F111\";\n}\n.mainNav .offscreenNav {\n  left: -17em;\n}\n@media (min-width: 600px) {\n.mainNav .shifter {\n    display: none;\n}\n.mainNav .nav {\n    z-index: 501;\n    box-sizing: border-box;\n    position: fixed;\n    bottom: 0;\n    left: 5%;\n    background-color: #fff;\n    width: 90%;\n    height: 7em;\n    padding: 2em;\n    border: 1px solid #DDDDDD;\n    border-radius: 3em 3em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n    font-weight: bold;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1rem;\n}\n.mainNav .nav .navLink .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F111\";\n}\n.mainNav .nav .navLink .faWrapper .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .faWrapper .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F060\";\n}\n.mainNav .nav .router-link-active {\n    color: #597249;\n}\n.mainNav .nav .router-link-active .link-title {\n    text-decoration: underline;\n}\n.mainNav .nav .router-link-active .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #597249;\n    content: \"\\F111\";\n}\n}\n@media (min-width: 1200px) {\n.mainNav .nav {\n    left: 15%;\n    background-color: #fff;\n    width: 70%;\n}\n.mainNav .nav .navLink {\n    font-size: 1.9rem;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1.1rem;\n}\n}", ""]);
 
 // exports
 
@@ -39765,7 +39800,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_c("router-view"), _vm._v(" "), _c("Nav")], 1)
+  return _c("div", [_c("Nav"), _vm._v(" "), _c("router-view")], 1)
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -39792,19 +39827,7 @@ var render = function() {
   return _c(
     "div",
     [
-      _c("h1", [_vm._v("HOME")]),
-      _vm._v(" "),
-      _vm.addPlantOpen
-        ? _c("AddPlantModal", { on: { closeAddPlant: _vm.toggleAddPlant } })
-        : _vm._e(),
-      _vm._v(" "),
-      _c("div", [
-        _c("p", [_vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")]),
-        _vm._v(" "),
-        _c("p", [_vm._v(_vm._s(_vm.weather.location.name))]),
-        _vm._v(" "),
-        _c("p", [_vm._v(_vm._s(_vm.weather.location.localtime))])
-      ]),
+      _c("h2", { staticClass: "invisibleHeader" }, [_vm._v("Home Page")]),
       _vm._v(" "),
       _c(
         "ul",
@@ -39820,6 +39843,18 @@ var render = function() {
         }),
         0
       ),
+      _vm._v(" "),
+      _vm.addPlantOpen
+        ? _c("AddPlantModal", { on: { closeAddPlant: _vm.toggleAddPlant } })
+        : _vm._e(),
+      _vm._v(" "),
+      _c("div", [
+        _c("p", [_vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")]),
+        _vm._v(" "),
+        _c("p", [_vm._v(_vm._s(_vm.weather.location.name))]),
+        _vm._v(" "),
+        _c("p", [_vm._v(_vm._s(_vm.weather.location.localtime))])
+      ]),
       _vm._v(" "),
       _c("div", { staticClass: "searchBar" }, [
         _c("input", {
@@ -40021,7 +40056,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("h1", [_vm._v("PROFILE")]),
+    _c("h1", { staticClass: "white" }, [_vm._v("PROFILE")]),
     _vm._v(" "),
     _vm.userInfo
       ? _c("div", [
@@ -40085,32 +40120,6 @@ var render = function() {
                     })
                   : _c("p", [_vm._v(_vm._s(_vm.userInfo.name))]),
                 _vm._v(" "),
-                _c("label", { attrs: { for: "new_email" } }, [_vm._v("email")]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_email",
-                        name: "new_email",
-                        placeholder: _vm.userInfo.email
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.email))]),
-                _vm._v(" "),
-                _c("label", { attrs: { for: "new_phone" } }, [_vm._v("phone")]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_phone",
-                        name: "new_phone",
-                        placeholder: _vm.userInfo.phone
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.phone))]),
-                _vm._v(" "),
                 _c("label", { attrs: { for: "new_location" } }, [
                   _vm._v("location")
                 ]),
@@ -40125,6 +40134,32 @@ var render = function() {
                       }
                     })
                   : _c("p", [_vm._v(_vm._s(_vm.userInfo.location))]),
+                _vm._v(" "),
+                _c("label", { attrs: { for: "new_phone" } }, [_vm._v("phone")]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_phone",
+                        name: "new_phone",
+                        placeholder: _vm.userInfo.phone
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.phone))]),
+                _vm._v(" "),
+                _c("label", { attrs: { for: "new_email" } }, [_vm._v("email")]),
+                _vm._v(" "),
+                _vm.editingUser
+                  ? _c("input", {
+                      attrs: {
+                        type: "text",
+                        id: "new_email",
+                        name: "new_email",
+                        placeholder: _vm.userInfo.email
+                      }
+                    })
+                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.email))]),
                 _vm._v(" "),
                 _vm.editingUser
                   ? _c("div", [
@@ -40393,31 +40428,38 @@ var render = function() {
   return _c("div", { staticClass: "mainNav" }, [
     _c("h2", { staticClass: "invisibleHeader" }, [_vm._v("Main Nav Menu")]),
     _vm._v(" "),
-    _c(
-      "div",
-      {
-        class: _vm.hamburgOpen ? "openHamburg" : "hamburg",
-        on: { click: _vm.openMenu }
-      },
-      [
-        _c("div", { staticClass: "hamBar Abar" }),
+    _c("div", { staticClass: "shifter", on: { click: _vm.openMenu } }, [
+      _c("span", { staticClass: "fa-stack faWrapper" }, [
+        _c("i", { staticClass: "fa circle fa-stack-2x" }),
         _vm._v(" "),
-        _c("div", { staticClass: "hamBar Bbar" }),
-        _vm._v(" "),
-        _c("div", { staticClass: "hamBar Cbar" })
-      ]
-    ),
+        _c("i", {
+          staticClass: "fa fa-stack-1x",
+          class: _vm.hamburgOpen ? "close" : "bars"
+        })
+      ])
+    ]),
     _vm._v(" "),
     _c(
       "div",
-      { staticClass: "nav" },
+      {
+        class: _vm.isNotMobileScreen
+          ? "nav"
+          : _vm.hamburgOpen
+          ? "mobNav"
+          : "mobNav offscreenNav"
+      },
       [
         _c(
           "router-link",
           { staticClass: "router-link navLink", attrs: { to: "/home" } },
           [
-            _c("span", { staticClass: "font-awesome-icons home" }),
-            _vm._v("\n            home\n        ")
+            _c("span", { staticClass: "fa-stack faWrapper" }, [
+              _c("i", { staticClass: "fa circle fa-stack-2x" }),
+              _vm._v(" "),
+              _c("i", { staticClass: "fa home fa-stack-1x" })
+            ]),
+            _vm._v(" "),
+            _c("span", { staticClass: "link-title" }, [_vm._v("home")])
           ]
         ),
         _vm._v(" "),
@@ -40425,8 +40467,13 @@ var render = function() {
           "router-link",
           { staticClass: "router-link navLink", attrs: { to: "/profile" } },
           [
-            _c("span", { staticClass: "font-awesome-icons profile" }),
-            _vm._v("\n            profile\n        ")
+            _c("span", { staticClass: "fa-stack faWrapper" }, [
+              _c("i", { staticClass: "fa circle fa-stack-2x" }),
+              _vm._v(" "),
+              _c("i", { staticClass: "fa profile fa-stack-1x" })
+            ]),
+            _vm._v(" "),
+            _c("span", { staticClass: "link-title" }, [_vm._v("profile")])
           ]
         ),
         _vm._v(" "),
@@ -40442,8 +40489,12 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("a", { staticClass: "navLink", attrs: { href: "/logout" } }, [
-      _c("span", { staticClass: "font-awesome-icons logout" }),
-      _vm._v("\n            logout\n        ")
+      _c("span", { staticClass: "fa-stack faWrapper" }, [
+        _c("i", { staticClass: "fa circle fa-stack-2x" }),
+        _vm._v(" "),
+        _c("i", { staticClass: "fa logout fa-stack-1x" })
+      ]),
+      _vm._v("\n                logout\n        ")
     ])
   }
 ]

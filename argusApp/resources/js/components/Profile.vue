@@ -1,6 +1,6 @@
 <template>
   <div>
-  <h1>PROFILE</h1>
+  <h1 class="white">PROFILE</h1>
     <div v-if="userInfo">
       <form ref="userForm" enctype="multipart/form-data">
         <div>
@@ -17,17 +17,18 @@
           <input v-if="editingUser" type="text" id="new_name" name="new_name" :placeholder="userInfo.name" />
           <p v-else>{{userInfo.name}}</p>
 
-          <label for="new_email">email</label>
-          <input v-if="editingUser" type="text" id="new_email" name="new_email" :placeholder="userInfo.email" />
-          <p v-else>{{userInfo.email}}</p>
+           <label for="new_location">location</label>
+          <input v-if="editingUser" type="text" id="new_location" name="new_location" :placeholder="userInfo.location" />
+          <p v-else>{{userInfo.location}}</p>
 
           <label for="new_phone">phone</label>
           <input v-if="editingUser" type="text" id="new_phone" name="new_phone" :placeholder="userInfo.phone" />
           <p v-else>{{userInfo.phone}}</p>
 
-          <label for="new_location">location</label>
-          <input v-if="editingUser" type="text" id="new_location" name="new_location" :placeholder="userInfo.location" />
-          <p v-else>{{userInfo.location}}</p>
+          <label for="new_email">email</label>
+          <input v-if="editingUser" type="text" id="new_email" name="new_email" :placeholder="userInfo.email" />
+          <p v-else>{{userInfo.email}}</p>
+
 
           <div v-if="editingUser">
             <div>
@@ -124,7 +125,9 @@
 @import "../.././sass/variables/breakpoints.scss";
 @import "../.././sass/variables/fonts.scss";
 @import "../.././sass/variables/colors.scss";
-
+.white {
+  color: white;
+}
 .userImage {
     background-position: center;
     background-repeat: no-repeat;
