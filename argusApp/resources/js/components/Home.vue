@@ -1,6 +1,14 @@
 <template>
     <div>
-        <h1>HOME</h1>
+        <h2 class="invisibleHeader">Home Page</h2>
+
+         <ul class="messageList">
+            <li v-for="message in userMessages" :key="message.id">
+                <p>message: {{message.message}}</p>
+                <p>alert generated at: {{message.generatedAt}}</p>
+
+            </li>
+        </ul>
 
         <AddPlantModal v-if="addPlantOpen" @closeAddPlant="toggleAddPlant" />
 
@@ -9,13 +17,7 @@
             <p>{{weather.location.name}}</p>
             <p>{{weather.location.localtime}}</p>
         </div>
-        <ul class="messageList">
-            <li v-for="message in userMessages" :key="message.id">
-                <p>message: {{message.message}}</p>
-                <p>alert generated at: {{message.generatedAt}}</p>
 
-            </li>
-        </ul>
 
         <div class="searchBar">
             <input placeholder="search plants" v-model="myPlantFilter" class="myPlantFilter"><span class="font-awesome-icons search"></span>

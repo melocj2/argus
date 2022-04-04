@@ -1,3 +1,13 @@
+
+//static mixins
+
+
+
+
+//mixin functions
+
+
+
 //inserts font awesome icon
 @mixin awesomeIcon ($color, $name) {
   font-family: "Font Awesome 5 Free";
@@ -26,6 +36,10 @@
     content: "\f304";
   } @else if $name == delete {
     content: "\f1f8";
+  } @else if $name == circle {
+    content: "\f111";
+  } @else if $name == bars {
+    content: "\f0c9";
   }
 
 }

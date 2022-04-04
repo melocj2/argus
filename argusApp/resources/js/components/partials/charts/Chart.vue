@@ -27,6 +27,7 @@ export default {
 @import "../../../.././sass/variables/colors.scss";
 
   #chart {
+    z-index: 10;
     .chart{
        * {
         font-family: $font !important;
