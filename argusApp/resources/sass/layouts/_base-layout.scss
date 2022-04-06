@@ -129,28 +129,42 @@ html {
     //font styles below
     p {
         font-size:$body-mobile;
+        margin: 0;
+        padding: 0;
     }
 
     h2 {
         font-size:$head-mobile;
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
     }
 
     h3 {
         font-size:$nav-mobile;
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
     }
 
     h4 {
         font-size:$subhead-mobile;
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
     }
 
     h5 {
         font-size:$card-mobile;
+        margin: 0;
+        padding: 0;
+        font-weight: normal;
     }
 
  }
 
 
- @media (min-width: $desktop-break) {
+ @media (min-width: $tablet-break) {
     body{
         p {
            font-size: $body-tablet;

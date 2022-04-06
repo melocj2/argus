@@ -1,6 +1,21 @@
 
 //static mixins
 
+//adds border, rbg is equivalent to $grey variable 209,209,209
+@mixin border {
+  border: 1px solid rgba(209, 209, 209, .7);
+}
+
+//adds a button
+@mixin buttonStyle {
+  background: $greyGreen;
+  border-radius: 1em;
+  transition: all 0.5s ease-in-out;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 
 
 
@@ -40,6 +55,24 @@
     content: "\f111";
   } @else if $name == bars {
     content: "\f0c9";
+  } @else if $name == check {
+    content: "\f00c";
   }
 
+}
+
+//adds scrollbar
+@mixin scrollbar($thumbColor, $backgroundColor) {
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+      width: 0.5em;
+  }
+  &::-webkit-scrollbar-track {
+      //box-shadow: inset 0 0 6px $grey-10;//rgba(0, 0, 0, 0.3);
+      background: $backgroundColor;
+  }
+  &::-webkit-scrollbar-thumb {
+      background: $thumbColor;
+      border-radius: 20px;
+  }
 }

@@ -60,7 +60,7 @@
 
         computed: {
             isNotMobileScreen() {
-                let isNotMobile = this.windowWidth >= 600;
+                let isNotMobile = this.windowWidth >= 700;
                 if (isNotMobile) {
                     this.hamburgOpen = false;
                 }
@@ -84,9 +84,8 @@
             z-index: 502;
             font-size: $head-tablet;
             position: fixed;
-            top: -5px;
-            left: -5px;
-
+            top: -15px;
+            left: -25px;
             .faWrapper {
                 transition: all 0.5s ease-in-out;
                 .circle::before {
@@ -115,7 +114,7 @@
             justify-content: center;
             align-content: center;
             background-color: $white;
-            border: 1px solid #DDDDDD;
+            @include border;
             border-radius: 0px 3em 3em 0px;
             transition: all 0.5s ease-in-out;
             .navLink {
@@ -175,7 +174,7 @@
                 height: 7em;
                 padding: 2em;
                 // margin-left: 10%;
-                border: 1px solid #DDDDDD;
+                @include border;
                 border-radius: 3em 3em 0px 0px;
                 display: flex;
                 flex-direction: row;

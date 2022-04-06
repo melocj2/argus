@@ -2157,6 +2157,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2190,19 +2196,17 @@ __webpack_require__.r(__webpack_exports__);
       return health;
     },
     userMessages: function userMessages() {
-      var messages = this.$store.state.userMessages.filter(function (item) {
-        return item.message;
+      var prodArr = [];
+      var messages = this.$store.state.userMessages.forEach(function (item) {
+        if (item.message) {
+          prodArr.push(item);
+        }
       });
-      console.log("SEE HOME MESSAGES HERE", messages);
-      return messages;
-    } // messages() {
-    //     //check values of 'current readings'
-    //     //if any values are high or low, generate a message and tie it to a post request to messages
-    //     //NOTE: get all plants
-    //     //send the message to update the db, and then receive an array back of all messages associated with the user
-    //     //
-    // }
-
+      return prodArr;
+    },
+    user: function user() {
+      return this.$store.state.user;
+    }
   },
   created: function created() {
     var vm = this;
@@ -2218,6 +2222,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     toggleAddPlant: function toggleAddPlant() {
+      if (document.querySelector("body").style.overflow != 'hidden') {
+        document.querySelector("body").style.overflow = 'hidden';
+      } else {
+        document.querySelector("body").style.overflow = 'auto';
+      }
+
       this.addPlantOpen = !this.addPlantOpen;
     }
   }
@@ -2630,12 +2640,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       editingUser: false,
       showPasswords: false,
-      processing: false
+      processing: false,
+      profImgLoaded: false
     };
   },
   computed: {
@@ -2667,6 +2699,9 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function () {
         _this.processing = false;
       });
+    },
+    profFileLoaded: function profFileLoaded() {
+      this.profImgLoaded = true;
     }
   }
 });
@@ -2747,12 +2782,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       currentDate: new Date().toISOString().slice(0, 10),
       disabledAdd: null,
-      errors: null
+      errors: null,
+      fileLoaded: false
     };
   },
   methods: {
@@ -2783,12 +2829,8 @@ __webpack_require__.r(__webpack_exports__);
         _this.disabledAdd = false; //you were here
       });
     },
-    sendSMS: function sendSMS() {
-      axios.get('/api/sensors/sendAlert').then(function (response) {
-        console.log('ALERT SENT', response.data);
-      })["catch"](function (error) {
-        console.log(error);
-      });
+    updateFile: function updateFile() {
+      this.fileLoaded = true;
     }
   }
 });
@@ -2863,7 +2905,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     isNotMobileScreen: function isNotMobileScreen() {
-      var isNotMobile = this.windowWidth >= 600;
+      var isNotMobile = this.windowWidth >= 700;
 
       if (isNotMobile) {
         this.hamburgOpen = false;
@@ -7550,7 +7592,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.searchBar {\n  position: relative;\n}\n.searchBar .search::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #d1d1d1;\n  content: \"\\F002\";\n  position: absolute;\n  left: 15px;\n  top: 1em;\n}\n.searchBar .myPlantFilter {\n  text-decoration: none;\n  background: #fff;\n  padding: 15px 15px 15px 40px;\n  border-radius: 10px;\n  box-sizing: border-box;\n  width: 20em;\n  font-family: \"Comfortaa\", cursive;\n}\n.addNewPlant {\n  cursor: pointer;\n}\n.addNewPlant .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.plantName .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n.plantSideImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.homePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 90%;\n  margin: 0 auto;\n}\n.homePage .headGroup {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .headGroup .homeLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: fit;\n  height: 8rem;\n  width: 15rem;\n  border-radius: 1rem;\n  background-color: transparent;\n}\n.homePage .headGroup .greeting {\n  color: #624972;\n  font-weight: bold;\n  margin-bottom: 1em;\n}\n.homePage .headGroup .updateIntro {\n  font-weight: normal;\n  width: 80%;\n  text-align: center;\n  margin-bottom: 3em;\n}\n.homePage .messageList {\n  width: 80%;\n  margin-bottom: 2em;\n}\n.homePage .messageList .msgCard {\n  background: #d1dccd;\n  padding: 0.8em 1.5rem;\n  border-radius: 1em;\n  margin-bottom: 1em;\n}\n.homePage .messageList .msgCard .msgContent {\n  color: black;\n  margin-top: 1em;\n  margin-bottom: 0.5em;\n}\n.homePage .messageList .msgCard .msgTimestamp {\n  color: #4e4e4e;\n  display: block;\n  text-align: right;\n  margin-top: 0.5em;\n}\n.homePage .weatherCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 3em;\n  background: #fff;\n  padding: 2em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 2em;\n  text-align: center;\n}\n.homePage .weatherCard .weatherTemp {\n  font-size: 4rem;\n  color: #597249;\n  margin: 0.25em 0;\n}\n.homePage .weatherCard .weatherLocation {\n  color: #597249;\n  margin-bottom: 1em;\n}\n.homePage .weatherCard .weatherDateTime {\n  color: #597249;\n  opacity: 0.8;\n}\n.homePage .searchAdd {\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 2em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n}\n.homePage .searchAdd .searchBar {\n  position: relative;\n  width: 100%;\n}\n.homePage .searchAdd .searchBar .search::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #d1d1d1;\n  content: \"\\F002\";\n  position: absolute;\n  left: 15px;\n  top: 1em;\n}\n.homePage .searchAdd .searchBar .myPlantFilter {\n  width: 100%;\n  text-decoration: none;\n  background: #fff;\n  padding: 15px 15px 15px 40px;\n  border-radius: 12px;\n  box-sizing: border-box;\n  font-family: \"Comfortaa\", cursive;\n  font-size: 1.2rem;\n}\n.homePage .searchAdd .addNewPlant {\n  font-size: 1.2rem;\n  width: 100%;\n  text-align: center;\n  margin-top: 1em;\n  color: #624972;\n  cursor: pointer;\n}\n.homePage .searchAdd .addNewPlant .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.homePage .plantList {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .plantList .plantListGrouping {\n  display: grid;\n  grid-template-rows: repeat(11, 1fr);\n  grid-template-columns: repeat(8, 1fr);\n  height: 35em;\n  width: 100%;\n  background-color: #597249;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  margin-bottom: 1em;\n  text-align: center;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n  grid-row: 1/8;\n  grid-column: 1/9;\n  width: 100%;\n  height: 100%;\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  border-radius: 20px 20px 0 0;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n  grid-row: 7/9;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  background: #fff;\n  border-radius: 0.5em;\n  padding: 0.5em 1em;\n  color: #624972;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n  grid-row: 8/10;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n  grid-row: 9/11;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n  grid-row: 11/12;\n  grid-column: 1/9;\n  background: #fff;\n  width: 100%;\n  height: 100%;\n  color: #624972;\n  border-radius: 0 0 19px 19px;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  text-align: center;\n  font-size: 1.2rem;\n  font-weight: bold;\n}\n@media (min-width: 700px) {\n.homePage {\n    display: grid;\n    grid-template-columns: repeat(13, 1fr);\n    grid-template-rows: repeat(5, 1fr) repeat(1, 10px);\n    width: 100%;\n    padding-top: 5em;\n    padding-bottom: 10em;\n    min-height: 0;\n    min-width: 0;\n}\n.homePage .headGroup {\n    width: 100%;\n    grid-row: 1/3;\n    grid-column: 2/8;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: contain;\n    width: 10em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    width: 100%;\n    height: 15em;\n    grid-row: 3/5;\n    grid-column: 2/8;\n    overflow-y: auto;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-align: center;\n            align-items: center;\n    margin-bottom: 0;\n}\n.homePage .messageList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .messageList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .messageList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .messageList .msgCard {\n    width: 100%;\n    border-radius: 10px;\n    box-sizing: border-box;\n}\n.homePage .weatherCard {\n    width: 100%;\n    height: 90%;\n    grid-row: 1/5;\n    grid-column: 9/13;\n    align-self: flex-start;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    direction: column;\n    -webkit-box-align: space-between;\n            align-items: space-between;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherTemp {\n    font-size: 5rem;\n}\n.homePage .searchAdd {\n    width: 100%;\n    grid-row: 5/6;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .plantList {\n    width: 100%;\n    grid-row: 6/8;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    flex-wrap: wrap;\n    gap: 5%;\n}\n.homePage .plantList .plantListGrouping {\n    height: 35em;\n    width: 47%;\n}\n}\n@media (min-width: 1200px) {\n.homePage {\n    height: 70em;\n    padding-top: 2em;\n    box-sizing: border-box;\n    display: grid;\n    grid-template-rows: repeat(16, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.homePage .headGroup {\n    grid-column: 2/9;\n    grid-row: 2/7;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    width: 13em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    grid-column: 2/9;\n    grid-row: 7/11;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n    margin-bottom: 0.5em;\n    -webkit-box-align: center;\n            align-items: center;\n}\n.homePage .weatherCard {\n    height: auto;\n    grid-column: 2/9;\n    grid-row: 11/16;\n    width: 100%;\n    display: initial;\n}\n.homePage .weatherCard .weatherTemp {\n    float: right;\n    font-size: 3em;\n}\n.homePage .weatherCard .weatherLocation {\n    float: left;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherDateTime {\n    float: left;\n    width: 100%;\n    text-align: left;\n}\n.homePage .searchAdd {\n    grid-column: 10/17;\n    grid-row: 4/6;\n    width: 100%;\n    align-self: end;\n    justify-self: center;\n}\n.homePage .plantList {\n    height: 30em;\n    grid-column: 10/17;\n    grid-row: 6/16;\n    display: block;\n    align-self: flex-start;\n    justify-self: center;\n    overflow-y: auto;\n}\n.homePage .plantList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .plantList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .plantList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .plantList .plantListGrouping {\n    height: 14em;\n    width: 99%;\n    display: grid;\n    grid-template-columns: repeat(8, 1fr);\n    grid-template-rows: repeat(5, 1fr);\n    background-color: #597249;\n    border-radius: 30px;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    margin-bottom: 1em;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n    grid-row: 1/6;\n    grid-column: 1/4;\n    width: 100%;\n    height: 100%;\n    color: #fff;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: cover;\n    border-radius: 20px 0 0 20px;\n    box-sizing: border-box;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n    grid-row: 1/3;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n    background: none;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n    grid-row: 2/4;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n    grid-row: 3/5;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n    grid-row: 5/6;\n    grid-column: 4/9;\n    justify-self: end;\n    align-self: end;\n    background: #fff;\n    width: 100%;\n    height: 100%;\n    color: #624972;\n    border-radius: 0 0 29px 0;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n            justify-content: center;\n    text-align: center;\n    font-size: 1.2rem;\n    font-weight: bold;\n}\n}", ""]);
 
 // exports
 
@@ -7588,7 +7630,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, ".white {\n  color: white;\n}\n.userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.userProfileLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: contain;\n  height: 3rem;\n  width: 100%;\n  border-radius: 1rem;\n  background-color: transparent;\n  margin-right: 0;\n  margin-top: 1em;\n  margin-bottom: 2em;\n}\n.userProfilePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 2em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  color: #624972;\n}\n.userProfilePage .userHeaderName {\n  font-weight: bold;\n}\n.userProfilePage .userProfileImage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  margin: 0 auto;\n  position: relative;\n  height: 17rem;\n  width: 17rem;\n  justify-self: center;\n}\n.userProfilePage .userProfileImage .userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 17rem;\n  width: 17rem;\n  border-radius: 1rem;\n  margin: 0;\n  position: absolute;\n  bottom: 0;\n}\n.userProfilePage .userProfileImage .newProfImgContainer {\n  position: absolute;\n  top: 0;\n  width: 100%;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage {\n  position: absolute;\n  top: 0.5rem;\n  right: 0.5rem;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .edit::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .check::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00C\";\n}\n.userProfilePage .editUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em 2em;\n  width: 17rem;\n}\n.userProfilePage .editUserInfoButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .editUserInfoButton .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileCard, .userProfilePage .passwordSubCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 1em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1rem;\n  padding: 2em;\n  width: 17rem;\n  box-sizing: border-box;\n  text-align: center;\n  font-size: 1.3rem;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n  font-weight: bold;\n  color: #597249;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard div input, .userProfilePage .passwordSubCard div input {\n  margin-top: 1em;\n}\n.userProfilePage .userProfileCard {\n  background: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n  background: transparent;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n  color: #624972;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em;\n  width: 12rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton:hover {\n  text-decoration: underline;\n}\n@media (min-width: 700px) {\n.userProfileLogo {\n    display: none;\n}\n.userProfilePage {\n    padding-bottom: 200px;\n    padding-top: 2em;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 35em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.4rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}\n@media (min-width: 1200px) {\n.userProfilePage {\n    display: -webkit-box;\n    display: flex;\n    width: 95%;\n    margin: 0 auto;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    height: 55rem;\n    padding-top: 1em;\n    -webkit-box-align: center;\n            align-items: center;\n    gap: 2em;\n    -webkit-box-pack: center;\n            justify-content: center;\n    box-sizing: border-box;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 35em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.5rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}", ""]);
 
 // exports
 
@@ -7626,7 +7668,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.addPlantBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: #d1d1d1;\n  z-index: 100;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 90%;\n  left: 50%;\n  -webkit-transform: translate(-50%, -90%);\n          transform: translate(-50%, -90%);\n  background-color: #d1d1d1;\n  padding: 2em 5em;\n  z-index: 1000;\n}\n.addPlantBlanket .closeAddPlantModal .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.addPlantBlanket {\n  overflow: hidden;\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(161, 161, 161, 0.8);\n  z-index: 600;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 1em;\n  height: 30em;\n  width: 75%;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n          transform: translateX(-50%);\n  background-color: #f7f7f7;\n  border-radius: 1em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 4em 2em;\n  z-index: 1000;\n  display: -webkit-box;\n  display: flex;\n  justify-content: space-around;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  gap: 1em;\n  text-align: center;\n  color: #624972;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n  position: absolute;\n  top: 0.5em;\n  right: 0.5em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n  font-size: 1.3rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n  height: 8em;\n  width: 8em;\n  border-radius: 1em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  background: #fff;\n  align-self: center;\n  justify-self: center;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  padding: 2em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n  border: 2px dashed #d1d1d1;\n  width: 100%;\n  height: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n  font-size: 1.2rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  width: 10em;\n  align-self: center;\n  font-size: 1.2rem;\n  padding: 0.5em 1em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton:hover {\n  text-decoration: underline;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n  display: inline-block;\n  width: 100%;\n  text-align: center;\n}\n@media (min-width: 700px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 40em;\n    min-width: 30em;\n    top: 5%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    justify-content: space-around;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    height: 20em;\n    width: 20em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    justify-content: space-around;\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    font-size: 1.9rem;\n}\n}\n@media (min-width: 1200px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 35em;\n    width: 70em;\n    top: 5em;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    display: grid;\n    grid-template-rows: repeat(10, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.addPlantBlanket .addPlantModalForm input {\n    font-size: 1.1rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    top: 1.5em;\n    right: 1.5em;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n    font-size: 1.9rem;\n}\n.addPlantBlanket .addPlantModalForm .plantModalTitle {\n    grid-row: 1/3;\n    grid-column: 2/9;\n    width: 100%;\n    text-align: left;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    grid-row: 4/9;\n    grid-column: 2/7;\n    width: 100%;\n    height: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    margin-bottom: 1em;\n    font-size: 3.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: transparent;\n    content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n    grid-row: 8/10;\n    grid-column: 8/17;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n    grid-row: 5/7;\n    grid-column: 8/13;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #name {\n    grid-row: 4/5;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #type {\n    grid-row: 5/7;\n    grid-column: 13/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #location {\n    grid-row: 7/8;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n}", ""]);
 
 // exports
 
@@ -7645,7 +7687,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.mainNav {\n  z-index: 500;\n}\n.mainNav .shifter {\n  z-index: 502;\n  font-size: 2.4rem;\n  position: fixed;\n  top: -5px;\n  left: -5px;\n}\n.mainNav .shifter .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .shifter .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.mainNav .shifter .faWrapper .bars::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C9\";\n}\n.mainNav .shifter .faWrapper .close::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.mainNav .mobNav {\n  z-index: 501;\n  position: fixed;\n  padding: 5em 2em;\n  gap: 2em;\n  left: 0;\n  top: 0;\n  width: 12em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  background-color: #fff;\n  border: 1px solid #DDDDDD;\n  border-radius: 0px 3em 3em 0px;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .mobNav .navLink {\n  text-decoration: none;\n  text-align: center;\n  color: #624972;\n  font-size: 1.7rem;\n  font-weight: bold;\n}\n.mainNav .mobNav .navLink .faWrapper {\n  font-size: 1rem;\n}\n.mainNav .mobNav .navLink .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F111\";\n}\n.mainNav .mobNav .navLink .faWrapper .home::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F015\";\n}\n.mainNav .mobNav .navLink .faWrapper .profile::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F007\";\n}\n.mainNav .mobNav .navLink .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F060\";\n}\n.mainNav .mobNav .router-link-active {\n  color: #597249;\n}\n.mainNav .mobNav .router-link-active .link-title {\n  text-decoration: underline;\n}\n.mainNav .mobNav .router-link-active .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #597249;\n  content: \"\\F111\";\n}\n.mainNav .offscreenNav {\n  left: -17em;\n}\n@media (min-width: 600px) {\n.mainNav .shifter {\n    display: none;\n}\n.mainNav .nav {\n    z-index: 501;\n    box-sizing: border-box;\n    position: fixed;\n    bottom: 0;\n    left: 5%;\n    background-color: #fff;\n    width: 90%;\n    height: 7em;\n    padding: 2em;\n    border: 1px solid #DDDDDD;\n    border-radius: 3em 3em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n    font-weight: bold;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1rem;\n}\n.mainNav .nav .navLink .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F111\";\n}\n.mainNav .nav .navLink .faWrapper .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .faWrapper .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F060\";\n}\n.mainNav .nav .router-link-active {\n    color: #597249;\n}\n.mainNav .nav .router-link-active .link-title {\n    text-decoration: underline;\n}\n.mainNav .nav .router-link-active .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #597249;\n    content: \"\\F111\";\n}\n}\n@media (min-width: 1200px) {\n.mainNav .nav {\n    left: 15%;\n    background-color: #fff;\n    width: 70%;\n}\n.mainNav .nav .navLink {\n    font-size: 1.9rem;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1.1rem;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.mainNav {\n  z-index: 500;\n}\n.mainNav .shifter {\n  z-index: 502;\n  font-size: 2.6rem;\n  position: fixed;\n  top: -15px;\n  left: -25px;\n}\n.mainNav .shifter .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .shifter .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.mainNav .shifter .faWrapper .bars::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C9\";\n}\n.mainNav .shifter .faWrapper .close::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.mainNav .mobNav {\n  z-index: 501;\n  position: fixed;\n  padding: 5em 2em;\n  gap: 2em;\n  left: 0;\n  top: 0;\n  width: 12em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  background-color: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 0px 3em 3em 0px;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .mobNav .navLink {\n  text-decoration: none;\n  text-align: center;\n  color: #624972;\n  font-size: 1.7rem;\n  font-weight: bold;\n}\n.mainNav .mobNav .navLink .faWrapper {\n  font-size: 1rem;\n}\n.mainNav .mobNav .navLink .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F111\";\n}\n.mainNav .mobNav .navLink .faWrapper .home::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F015\";\n}\n.mainNav .mobNav .navLink .faWrapper .profile::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F007\";\n}\n.mainNav .mobNav .navLink .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F060\";\n}\n.mainNav .mobNav .router-link-active {\n  color: #597249;\n}\n.mainNav .mobNav .router-link-active .link-title {\n  text-decoration: underline;\n}\n.mainNav .mobNav .router-link-active .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #597249;\n  content: \"\\F111\";\n}\n.mainNav .offscreenNav {\n  left: -17em;\n}\n@media (min-width: 700px) {\n.mainNav .shifter {\n    display: none;\n}\n.mainNav .nav {\n    z-index: 501;\n    box-sizing: border-box;\n    position: fixed;\n    bottom: 0;\n    left: 5%;\n    background-color: #fff;\n    width: 90%;\n    height: 7em;\n    padding: 2em;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    border-radius: 3em 3em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n    font-weight: bold;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1rem;\n}\n.mainNav .nav .navLink .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F111\";\n}\n.mainNav .nav .navLink .faWrapper .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .faWrapper .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F060\";\n}\n.mainNav .nav .router-link-active {\n    color: #597249;\n}\n.mainNav .nav .router-link-active .link-title {\n    text-decoration: underline;\n}\n.mainNav .nav .router-link-active .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #597249;\n    content: \"\\F111\";\n}\n}\n@media (min-width: 1200px) {\n.mainNav .nav {\n    left: 15%;\n    background-color: #fff;\n    width: 70%;\n}\n.mainNav .nav .navLink {\n    font-size: 1.9rem;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1.1rem;\n}\n}", ""]);
 
 // exports
 
@@ -39785,10 +39827,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true&":
-/*!******************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true& ***!
-  \******************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=template&id=332fccf4&":
+/*!******************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/App.vue?vue&type=template&id=332fccf4& ***!
+  \******************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -39826,101 +39868,130 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
+    { staticClass: "homePage" },
     [
       _c("h2", { staticClass: "invisibleHeader" }, [_vm._v("Home Page")]),
       _vm._v(" "),
+      _c("div", { staticClass: "headGroup" }, [
+        _c("div", {
+          staticClass: "homeLogo",
+          style: { "background-image": "url(/images/logoP.svg)" }
+        }),
+        _vm._v(" "),
+        _c("h2", { staticClass: "greeting" }, [
+          _vm._v("hi, " + _vm._s(_vm.user.name) + ".")
+        ]),
+        _vm._v(" "),
+        _c("h5", { staticClass: "updateIntro" }, [
+          _vm._v("Here's what happened while you were away:")
+        ])
+      ]),
+      _vm._v(" "),
       _c(
-        "ul",
+        "div",
         { staticClass: "messageList" },
         _vm._l(_vm.userMessages, function(message) {
-          return _c("li", { key: message.id }, [
-            _c("p", [_vm._v("message: " + _vm._s(message.message))]),
-            _vm._v(" "),
-            _c("p", [
-              _vm._v("alert generated at: " + _vm._s(message.generatedAt))
+          return _c("div", { key: message.id, staticClass: "msgCard" }, [
+            _c("p", { staticClass: "msgContent" }, [
+              _vm._v(_vm._s(message.message) + "\n                "),
+              _c("span", { staticClass: "msgTimestamp" }, [
+                _vm._v(_vm._s(message.generatedAt))
+              ])
             ])
           ])
         }),
         0
       ),
       _vm._v(" "),
+      _c("div", { staticClass: "weatherCard" }, [
+        _c("h2", { staticClass: "weatherTemp" }, [
+          _vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")
+        ]),
+        _vm._v(" "),
+        _c("h2", { staticClass: "weatherLocation" }, [
+          _vm._v(_vm._s(_vm.weather.location.name))
+        ]),
+        _vm._v(" "),
+        _c("h5", { staticClass: "weatherDateTime" }, [
+          _vm._v(_vm._s(_vm.weather.location.localtime))
+        ])
+      ]),
+      _vm._v(" "),
       _vm.addPlantOpen
         ? _c("AddPlantModal", { on: { closeAddPlant: _vm.toggleAddPlant } })
         : _vm._e(),
       _vm._v(" "),
-      _c("div", [
-        _c("p", [_vm._v(_vm._s(_vm.weather.current.temp_c) + "°C")]),
-        _vm._v(" "),
-        _c("p", [_vm._v(_vm._s(_vm.weather.location.name))]),
-        _vm._v(" "),
-        _c("p", [_vm._v(_vm._s(_vm.weather.location.localtime))])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "searchBar" }, [
-        _c("input", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.myPlantFilter,
-              expression: "myPlantFilter"
-            }
-          ],
-          staticClass: "myPlantFilter",
-          attrs: { placeholder: "search plants" },
-          domProps: { value: _vm.myPlantFilter },
-          on: {
-            input: function($event) {
-              if ($event.target.composing) {
-                return
+      _c("div", { staticClass: "searchAdd" }, [
+        _c("div", { staticClass: "searchBar" }, [
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.myPlantFilter,
+                expression: "myPlantFilter"
               }
-              _vm.myPlantFilter = $event.target.value
+            ],
+            staticClass: "myPlantFilter",
+            attrs: { placeholder: "search plants" },
+            domProps: { value: _vm.myPlantFilter },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.myPlantFilter = $event.target.value
+              }
             }
-          }
-        }),
-        _c("span", { staticClass: "font-awesome-icons search" })
+          }),
+          _c("span", { staticClass: "font-awesome-icons search" })
+        ]),
+        _vm._v(" "),
+        _c(
+          "a",
+          { staticClass: "addNewPlant", on: { click: _vm.toggleAddPlant } },
+          [
+            _c("span", { staticClass: "font-awesome-icons add" }),
+            _vm._v(" add new plant")
+          ]
+        )
       ]),
       _vm._v(" "),
       _c(
-        "a",
-        { staticClass: "addNewPlant", on: { click: _vm.toggleAddPlant } },
-        [_c("span", { staticClass: "font-awesome-icons add" }), _vm._v(" add")]
-      ),
-      _c("br"),
-      _c("br"),
-      _c("br"),
-      _vm._v(" "),
-      _c(
-        "ul",
+        "div",
         { staticClass: "plantList" },
         _vm._l(_vm.userPlants, function(plant) {
           return _c(
-            "li",
-            { key: plant.id },
+            "div",
+            { key: plant.id, staticClass: "plantListGrouping" },
             [
               _c("div", {
                 staticClass: "plantSideImage",
                 style: { "background-image": "url(" + plant.image + ")" }
               }),
               _vm._v(" "),
-              _c("p", { staticClass: "plantName" }, [
+              _c("h4", { staticClass: "plantNameHome" }, [
                 _c("span", { staticClass: "font-awesome-icons plant" }),
                 _vm._v(" " + _vm._s(plant.name))
               ]),
               _vm._v(" "),
-              _c("p", [_vm._v("location: " + _vm._s(plant.location))]),
+              _c("h5", { staticClass: "plantLocationHome" }, [
+                _vm._v("location: " + _vm._s(plant.location))
+              ]),
               _vm._v(" "),
-              _c("p", [_vm._v("status: " + _vm._s(_vm.isHealthy))]),
+              _c("h5", { staticClass: "plantStatusHome" }, [
+                _vm._v("status: " + _vm._s(_vm.isHealthy))
+              ]),
               _vm._v(" "),
               _c(
                 "router-link",
                 {
-                  staticClass: "routerLink",
+                  staticClass: "routerLink view viewPlantHome",
                   attrs: {
                     to: { name: "plant", params: { id: "" + plant.id } }
                   }
                 },
-                [_vm._v("view plant")]
+                [_vm._v("view plant >")]
               )
             ],
             1
@@ -40056,15 +40127,28 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("h1", { staticClass: "white" }, [_vm._v("PROFILE")]),
+    _c("h1", { staticClass: "invisibleHeader" }, [_vm._v("PROFILE")]),
     _vm._v(" "),
     _vm.userInfo
       ? _c("div", [
+          _c("div", {
+            staticClass: "userProfileLogo",
+            style: { "background-image": "url(/images/logoP.svg)" }
+          }),
+          _vm._v(" "),
           _c(
             "form",
-            { ref: "userForm", attrs: { enctype: "multipart/form-data" } },
+            {
+              ref: "userForm",
+              staticClass: "userProfilePage",
+              attrs: { enctype: "multipart/form-data" }
+            },
             [
-              _c("div", [
+              _c("h2", { staticClass: "userHeaderName" }, [
+                _vm._v(_vm._s(_vm.userInfo.name))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "userProfileImage" }, [
                 _c("div", {
                   staticClass: "userImage",
                   style: {
@@ -40072,190 +40156,233 @@ var render = function() {
                   }
                 }),
                 _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    attrs: { type: "button" },
-                    on: { click: _vm.toggleEditUser }
-                  },
-                  [
-                    _vm._v(
-                      _vm._s(
-                        _vm.editingUser
-                          ? "revert without saving"
-                          : "edit user details"
-                      )
-                    )
-                  ]
-                ),
-                _vm._v(" "),
                 _vm.editingUser
-                  ? _c("div", [
-                      _c("label", { attrs: { for: "avatar" } }, [
-                        _vm._v("new profile image")
-                      ]),
+                  ? _c("div", { staticClass: "newProfImgContainer" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "newProfileImage",
+                          attrs: { for: "thumbnail" }
+                        },
+                        [
+                          _c("span", { staticClass: "fa-stack faWrapper" }, [
+                            _c("i", { staticClass: "fa circle fa-stack-2x" }),
+                            _vm._v(" "),
+                            _vm.profImgLoaded
+                              ? _c("i", { staticClass: "fa check fa-stack-1x" })
+                              : _c("i", { staticClass: "fa edit fa-stack-1x" })
+                          ])
+                        ]
+                      ),
                       _vm._v(" "),
                       _c("input", {
                         attrs: {
                           type: "file",
                           name: "thumbnail",
-                          id: "thumbnail"
-                        }
+                          id: "thumbnail",
+                          hidden: ""
+                        },
+                        on: { change: _vm.profFileLoaded }
                       })
                     ])
                   : _vm._e()
               ]),
               _vm._v(" "),
-              _c("div", [
-                _c("label", { attrs: { for: "new_name" } }, [_vm._v("name")]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_name",
-                        name: "new_name",
-                        placeholder: _vm.userInfo.name
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.name))]),
-                _vm._v(" "),
-                _c("label", { attrs: { for: "new_location" } }, [
-                  _vm._v("location")
-                ]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_location",
-                        name: "new_location",
-                        placeholder: _vm.userInfo.location
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.location))]),
-                _vm._v(" "),
-                _c("label", { attrs: { for: "new_phone" } }, [_vm._v("phone")]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_phone",
-                        name: "new_phone",
-                        placeholder: _vm.userInfo.phone
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.phone))]),
-                _vm._v(" "),
-                _c("label", { attrs: { for: "new_email" } }, [_vm._v("email")]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("input", {
-                      attrs: {
-                        type: "text",
-                        id: "new_email",
-                        name: "new_email",
-                        placeholder: _vm.userInfo.email
-                      }
-                    })
-                  : _c("p", [_vm._v(_vm._s(_vm.userInfo.email))]),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c("div", [
-                      _c("div", [
-                        _c("p", [_vm._v("Change Password")]),
-                        _vm._v(" "),
-                        _c(
-                          "button",
-                          {
-                            attrs: { type: "button" },
-                            on: {
-                              click: function($event) {
-                                _vm.showPasswords = !_vm.showPasswords
-                              }
+              _c(
+                "button",
+                {
+                  staticClass: "editUserInfoButton",
+                  attrs: { type: "button" },
+                  on: { click: _vm.toggleEditUser }
+                },
+                [
+                  !_vm.editingUser
+                    ? _c("span", { staticClass: "font-awesome-icons edit" })
+                    : _vm._e(),
+                  _vm._v(
+                    " " +
+                      _vm._s(
+                        _vm.editingUser
+                          ? "revert without saving"
+                          : "edit user details"
+                      ) +
+                      "\n      "
+                  )
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                {
+                  staticClass: "userProfileCard",
+                  class: !_vm.editingUser ? "userProfileNotEditing" : ""
+                },
+                [
+                  _c("div", [
+                    _c("label", { attrs: { for: "new_name" } }, [
+                      _vm._v("name")
+                    ]),
+                    _vm._v(" "),
+                    _vm.editingUser
+                      ? _c("input", {
+                          attrs: {
+                            type: "text",
+                            id: "new_name",
+                            name: "new_name",
+                            placeholder: _vm.userInfo.name
+                          }
+                        })
+                      : _c("p", [_vm._v(_vm._s(_vm.userInfo.name))])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("label", { attrs: { for: "new_location" } }, [
+                      _vm._v("location")
+                    ]),
+                    _vm._v(" "),
+                    _vm.editingUser
+                      ? _c("input", {
+                          attrs: {
+                            type: "text",
+                            id: "new_location",
+                            name: "new_location",
+                            placeholder: _vm.userInfo.location
+                          }
+                        })
+                      : _c("p", [_vm._v(_vm._s(_vm.userInfo.location))])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("label", { attrs: { for: "new_phone" } }, [
+                      _vm._v("phone")
+                    ]),
+                    _vm._v(" "),
+                    _vm.editingUser
+                      ? _c("input", {
+                          attrs: {
+                            type: "text",
+                            id: "new_phone",
+                            name: "new_phone",
+                            placeholder: _vm.userInfo.phone
+                          }
+                        })
+                      : _c("p", [_vm._v(_vm._s(_vm.userInfo.phone))])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("label", { attrs: { for: "new_email" } }, [
+                      _vm._v("email")
+                    ]),
+                    _vm._v(" "),
+                    _vm.editingUser
+                      ? _c("input", {
+                          attrs: {
+                            type: "text",
+                            id: "new_email",
+                            name: "new_email",
+                            placeholder: _vm.userInfo.email
+                          }
+                        })
+                      : _c("p", [_vm._v(_vm._s(_vm.userInfo.email))])
+                  ]),
+                  _vm._v(" "),
+                  _vm.editingUser
+                    ? _c("div", { staticClass: "passwordSubCard" }, [
+                        _c("div", [
+                          _c("label", { attrs: { for: "password" } }, [
+                            _vm._v("current password")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            attrs: {
+                              type: _vm.showPasswords ? "text" : "password",
+                              id: "password",
+                              name: "password"
                             }
-                          },
-                          [
-                            _vm.showPasswords
-                              ? [
-                                  _vm._v(
-                                    "\n                  hide passwords\n              "
-                                  )
-                                ]
-                              : [
-                                  _vm._v(
-                                    "\n                  show passwords\n              "
-                                  )
-                                ]
-                          ],
-                          2
-                        )
-                      ]),
-                      _vm._v(" "),
-                      _c("div", [
-                        _c("label", { attrs: { for: "password" } }, [
-                          _vm._v("current password")
+                          })
                         ]),
                         _vm._v(" "),
-                        _c("input", {
-                          attrs: {
-                            type: _vm.showPasswords ? "text" : "password",
-                            id: "password",
-                            name: "password"
-                          }
-                        })
-                      ]),
-                      _vm._v(" "),
-                      _c("div", [
-                        _c("label", { attrs: { for: "new_password" } }, [
-                          _vm._v("new password")
+                        _c("div", [
+                          _c("label", { attrs: { for: "new_password" } }, [
+                            _vm._v("new password")
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            attrs: {
+                              type: _vm.showPasswords ? "text" : "password",
+                              id: "new_password",
+                              name: "new_password"
+                            }
+                          })
                         ]),
                         _vm._v(" "),
-                        _c("input", {
-                          attrs: {
-                            type: _vm.showPasswords ? "text" : "password",
-                            id: "new_password",
-                            name: "new_password"
-                          }
-                        })
-                      ]),
-                      _vm._v(" "),
-                      _c("div", [
-                        _c(
-                          "label",
-                          { attrs: { for: "new_password_confirm" } },
-                          [_vm._v("confirm new password")]
-                        ),
+                        _c("div", [
+                          _c(
+                            "label",
+                            { attrs: { for: "new_password_confirm" } },
+                            [_vm._v("confirm password")]
+                          ),
+                          _vm._v(" "),
+                          _c("input", {
+                            attrs: {
+                              type: _vm.showPasswords ? "text" : "password",
+                              id: "new_password_confirm",
+                              name: "new_password_confirm"
+                            }
+                          })
+                        ]),
                         _vm._v(" "),
-                        _c("input", {
-                          attrs: {
-                            type: _vm.showPasswords ? "text" : "password",
-                            id: "new_password_confirm",
-                            name: "new_password_confirm"
-                          }
-                        })
+                        _c("div", [
+                          _c(
+                            "a",
+                            {
+                              staticClass: "showPasswordButton",
+                              on: {
+                                click: function($event) {
+                                  _vm.showPasswords = !_vm.showPasswords
+                                }
+                              }
+                            },
+                            [
+                              _vm.showPasswords
+                                ? [
+                                    _vm._v(
+                                      "\n                  hide passwords\n              "
+                                    )
+                                  ]
+                                : [
+                                    _vm._v(
+                                      "\n                  show passwords\n              "
+                                    )
+                                  ]
+                            ],
+                            2
+                          )
+                        ])
                       ])
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.editingUser
-                  ? _c(
-                      "button",
-                      {
-                        attrs: { type: "button", disabled: _vm.processing },
-                        on: { click: _vm.submit }
-                      },
-                      [
-                        _vm._v(
-                          "\n          " +
-                            _vm._s(_vm.processing ? "Processing..." : "save") +
-                            "\n        "
-                        )
-                      ]
-                    )
-                  : _vm._e()
-              ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.editingUser
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "saveUserInfoButton",
+                          attrs: { type: "button", disabled: _vm.processing },
+                          on: { click: _vm.submit }
+                        },
+                        [
+                          _vm._v(
+                            "\n          " +
+                              _vm._s(
+                                _vm.processing ? "processing..." : "save"
+                              ) +
+                              "\n        "
+                          )
+                        ]
+                      )
+                    : _vm._e()
+                ]
+              )
             ]
           )
         ])
@@ -40325,85 +40452,140 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "addPlantBlanket" }, [
-    _c("div", { staticClass: "addPlantModalForm" }, [
-      _c("h1", [_vm._v("ADD PLANT MODAL")]),
-      _vm._v(" "),
-      _c("p", [_vm._v("ADD NEW PLANT INFO FORM HERE")]),
-      _vm._v(" "),
-      _c(
-        "button",
-        { staticClass: "closeAddPlantModal", on: { click: _vm.closeAddPlant } },
-        [_c("span", { staticClass: "font-awesome-icons close" })]
-      ),
-      _vm._v(" "),
-      _c(
-        "form",
-        { ref: "plantForm", attrs: { enctype: "multipart/form-data" } },
-        [
-          _c("input", {
-            attrs: { type: "hidden", name: "upload_plant", value: "1" }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("name: ")]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: { type: "text", name: "name", id: "name" }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("type: ")]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: { type: "text", name: "type", id: "type" }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("image: ")]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: { type: "file", name: "image", id: "image" }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("date planted (estimates are fine): ")]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: {
-              type: "date",
-              name: "date_planted",
-              id: "datePlanted",
-              min: "2000-01-01",
-              max: _vm.currentDate
-            },
-            domProps: { value: _vm.currentDate }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("location: ")]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: { type: "text", name: "location", id: "location" }
-          }),
-          _vm._v(" "),
-          _vm.errors
-            ? _c("div", [_c("p", [_vm._v(_vm._s(_vm.errors))])])
-            : _vm._e(),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              attrs: { id: "addPlantButton", disabled: _vm.disabledAdd },
-              on: { click: _vm.addPlant }
-            },
-            [_vm._v("\n            add plant\n        ")]
-          )
-        ]
-      )
-    ])
+    _c("h2", { staticClass: "invisibleHeader" }, [_vm._v("Add Plant Modal")]),
+    _vm._v(" "),
+    _c(
+      "form",
+      {
+        ref: "plantForm",
+        staticClass: "addPlantModalForm",
+        attrs: { enctype: "multipart/form-data" }
+      },
+      [
+        _c("h2", { staticClass: "plantModalTitle" }, [_vm._v("add a plant")]),
+        _vm._v(" "),
+        _c(
+          "a",
+          {
+            staticClass: "closeAddPlantModal",
+            on: { click: _vm.closeAddPlant }
+          },
+          [_vm._m(0)]
+        ),
+        _vm._v(" "),
+        _c("label", { staticClass: "addPlantImage", attrs: { for: "image" } }, [
+          _c("span", { staticClass: "inAddImg" }, [
+            _vm._m(1),
+            _vm._v(
+              "\n            " +
+                _vm._s(
+                  _vm.fileLoaded
+                    ? "file uploaded!"
+                    : "upload a picture of your plant"
+                ) +
+                "\n            "
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("input", {
+          staticClass: "form-control",
+          attrs: { type: "file", name: "image", id: "image", hidden: "" },
+          on: { change: _vm.updateFile }
+        }),
+        _vm._v(" "),
+        _c("input", {
+          attrs: { type: "hidden", name: "upload_plant", value: "1" }
+        }),
+        _vm._v(" "),
+        _c("input", {
+          staticClass: "form-control",
+          attrs: {
+            type: "text",
+            name: "name",
+            id: "name",
+            placeholder: "name your plant"
+          }
+        }),
+        _vm._v(" "),
+        _c("input", {
+          staticClass: "form-control",
+          attrs: {
+            type: "text",
+            name: "type",
+            id: "type",
+            placeholder: "plant type"
+          }
+        }),
+        _vm._v(" "),
+        _c("input", {
+          staticClass: "form-control",
+          attrs: {
+            type: "text",
+            name: "location",
+            id: "location",
+            placeholder: "plant location (e.g. 'kitchen')"
+          }
+        }),
+        _vm._v(" "),
+        _c(
+          "label",
+          { staticClass: "dateLabel", attrs: { for: "datePlanted" } },
+          [
+            _vm._v("date planted:\n            "),
+            _c("input", {
+              staticClass: "form-control",
+              attrs: {
+                type: "date",
+                name: "date_planted",
+                id: "datePlanted",
+                min: "2000-01-01",
+                max: _vm.currentDate
+              },
+              domProps: { value: _vm.currentDate }
+            })
+          ]
+        ),
+        _vm._v(" "),
+        _vm.errors
+          ? _c("div", [_c("p", [_vm._v(_vm._s(_vm.errors))])])
+          : _vm._e(),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "addPlantButton",
+            attrs: { disabled: _vm.disabledAdd },
+            on: { click: _vm.addPlant }
+          },
+          [_vm._v("\n            create plant\n        ")]
+        )
+      ]
+    )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa close fa-stack-1x" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa add fa-stack-1x" })
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -57550,7 +57732,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./App.vue?vue&type=template&id=332fccf4&scoped=true& */ "./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true&");
+/* harmony import */ var _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./App.vue?vue&type=template&id=332fccf4& */ "./resources/js/components/App.vue?vue&type=template&id=332fccf4&");
 /* harmony import */ var _App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./App.vue?vue&type=script&lang=js& */ "./resources/js/components/App.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
@@ -57562,11 +57744,11 @@ __webpack_require__.r(__webpack_exports__);
 
 var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
   _App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
   false,
   null,
-  "332fccf4",
+  null,
   null
   
 )
@@ -57592,19 +57774,19 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true&":
-/*!************************************************************************************!*\
-  !*** ./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true& ***!
-  \************************************************************************************/
+/***/ "./resources/js/components/App.vue?vue&type=template&id=332fccf4&":
+/*!************************************************************************!*\
+  !*** ./resources/js/components/App.vue?vue&type=template&id=332fccf4& ***!
+  \************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./App.vue?vue&type=template&id=332fccf4&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=template&id=332fccf4&scoped=true&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./App.vue?vue&type=template&id=332fccf4& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=template&id=332fccf4&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
