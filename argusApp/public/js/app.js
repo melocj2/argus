@@ -2939,12 +2939,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["currentPlant"],
   data: function data() {
     return {
       plant: this.currentPlant,
-      addedPlantInfo: false
+      addedPlantInfo: false,
+      tips: {}
     };
   },
   methods: {
@@ -2982,6 +2984,15 @@ __webpack_require__.r(__webpack_exports__);
       console.log("API CALL", data);
     })["catch"](function (error) {
       console.log(error);
+    });
+  },
+  created: function created() {
+    var vm = this;
+    fetch("http://localhost:8082/api/get-tips").then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      vm.tips = data[Math.floor(Math.random() * 12)].protip;
+      console.log(data[Math.floor(Math.random() * 12)].protip);
     });
   }
 });
@@ -40713,6 +40724,8 @@ var render = function() {
           _c("p", [_vm._v("age: " + _vm._s(this.plant.age))]),
           _vm._v(" "),
           _c("p", [_vm._v("description: " + _vm._s(this.addedPlantInfo.info))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("protip: " + _vm._s(_vm.tips))]),
           _vm._v(" "),
           _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
         ])

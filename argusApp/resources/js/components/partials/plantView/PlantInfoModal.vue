@@ -5,6 +5,7 @@
             <p>scientific name: {{this.addedPlantInfo.species}}</p>
             <p>age: {{this.plant.age}}</p>
             <p>description: {{this.addedPlantInfo.info}}</p>
+            <p>protip: {{tips}}</p>
             <button @click="closePlantInfo">close</button>
         </div>
     </div>
@@ -19,6 +20,7 @@
         return {
             plant: this.currentPlant,
             addedPlantInfo: false,
+            tips: {}
         }
     },
 
@@ -70,10 +72,20 @@
             .catch(error => {
                 console.log(error);
 		    });
+
         },
 
-
-
+        created: function () {
+            let vm = this;
+            fetch(`http://localhost:8082/api/get-tips`)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data) {
+            vm.tips = data[Math.floor(Math.random()*12)].protip;
+            console.log(data[Math.floor(Math.random()*12)].protip);
+		    });
+        },
 }
 </script>
 
