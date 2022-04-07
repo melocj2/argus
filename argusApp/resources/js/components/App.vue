@@ -1,6 +1,6 @@
 <template>
     <div>
-
+        <h2 class="invisibleHeader">Main Argus Container Page</h2>
  <Nav :userPlants="userPlantsMain"/>
 
         <transition
