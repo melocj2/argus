@@ -30,7 +30,6 @@
 
 </head>
 <body>
-    <h1 class="invisibleHeader">Body of Application</h1>
     <main>
             @yield('content')
     </main>
