@@ -162,24 +162,24 @@ class MessageController extends Controller
 
         // Find your Account SID and Auth Token at twilio.com/console
         // and set the environment variables. See http://twil.io/secure
-        // $sid = 'AC94861c75a2af4aade991242e0d2c4b09';
-        // $token = '2a2dc75d7ec89c94fe168804e69668d4';
-        // $twilio = new Client($sid, $token);
+        $sid = getenv("TWILIO_SID");
+        $token = getenv("TWILIO_TOKEN");
+        $twilio = new Client($sid, $token);
 
-        // // +12269777826 natasha
-        // // +15192007926 jake
+        // +12269777826 natasha
+        // +15192007926 jake
 
-        // $message = $twilio->messages
-        //                 ->create("+15192007926", // to
-        //                         [
-        //                             "body" => $request->message,
-        //                             "from" => "+12565889944"
-        //                         ]
-        //                 );
+        $message = $twilio->messages
+                        ->create("+15192007926", // to
+                                [
+                                    "body" => $request->message,
+                                    "from" => "+12565889944"
+                                ]
+                        );
 
-        // print($message->sid);
+        print($message->sid);
 
-        // return response()->json($message);
+        return response()->json($message);
     }
 
 }

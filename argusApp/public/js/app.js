@@ -1849,6 +1849,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -1861,7 +1866,19 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     }
   },
-  computed: {},
+  computed: {
+    userPlantsMain: function userPlantsMain() {
+      if (!this.$store.state.userPlants) {
+        return false;
+      }
+
+      var plants = this.$store.state.userPlants;
+
+      if (plants && plants[0] && plants[0].id != 'loading data...') {
+        return plants;
+      }
+    }
+  },
   methods: {
     generateAlerts: function generateAlerts() {
       var messages = this.getMessagesFromReadings();
@@ -2249,6 +2266,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _partials_plantView_PlantProfileCard_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./partials/plantView/PlantProfileCard.vue */ "./resources/js/components/partials/plantView/PlantProfileCard.vue");
 /* harmony import */ var _partials_plantView_PlantListMenu_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./partials/plantView/PlantListMenu.vue */ "./resources/js/components/partials/plantView/PlantListMenu.vue");
 /* harmony import */ var _partials_plantView_SensorCardDealer_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./partials/plantView/SensorCardDealer.vue */ "./resources/js/components/partials/plantView/SensorCardDealer.vue");
+/* harmony import */ var _partials_plantView_ChartModal_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./partials/plantView/ChartModal.vue */ "./resources/js/components/partials/plantView/ChartModal.vue");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -2284,6 +2302,8 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+
 
 
 
@@ -2295,11 +2315,14 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     Chart: _partials_charts_Chart_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
     PlantProfileCard: _partials_plantView_PlantProfileCard_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
     PlantListMenu: _partials_plantView_PlantListMenu_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
-    SensorCardDealer: _partials_plantView_SensorCardDealer_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
+    SensorCardDealer: _partials_plantView_SensorCardDealer_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+    ChartModal: _partials_plantView_ChartModal_vue__WEBPACK_IMPORTED_MODULE_5__["default"]
   },
   data: function data() {
     return {
-      plantInfoOpen: false
+      plantInfoOpen: false,
+      chartModalOpen: false,
+      windowWidth: false
     };
   },
   computed: {
@@ -2345,12 +2368,19 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       }
 
       var info = [dayData, monthData];
-      var data = {};
-      data.sensors = this.convertToChartData(dayData, monthData); //should return 1 array, with both one day and one 30 day data, each with chart data for broken up gas, temp, light, and moisture;
-
-      data.summary = this.getHealthSummary(dayData, monthData); //should return 2 arrays, one day and one 30 day, each with chart data for summary of 30 day and one day;
-
-      data.info = info;
+      var data = [];
+      data.push({
+        data: this.convertToChartData(dayData, monthData),
+        type: 'BarChart',
+        id: 1,
+        title: "health score by sensor"
+      });
+      data.push({
+        data: this.getHealthSummary(dayData, monthData),
+        type: 'ColumnChart',
+        id: 2,
+        title: "summary of health data"
+      });
       return data;
     },
     dayTrend: function dayTrend() {
@@ -2374,7 +2404,22 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
   },
   methods: {
     togglePlantInfo: function togglePlantInfo() {
+      if (document.querySelector("body").style.overflow != 'hidden') {
+        document.querySelector("body").style.overflow = 'hidden';
+      } else {
+        document.querySelector("body").style.overflow = 'auto';
+      }
+
       this.plantInfoOpen = !this.plantInfoOpen;
+    },
+    toggleChartModal: function toggleChartModal() {
+      if (document.querySelector("body").style.overflow != 'hidden') {
+        document.querySelector("body").style.overflow = 'hidden';
+      } else {
+        document.querySelector("body").style.overflow = 'auto';
+      }
+
+      this.chartModalOpen = !this.chartModalOpen;
     },
     getHealthAvgs: function getHealthAvgs(arr) {
       var _this2 = this;
@@ -2388,7 +2433,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       });
 
       if (arr.length > 0) {
-        //return single object with average of sensor values as health value
         arr.forEach(function (item) {
           names.forEach(function (name) {
             if (item[name]) {
@@ -2482,10 +2526,27 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         role: 'style'
       }, {
         role: 'annotation'
-      }], ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temperature', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'], ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temperature', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']];
+      }], ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temp.', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'], ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temp.', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']];
       var options = {};
-      options.width = 600;
-      options.height = 900;
+      var dimensions = [];
+
+      if (this.isMobileScreen()) {
+        dimensions.push(360);
+        dimensions.push(280);
+      } else if (this.isTabletScreen()) {
+        dimensions.push(400);
+        dimensions.push(320);
+      } else if (this.isDesktopScreen()) {
+        dimensions.push(400);
+        dimensions.push(330);
+      }
+
+      options.width = dimensions[0];
+      options.height = dimensions[1];
+      options.backgroundColor = {
+        fill: '#f7f7f7'
+      }; //this is $bg
+
       options.legend = 'none';
       options.vAxis = {
         gridlines: {
@@ -2534,10 +2595,30 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         role: 'style'
       }], ['24 hrs', obj.day, 'color: #624972; opacity: 0.9'], ['30 days', obj.month, 'color: #597249; opacity: 0.9']];
       var options = {};
-      options.width = 700, options.height = 900, options.bar = {
+      var dimensions = [];
+
+      if (this.isMobileScreen()) {
+        dimensions.push(360);
+        dimensions.push(280);
+      } else if (this.isTabletScreen()) {
+        dimensions.push(400);
+        dimensions.push(320);
+      } else if (this.isDesktopScreen()) {
+        dimensions.push(400);
+        dimensions.push(330);
+      }
+
+      options.width = dimensions[0];
+      options.height = dimensions[1];
+      options.bar = {
         width: '40%'
       };
-      options.legend = 'none', options.vAxis = {
+      options.legend = 'none';
+      options.backgroundColor = {
+        fill: '#f7f7f7'
+      }; //this is $bg
+
+      options.vAxis = {
         title: 'health rating',
         viewWindow: {
           max: 100,
@@ -2552,7 +2633,42 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       };
       console.log("chartDataHere MONTHLY", finalProduct);
       return finalProduct;
+    },
+    isMobileScreen: function isMobileScreen() {
+      var isMobile = this.windowWidth < 700;
+
+      if (isMobile) {
+        this.hamburgOpen = false;
+      }
+
+      return isMobile;
+    },
+    isTabletScreen: function isTabletScreen() {
+      var isTablet = this.windowWidth >= 700 && this.windowWidth < 1200;
+
+      if (isTablet) {
+        this.hamburgOpen = false;
+      }
+
+      return isTablet;
+    },
+    isDesktopScreen: function isDesktopScreen() {
+      var isTablet = this.windowWidth >= 1200;
+
+      if (isTablet) {
+        this.hamburgOpen = false;
+      }
+
+      return isTablet;
     }
+  },
+  mounted: function mounted() {
+    var _this3 = this;
+
+    this.windowWidth = window.innerWidth;
+    window.addEventListener('resize', function () {
+      _this3.windowWidth = window.innerWidth;
+    });
   }
 });
 
@@ -2567,6 +2683,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
 //
 //
 //
@@ -2682,6 +2799,10 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     toggleEditUser: function toggleEditUser() {
+      if (this.editingUser) {
+        this.profImgLoaded = false;
+      }
+
       this.editingUser = !this.editingUser;
     },
     submit: function submit() {
@@ -2749,6 +2870,9 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
 //
 //
 //
@@ -2883,7 +3007,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["userPlants"],
   data: function data() {
     return {
       hamburgOpen: false,
@@ -2918,6 +3057,48 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _charts_Chart_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! .././charts/Chart.vue */ "./resources/js/components/partials/charts/Chart.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["chartData"],
+  components: {
+    Chart: _charts_Chart_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  methods: {
+    closeCharts: function closeCharts() {
+      return this.$emit('closeChartModal');
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantInfoModal.vue?vue&type=script&lang=js&":
 /*!********************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantInfoModal.vue?vue&type=script&lang=js& ***!
@@ -2927,6 +3108,23 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3007,13 +3205,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   computed: {
     sideNavUserPlants: function sideNavUserPlants() {
-      return this.$store.state.userPlants;
+      if (this.$store.state.userPlants && this.$store.state.userPlants[0].id != 'loading data...') {
+        return this.$store.state.userPlants;
+      }
+
+      return false;
     }
   }
 });
@@ -3065,20 +3264,67 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["currentPlant"],
   data: function data() {
     return {
       editingPlant: false,
-      showDeletePlant: false
+      showDeletePlant: false,
+      plantEditFileLoaded: false
     };
   },
   methods: {
+    updatePlantFile: function updatePlantFile() {
+      this.plantEditFileLoaded = !this.plantEditFileLoaded;
+    },
     toggleEdit: function toggleEdit() {
       this.editingPlant = !this.editingPlant;
     },
     editPlant: function editPlant() {
       var _this = this;
+
+      if (!this.editingPlant) {
+        this.toggleEdit();
+        return;
+      }
 
       var PlantEditFormData = new FormData(this.$refs.plantEditForm);
       PlantEditFormData.append('_method', 'PATCH');
@@ -3156,14 +3402,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["cardHealthScores"],
-  // data() {
-  //   return {
-  //     meters: {
-  //     }
-  //   }
-  // },
   computed: {
     sensors: function sensors() {
       var readings = this.$store.state.currentReading;
@@ -7580,6 +7823,25 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".viewFade-enter-active,\n.viewFade-leave-active {\n  -webkit-transition-duration: 0.7s;\n          transition-duration: 0.7s;\n  -webkit-transition-property: opacity;\n  transition-property: opacity;\n  -webkit-transition-timing-function: ease;\n          transition-timing-function: ease;\n}\n.viewFade-enter,\n.viewFade-leave-to {\n  opacity: 0;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&":
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss& ***!
@@ -7592,7 +7854,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.homePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 90%;\n  margin: 0 auto;\n}\n.homePage .headGroup {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .headGroup .homeLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: fit;\n  height: 8rem;\n  width: 15rem;\n  border-radius: 1rem;\n  background-color: transparent;\n}\n.homePage .headGroup .greeting {\n  color: #624972;\n  font-weight: bold;\n  margin-bottom: 1em;\n}\n.homePage .headGroup .updateIntro {\n  font-weight: normal;\n  width: 80%;\n  text-align: center;\n  margin-bottom: 3em;\n}\n.homePage .messageList {\n  width: 80%;\n  margin-bottom: 2em;\n}\n.homePage .messageList .msgCard {\n  background: #d1dccd;\n  padding: 0.8em 1.5rem;\n  border-radius: 1em;\n  margin-bottom: 1em;\n}\n.homePage .messageList .msgCard .msgContent {\n  color: black;\n  margin-top: 1em;\n  margin-bottom: 0.5em;\n}\n.homePage .messageList .msgCard .msgTimestamp {\n  color: #4e4e4e;\n  display: block;\n  text-align: right;\n  margin-top: 0.5em;\n}\n.homePage .weatherCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 3em;\n  background: #fff;\n  padding: 2em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 2em;\n  text-align: center;\n}\n.homePage .weatherCard .weatherTemp {\n  font-size: 4rem;\n  color: #597249;\n  margin: 0.25em 0;\n}\n.homePage .weatherCard .weatherLocation {\n  color: #597249;\n  margin-bottom: 1em;\n}\n.homePage .weatherCard .weatherDateTime {\n  color: #597249;\n  opacity: 0.8;\n}\n.homePage .searchAdd {\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 2em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n}\n.homePage .searchAdd .searchBar {\n  position: relative;\n  width: 100%;\n}\n.homePage .searchAdd .searchBar .search::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #d1d1d1;\n  content: \"\\F002\";\n  position: absolute;\n  left: 15px;\n  top: 1em;\n}\n.homePage .searchAdd .searchBar .myPlantFilter {\n  width: 100%;\n  text-decoration: none;\n  background: #fff;\n  padding: 15px 15px 15px 40px;\n  border-radius: 12px;\n  box-sizing: border-box;\n  font-family: \"Comfortaa\", cursive;\n  font-size: 1.2rem;\n}\n.homePage .searchAdd .addNewPlant {\n  font-size: 1.2rem;\n  width: 100%;\n  text-align: center;\n  margin-top: 1em;\n  color: #624972;\n  cursor: pointer;\n}\n.homePage .searchAdd .addNewPlant .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.homePage .plantList {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .plantList .plantListGrouping {\n  display: grid;\n  grid-template-rows: repeat(11, 1fr);\n  grid-template-columns: repeat(8, 1fr);\n  height: 35em;\n  width: 100%;\n  background-color: #597249;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  margin-bottom: 1em;\n  text-align: center;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n  grid-row: 1/8;\n  grid-column: 1/9;\n  width: 100%;\n  height: 100%;\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  border-radius: 20px 20px 0 0;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n  grid-row: 7/9;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  background: #fff;\n  border-radius: 0.5em;\n  padding: 0.5em 1em;\n  color: #624972;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n  grid-row: 8/10;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n  grid-row: 9/11;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n  grid-row: 11/12;\n  grid-column: 1/9;\n  background: #fff;\n  width: 100%;\n  height: 100%;\n  color: #624972;\n  border-radius: 0 0 19px 19px;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  text-align: center;\n  font-size: 1.2rem;\n  font-weight: bold;\n}\n@media (min-width: 700px) {\n.homePage {\n    display: grid;\n    grid-template-columns: repeat(13, 1fr);\n    grid-template-rows: repeat(5, 1fr) repeat(1, 10px);\n    width: 100%;\n    padding-top: 5em;\n    padding-bottom: 10em;\n    min-height: 0;\n    min-width: 0;\n}\n.homePage .headGroup {\n    width: 100%;\n    grid-row: 1/3;\n    grid-column: 2/8;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: contain;\n    width: 10em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    width: 100%;\n    height: 15em;\n    grid-row: 3/5;\n    grid-column: 2/8;\n    overflow-y: auto;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-align: center;\n            align-items: center;\n    margin-bottom: 0;\n}\n.homePage .messageList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .messageList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .messageList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .messageList .msgCard {\n    width: 100%;\n    border-radius: 10px;\n    box-sizing: border-box;\n}\n.homePage .weatherCard {\n    width: 100%;\n    height: 90%;\n    grid-row: 1/5;\n    grid-column: 9/13;\n    align-self: flex-start;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    direction: column;\n    -webkit-box-align: space-between;\n            align-items: space-between;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherTemp {\n    font-size: 5rem;\n}\n.homePage .searchAdd {\n    width: 100%;\n    grid-row: 5/6;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .plantList {\n    width: 100%;\n    grid-row: 6/8;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    flex-wrap: wrap;\n    gap: 5%;\n}\n.homePage .plantList .plantListGrouping {\n    height: 35em;\n    width: 47%;\n}\n}\n@media (min-width: 1200px) {\n.homePage {\n    height: 70em;\n    padding-top: 2em;\n    box-sizing: border-box;\n    display: grid;\n    grid-template-rows: repeat(16, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.homePage .headGroup {\n    grid-column: 2/9;\n    grid-row: 2/7;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    width: 13em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    grid-column: 2/9;\n    grid-row: 7/11;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n    margin-bottom: 0.5em;\n    -webkit-box-align: center;\n            align-items: center;\n}\n.homePage .weatherCard {\n    height: auto;\n    grid-column: 2/9;\n    grid-row: 11/16;\n    width: 100%;\n    display: initial;\n}\n.homePage .weatherCard .weatherTemp {\n    float: right;\n    font-size: 3em;\n}\n.homePage .weatherCard .weatherLocation {\n    float: left;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherDateTime {\n    float: left;\n    width: 100%;\n    text-align: left;\n}\n.homePage .searchAdd {\n    grid-column: 10/17;\n    grid-row: 4/6;\n    width: 100%;\n    align-self: end;\n    justify-self: center;\n}\n.homePage .plantList {\n    height: 30em;\n    grid-column: 10/17;\n    grid-row: 6/16;\n    display: block;\n    align-self: flex-start;\n    justify-self: center;\n    overflow-y: auto;\n}\n.homePage .plantList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .plantList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .plantList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .plantList .plantListGrouping {\n    height: 14em;\n    width: 99%;\n    display: grid;\n    grid-template-columns: repeat(8, 1fr);\n    grid-template-rows: repeat(5, 1fr);\n    background-color: #597249;\n    border-radius: 30px;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    margin-bottom: 1em;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n    grid-row: 1/6;\n    grid-column: 1/4;\n    width: 100%;\n    height: 100%;\n    color: #fff;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: cover;\n    border-radius: 20px 0 0 20px;\n    box-sizing: border-box;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n    grid-row: 1/3;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n    background: none;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n    grid-row: 2/4;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n    grid-row: 3/5;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n    grid-row: 5/6;\n    grid-column: 4/9;\n    justify-self: end;\n    align-self: end;\n    background: #fff;\n    width: 100%;\n    height: 100%;\n    color: #624972;\n    border-radius: 0 0 29px 0;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n            justify-content: center;\n    text-align: center;\n    font-size: 1.2rem;\n    font-weight: bold;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.homePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 90%;\n  margin: 0 auto;\n}\n.homePage .headGroup {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .headGroup .homeLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: fit;\n  height: 8rem;\n  width: 15rem;\n  border-radius: 1rem;\n  background-color: transparent;\n}\n.homePage .headGroup .greeting {\n  color: #624972;\n  font-weight: bold;\n  margin-bottom: 1em;\n}\n.homePage .headGroup .updateIntro {\n  font-weight: normal;\n  width: 80%;\n  text-align: center;\n  margin-bottom: 3em;\n}\n.homePage .messageList {\n  width: 80%;\n  margin-bottom: 2em;\n}\n.homePage .messageList .msgCard {\n  background: #d1dccd;\n  padding: 0.8em 1.5rem;\n  border-radius: 1em;\n  margin-bottom: 1em;\n}\n.homePage .messageList .msgCard .msgContent {\n  color: black;\n  margin-top: 1em;\n  margin-bottom: 0.5em;\n}\n.homePage .messageList .msgCard .msgTimestamp {\n  color: #4e4e4e;\n  display: block;\n  text-align: right;\n  margin-top: 0.5em;\n}\n.homePage .weatherCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 3em;\n  background: #fff;\n  padding: 2em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 2em;\n  text-align: center;\n}\n.homePage .weatherCard .weatherTemp {\n  font-size: 4rem;\n  color: #597249;\n  margin: 0.25em 0;\n}\n.homePage .weatherCard .weatherLocation {\n  color: #597249;\n  margin-bottom: 1em;\n}\n.homePage .weatherCard .weatherDateTime {\n  color: #597249;\n  opacity: 0.8;\n}\n.homePage .searchAdd {\n  width: 80%;\n  box-sizing: border-box;\n  margin-bottom: 2em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n}\n.homePage .searchAdd .searchBar {\n  position: relative;\n  width: 100%;\n}\n.homePage .searchAdd .searchBar .search::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #d1d1d1;\n  content: \"\\F002\";\n  position: absolute;\n  left: 15px;\n  top: 1em;\n}\n.homePage .searchAdd .searchBar .myPlantFilter {\n  width: 100%;\n  text-decoration: none;\n  background: #fff;\n  padding: 15px 15px 15px 40px;\n  border-radius: 12px;\n  box-sizing: border-box;\n  font-family: \"Comfortaa\", cursive;\n  font-size: 1.2rem;\n}\n.homePage .searchAdd .addNewPlant {\n  font-size: 1.2rem;\n  width: 100%;\n  text-align: center;\n  margin-top: 1em;\n  color: #624972;\n  cursor: pointer;\n}\n.homePage .searchAdd .addNewPlant .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.homePage .plantList {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n  width: 80%;\n}\n.homePage .plantList .plantListGrouping {\n  display: grid;\n  grid-template-rows: repeat(11, 1fr);\n  grid-template-columns: repeat(8, 1fr);\n  height: 35em;\n  width: 100%;\n  background-color: #597249;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  margin-bottom: 1em;\n  text-align: center;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n  grid-row: 1/8;\n  grid-column: 1/9;\n  width: 100%;\n  height: 100%;\n  color: #fff;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  border-radius: 20px 20px 0 0;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n  grid-row: 7/9;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  background: #fff;\n  border-radius: 0.5em;\n  padding: 0.5em 1em;\n  color: #624972;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n  grid-row: 8/10;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n  grid-row: 9/11;\n  grid-column: 2/8;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n  grid-row: 11/12;\n  grid-column: 1/9;\n  background: #fff;\n  width: 100%;\n  height: 100%;\n  color: #624972;\n  border-radius: 0 0 19px 19px;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  text-align: center;\n  font-size: 1.2rem;\n  font-weight: bold;\n}\n@media (min-width: 700px) {\n.homePage {\n    display: grid;\n    grid-template-columns: repeat(13, 1fr);\n    grid-template-rows: repeat(5, 1fr) repeat(1, 10px);\n    width: 100%;\n    padding-bottom: 8em;\n    padding-top: 2em;\n    min-height: 0;\n    min-width: 0;\n}\n.homePage .headGroup {\n    width: 100%;\n    grid-row: 1/3;\n    grid-column: 2/8;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: contain;\n    width: 10em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    width: 100%;\n    height: 15em;\n    grid-row: 3/5;\n    grid-column: 2/8;\n    overflow-y: auto;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-align: center;\n            align-items: center;\n    -webkit-box-pack: normal;\n            justify-content: normal;\n    margin-bottom: 0;\n}\n.homePage .messageList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .messageList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .messageList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .messageList .msgCard {\n    width: 100%;\n    border-radius: 10px;\n    box-sizing: border-box;\n}\n.homePage .messageList.centerOne {\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n.homePage .weatherCard {\n    width: 100%;\n    height: 90%;\n    grid-row: 1/5;\n    grid-column: 9/13;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    direction: column;\n    -webkit-box-align: space-between;\n            align-items: space-between;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherTemp {\n    font-size: 5rem;\n}\n.homePage .searchAdd {\n    width: 100%;\n    grid-row: 5/6;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .plantList {\n    width: 100%;\n    grid-row: 6/8;\n    grid-column: 2/13;\n    align-self: center;\n    justify-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    flex-wrap: wrap;\n    gap: 5%;\n}\n.homePage .plantList .plantListGrouping {\n    height: 35em;\n    width: 47%;\n}\n}\n@media (min-width: 1200px) {\n.homePage {\n    padding-top: 0;\n    padding-bottom: 0;\n    height: calc(100vh - 8em);\n    min-height: 55em;\n    box-sizing: border-box;\n    display: grid;\n    grid-template-rows: repeat(15, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.homePage .headGroup {\n    grid-column: 2/9;\n    grid-row: 2/7;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n}\n.homePage .headGroup .homeLogo {\n    width: 13em;\n}\n.homePage .headGroup .greeting {\n    font-weight: bold;\n    margin-bottom: 0.5em;\n}\n.homePage .headGroup .updateIntro {\n    width: 100%;\n    margin-bottom: 1em;\n}\n.homePage .messageList {\n    grid-column: 2/9;\n    grid-row: 7/11;\n    width: 100%;\n    align-self: center;\n    justify-self: center;\n    margin-bottom: 0.5em;\n    -webkit-box-align: center;\n            align-items: center;\n}\n.homePage .weatherCard {\n    height: auto;\n    grid-column: 2/9;\n    grid-row: 11/14;\n    width: 100%;\n    display: initial;\n}\n.homePage .weatherCard .weatherTemp {\n    float: right;\n    font-size: 3em;\n}\n.homePage .weatherCard .weatherLocation {\n    float: left;\n    margin-bottom: 0;\n}\n.homePage .weatherCard .weatherDateTime {\n    float: left;\n    width: 100%;\n    text-align: left;\n}\n.homePage .searchAdd {\n    grid-column: 10/17;\n    grid-row: 4/6;\n    width: 100%;\n    align-self: end;\n    justify-self: center;\n}\n.homePage .plantList {\n    height: 30em;\n    grid-column: 10/17;\n    grid-row: 6/14;\n    display: block;\n    align-self: flex-start;\n    justify-self: center;\n    overflow-y: auto;\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n.homePage .plantList::-webkit-scrollbar {\n    width: 0.5em;\n}\n.homePage .plantList::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.homePage .plantList::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.homePage .plantList .plantListGrouping {\n    height: 14em;\n    width: 99%;\n    display: grid;\n    grid-template-columns: repeat(8, 1fr);\n    grid-template-rows: repeat(5, 1fr);\n    background-color: #597249;\n    border-radius: 30px;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    margin-bottom: 1em;\n}\n.homePage .plantList .plantListGrouping .plantSideImage {\n    grid-row: 1/6;\n    grid-column: 1/4;\n    width: 100%;\n    height: 100%;\n    color: #fff;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: cover;\n    border-radius: 20px 0 0 20px;\n    box-sizing: border-box;\n}\n.homePage .plantList .plantListGrouping .plantNameHome {\n    grid-row: 1/3;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n    background: none;\n}\n.homePage .plantList .plantListGrouping .plantNameHome .plant::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F4D8\";\n}\n.homePage .plantList .plantListGrouping .plantLocationHome {\n    grid-row: 2/4;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .plantStatusHome {\n    grid-row: 3/5;\n    grid-column: 4/9;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n}\n.homePage .plantList .plantListGrouping .viewPlantHome {\n    grid-row: 5/6;\n    grid-column: 4/9;\n    justify-self: end;\n    align-self: end;\n    background: #fff;\n    width: 100%;\n    height: 100%;\n    color: #624972;\n    border-radius: 0 0 29px 0;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n            justify-content: center;\n    text-align: center;\n    font-size: 1.2rem;\n    font-weight: bold;\n}\n}", ""]);
 
 // exports
 
@@ -7611,7 +7873,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.plantProfileImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 20rem;\n  width: 20rem;\n  border-radius: 1rem;\n}\n.mainPlantViewContainer {\n  margin-left: 12rem;\n}\n.morePlantInfoBtn .info::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F05A\";\n}\n#chartContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  gap: 20%;\n}\n#chartContainer .barChart {\n  display: inline-block;\n  align-self: flex-start;\n}\n#chartContainer .columnChart {\n  display: inline-block;\n  align-self: flex-end;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n#plantViewPage {\n  width: 100%;\n}\n#plantViewPage .plantViewLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: contain;\n  height: 3rem;\n  width: 100%;\n  border-radius: 10px;\n  background-color: transparent;\n  margin-right: 0;\n  margin-top: 1em;\n  margin-bottom: 2em;\n}\n#plantViewPage .mainPlantViewContainer {\n  width: 16rem;\n  margin: 0 auto;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n}\n#plantViewPage .mainPlantViewContainer .morePlantInfoBtn, #plantViewPage .mainPlantViewContainer .chartModalBtn {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em 2em;\n  margin-bottom: 1em;\n  box-sizing: border-box;\n  cursor: pointer;\n}\n#plantViewPage .mainPlantViewContainer .morePlantInfoBtn:hover, #plantViewPage .mainPlantViewContainer .chartModalBtn:hover {\n  text-decoration: underline;\n}\n#plantViewPage .mainPlantViewContainer .morePlantInfoBtn .info::before, #plantViewPage .mainPlantViewContainer .chartModalBtn .info::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F05A\";\n}\n@media (min-width: 700px) {\n#plantViewPage {\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-flex: 12rem;\n            flex: 12rem 1fr;\n}\n#plantViewPage .plantViewLogo {\n    display: none;\n}\n#plantViewPage .mainPlantViewContainer {\n    width: 100%;\n    height: 80%;\n    min-width: 850px;\n    justify-self: center;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    grid-template-rows: repeat(18, 1fr);\n}\n#plantViewPage .mainPlantViewContainer .plantProfileCard {\n    grid-row: 2/11;\n    grid-column: 1/2;\n    align-self: center;\n    justify-self: center;\n}\n#plantViewPage .mainPlantViewContainer .morePlantInfoBtn {\n    grid-row: 11/12;\n    grid-column: 1/2;\n    align-self: center;\n    justify-self: center;\n    width: 15rem;\n}\n#plantViewPage .mainPlantViewContainer .chartModalBtn {\n    grid-row: 12/13;\n    grid-column: 1/2;\n    align-self: center;\n    justify-self: center;\n    width: 15rem;\n}\n#plantViewPage .mainPlantViewContainer .sensorCardDealer {\n    grid-row: 2/13;\n    grid-column: 2/4;\n    align-self: center;\n    justify-self: center;\n}\n}\n@media (min-width: 1200px) {\n#plantViewPage .plantViewLogo {\n    display: none;\n}\n#plantViewPage .mainPlantViewContainer {\n    margin: 0 auto;\n    width: 1260px;\n    min-width: 1240px;\n    height: calc(100vh - 7em);\n    min-height: 900px;\n    justify-self: center;\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    grid-template-rows: repeat(14, 1fr);\n}\n#plantViewPage .mainPlantViewContainer .plantProfileCard {\n    grid-row: 2/12;\n    grid-column: 1/2;\n    align-self: center;\n    justify-self: center;\n}\n#plantViewPage .mainPlantViewContainer .morePlantInfoBtn {\n    grid-row: 12/13;\n    grid-column: 1/3;\n    align-self: center;\n    justify-self: center;\n    width: 20rem;\n}\n#plantViewPage .mainPlantViewContainer .chartModalBtn {\n    grid-row: 12/13;\n    grid-column: 2/4;\n    align-self: center;\n    justify-self: center;\n    width: 20rem;\n}\n#plantViewPage .mainPlantViewContainer .sensorCardDealer {\n    grid-row: 3/11;\n    grid-column: 2/4;\n    align-self: center;\n    justify-self: center;\n}\n}", ""]);
 
 // exports
 
@@ -7630,7 +7892,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.userProfileLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: contain;\n  height: 3rem;\n  width: 100%;\n  border-radius: 1rem;\n  background-color: transparent;\n  margin-right: 0;\n  margin-top: 1em;\n  margin-bottom: 2em;\n}\n.userProfilePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 2em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  color: #624972;\n}\n.userProfilePage .userHeaderName {\n  font-weight: bold;\n}\n.userProfilePage .userProfileImage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  margin: 0 auto;\n  position: relative;\n  height: 17rem;\n  width: 17rem;\n  justify-self: center;\n}\n.userProfilePage .userProfileImage .userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 17rem;\n  width: 17rem;\n  border-radius: 1rem;\n  margin: 0;\n  position: absolute;\n  bottom: 0;\n}\n.userProfilePage .userProfileImage .newProfImgContainer {\n  position: absolute;\n  top: 0;\n  width: 100%;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage {\n  position: absolute;\n  top: 0.5rem;\n  right: 0.5rem;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .edit::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .check::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00C\";\n}\n.userProfilePage .editUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em 2em;\n  width: 17rem;\n}\n.userProfilePage .editUserInfoButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .editUserInfoButton .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileCard, .userProfilePage .passwordSubCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 1em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1rem;\n  padding: 2em;\n  width: 17rem;\n  box-sizing: border-box;\n  text-align: center;\n  font-size: 1.3rem;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n  font-weight: bold;\n  color: #597249;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard div input, .userProfilePage .passwordSubCard div input {\n  margin-top: 1em;\n}\n.userProfilePage .userProfileCard {\n  background: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n  background: transparent;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n  color: #624972;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em;\n  width: 12rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton:hover {\n  text-decoration: underline;\n}\n@media (min-width: 700px) {\n.userProfileLogo {\n    display: none;\n}\n.userProfilePage {\n    padding-bottom: 200px;\n    padding-top: 2em;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 35em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.4rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}\n@media (min-width: 1200px) {\n.userProfilePage {\n    display: -webkit-box;\n    display: flex;\n    width: 95%;\n    margin: 0 auto;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    height: 55rem;\n    padding-top: 1em;\n    -webkit-box-align: center;\n            align-items: center;\n    gap: 2em;\n    -webkit-box-pack: center;\n            justify-content: center;\n    box-sizing: border-box;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 35em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.5rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.userProfileLogo {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: contain;\n  height: 3rem;\n  width: 100%;\n  border-radius: 1rem;\n  background-color: transparent;\n  margin-right: 0;\n  margin-top: 1em;\n  margin-bottom: 2em;\n}\n.userProfilePage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 2em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  color: #624972;\n  padding-bottom: 2em;\n  box-sizing: border-box;\n}\n.userProfilePage .userHeaderName {\n  font-weight: bold;\n}\n.userProfilePage .userProfileImage {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  margin: 0 auto;\n  position: relative;\n  height: 17rem;\n  width: 17rem;\n  justify-self: center;\n}\n.userProfilePage .userProfileImage .userImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  height: 17rem;\n  width: 17rem;\n  border-radius: 1rem;\n  margin: 0;\n  position: absolute;\n  bottom: 0;\n}\n.userProfilePage .userProfileImage .newProfImgContainer {\n  position: absolute;\n  bottom: 0;\n  width: 100%;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage {\n  position: absolute;\n  bottom: 0.5rem;\n  right: 0.5rem;\n  background-color: #f7f7f7;\n  padding: 0.5em 1em;\n  border-radius: 1em;\n  cursor: pointer;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage span {\n  font-size: 0.9rem;\n  color: #624972;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage span:hover {\n  text-decoration: underline;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .edit::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileImage .newProfImgContainer .newProfileImage .faWrapper .check::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00C\";\n}\n.userProfilePage .editUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em 2em;\n  width: 17rem;\n}\n.userProfilePage .editUserInfoButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .editUserInfoButton .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #000;\n  content: \"\\F304\";\n}\n.userProfilePage .userProfileCard, .userProfilePage .passwordSubCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: start;\n          justify-content: flex-start;\n  gap: 1em;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1rem;\n  padding: 2em;\n  width: 17rem;\n  box-sizing: border-box;\n  text-align: center;\n  font-size: 1.3rem;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n  font-weight: bold;\n  color: #597249;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard div input, .userProfilePage .passwordSubCard div input {\n  margin-top: 1em;\n}\n.userProfilePage .userProfileCard {\n  background: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n  background: transparent;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n  color: #624972;\n  font-size: 0.9rem;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton:hover {\n  text-decoration: underline;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 1em;\n  width: 12rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton:hover {\n  text-decoration: underline;\n}\n@media (min-width: 700px) {\n.userProfileLogo {\n    display: none;\n}\n.userProfilePage {\n    padding-top: 4em;\n    padding-bottom: 8em;\n    min-height: 850px;\n    box-sizing: border-box;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 35em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.4rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}\n@media (min-width: 1200px) {\n.userProfilePage {\n    display: -webkit-box;\n    display: flex;\n    width: 95%;\n    margin: 0 auto;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    height: calc(100vh - 7em);\n    min-height: 850px;\n    padding: 10% 10%;\n    -webkit-box-align: center;\n            align-items: center;\n    align-self: center;\n    justify-self: center;\n    gap: 2em;\n    -webkit-box-pack: center;\n            justify-content: center;\n    box-sizing: border-box;\n}\n.userProfilePage .userProfileCard div label, .userProfilePage .passwordSubCard div label {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard {\n    width: 34em;\n    padding-bottom: 3em;\n    padding-top: 1em;\n    height: 22em;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-flex: 30%;\n            flex: 30% 55%;\n    flex-wrap: wrap;\n    font-size: 1.5rem;\n    -webkit-box-pack: center;\n            justify-content: center;\n    -webkit-box-align: center;\n            align-items: center;\n    box-sizing: border-box;\n    align-self: center;\n    justify-self: center;\n    position: relative;\n}\n.userProfilePage .userProfileCard .passwordSubCard {\n    width: 55%;\n    padding: 0;\n    text-align: center;\n}\n.userProfilePage .userProfileCard .passwordSubCard div {\n    width: 100%;\n}\n.userProfilePage .userProfileCard .passwordSubCard .showPasswordButton {\n    font-size: 1.1rem;\n}\n.userProfilePage .userProfileCard .saveUserInfoButton {\n    position: absolute;\n    left: 50%;\n    margin-left: -6em;\n    bottom: 2em;\n}\n.userProfilePage .userProfileCard.userProfileNotEditing {\n    height: 14rem;\n    padding: 2em;\n}\n}", ""]);
 
 // exports
 
@@ -7649,7 +7911,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "#chart {\n  z-index: 10;\n}\n#chart .chart * {\n  font-family: \"Comfortaa\", cursive !important;\n  font-size: 20px !important;\n  font-style: normal !important;\n}", ""]);
+exports.push([module.i, ".chartCompContainer {\n  z-index: 10;\n}\n.chartCompContainer .chart {\n  z-index: 10;\n}\n.chartCompContainer .chart * {\n  font-family: \"Comfortaa\", cursive !important;\n  font-size: 12px !important;\n  font-style: normal !important;\n}\n@media (min-width: 700px) {\n.chartCompContainer {\n    z-index: 10;\n}\n.chartCompContainer .chart {\n    z-index: 10;\n}\n.chartCompContainer .chart * {\n    font-family: \"Comfortaa\", cursive !important;\n    font-size: 15px !important;\n    font-style: normal !important;\n}\n}\n@media (min-width: 1200px) {\n.chartCompContainer {\n    z-index: 10;\n}\n.chartCompContainer .chart {\n    z-index: 10;\n}\n.chartCompContainer .chart * {\n    font-family: \"Comfortaa\", cursive !important;\n    font-size: 17px !important;\n    font-style: normal !important;\n}\n}", ""]);
 
 // exports
 
@@ -7668,7 +7930,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.addPlantBlanket {\n  overflow: hidden;\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(161, 161, 161, 0.8);\n  z-index: 600;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 1em;\n  height: 30em;\n  width: 75%;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n          transform: translateX(-50%);\n  background-color: #f7f7f7;\n  border-radius: 1em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 4em 2em;\n  z-index: 1000;\n  display: -webkit-box;\n  display: flex;\n  justify-content: space-around;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  gap: 1em;\n  text-align: center;\n  color: #624972;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n  position: absolute;\n  top: 0.5em;\n  right: 0.5em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n  font-size: 1.3rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n  height: 8em;\n  width: 8em;\n  border-radius: 1em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  background: #fff;\n  align-self: center;\n  justify-self: center;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  padding: 2em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n  border: 2px dashed #d1d1d1;\n  width: 100%;\n  height: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n  font-size: 1.2rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  width: 10em;\n  align-self: center;\n  font-size: 1.2rem;\n  padding: 0.5em 1em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton:hover {\n  text-decoration: underline;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n  display: inline-block;\n  width: 100%;\n  text-align: center;\n}\n@media (min-width: 700px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 40em;\n    min-width: 30em;\n    top: 5%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    justify-content: space-around;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    height: 20em;\n    width: 20em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    justify-content: space-around;\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    font-size: 1.9rem;\n}\n}\n@media (min-width: 1200px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 35em;\n    width: 70em;\n    top: 5em;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    display: grid;\n    grid-template-rows: repeat(10, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.addPlantBlanket .addPlantModalForm input {\n    font-size: 1.1rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    top: 1.5em;\n    right: 1.5em;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n    font-size: 1.9rem;\n}\n.addPlantBlanket .addPlantModalForm .plantModalTitle {\n    grid-row: 1/3;\n    grid-column: 2/9;\n    width: 100%;\n    text-align: left;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    grid-row: 4/9;\n    grid-column: 2/7;\n    width: 100%;\n    height: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    margin-bottom: 1em;\n    font-size: 3.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: transparent;\n    content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n    grid-row: 8/10;\n    grid-column: 8/17;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n    grid-row: 5/7;\n    grid-column: 8/13;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #name {\n    grid-row: 4/5;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #type {\n    grid-row: 5/7;\n    grid-column: 13/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #location {\n    grid-row: 7/8;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.addPlantBlanket {\n  overflow: hidden;\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(161, 161, 161, 0.8);\n  z-index: 600;\n}\n.addPlantBlanket .addPlantModalForm {\n  position: fixed;\n  top: 1em;\n  height: 30em;\n  width: 75%;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n          transform: translateX(-50%);\n  background-color: #f7f7f7;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 4em 2em;\n  z-index: 1000;\n  display: -webkit-box;\n  display: flex;\n  justify-content: space-around;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  gap: 1em;\n  text-align: center;\n  color: #624972;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n  position: absolute;\n  top: 0.5em;\n  right: 0.5em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n  font-size: 1.3rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n  height: 8em;\n  width: 8em;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  background: #fff;\n  align-self: center;\n  justify-self: center;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n  padding: 2em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n  border: 2px dashed #d1d1d1;\n  width: 100%;\n  height: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-align: center;\n          align-items: center;\n  text-align: center;\n  border-radius: 1em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n  font-size: 1.2rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .check::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00C\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n  background: #d1dccd;\n  border-radius: 1em;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  width: 10em;\n  align-self: center;\n  font-size: 1.2rem;\n  padding: 0.5em 1em;\n  cursor: pointer;\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton:hover {\n  text-decoration: underline;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n  display: inline-block;\n  width: 100%;\n  text-align: center;\n}\n@media (min-width: 700px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 40em;\n    min-width: 30em;\n    top: 5%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    justify-content: space-around;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    height: 20em;\n    width: 20em;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    justify-content: space-around;\n    font-size: 1.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    font-size: 1.9rem;\n}\n}\n@media (min-width: 1200px) {\n.addPlantBlanket .addPlantModalForm {\n    height: 35em;\n    width: 70em;\n    top: 5em;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    display: grid;\n    grid-template-rows: repeat(10, 1fr);\n    grid-template-columns: repeat(17, 1fr);\n}\n.addPlantBlanket .addPlantModalForm input {\n    font-size: 1.1rem;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal {\n    top: 1.5em;\n    right: 1.5em;\n}\n.addPlantBlanket .addPlantModalForm .closeAddPlantModal .faWrapper {\n    font-size: 1.9rem;\n}\n.addPlantBlanket .addPlantModalForm .plantModalTitle {\n    grid-row: 1/3;\n    grid-column: 2/9;\n    width: 100%;\n    text-align: left;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage {\n    grid-row: 4/9;\n    grid-column: 2/7;\n    width: 100%;\n    height: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg {\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper {\n    margin-bottom: 1em;\n    font-size: 3.4rem;\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: transparent;\n    content: \"\\F111\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantImage .inAddImg .faWrapper .add::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F055\";\n}\n.addPlantBlanket .addPlantModalForm .addPlantButton {\n    grid-row: 8/10;\n    grid-column: 8/17;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm .dateLabel {\n    grid-row: 5/7;\n    grid-column: 8/13;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #name {\n    grid-row: 4/5;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #type {\n    grid-row: 5/7;\n    grid-column: 13/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n.addPlantBlanket .addPlantModalForm #location {\n    grid-row: 7/8;\n    grid-column: 8/17;\n    width: 100%;\n    justify-self: center;\n    align-self: center;\n}\n}", ""]);
 
 // exports
 
@@ -7687,7 +7949,26 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.mainNav {\n  z-index: 500;\n}\n.mainNav .shifter {\n  z-index: 502;\n  font-size: 2.6rem;\n  position: fixed;\n  top: -15px;\n  left: -25px;\n}\n.mainNav .shifter .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .shifter .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.mainNav .shifter .faWrapper .bars::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C9\";\n}\n.mainNav .shifter .faWrapper .close::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.mainNav .mobNav {\n  z-index: 501;\n  position: fixed;\n  padding: 5em 2em;\n  gap: 2em;\n  left: 0;\n  top: 0;\n  width: 12em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  background-color: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 0px 3em 3em 0px;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .mobNav .navLink {\n  text-decoration: none;\n  text-align: center;\n  color: #624972;\n  font-size: 1.7rem;\n  font-weight: bold;\n}\n.mainNav .mobNav .navLink .faWrapper {\n  font-size: 1rem;\n}\n.mainNav .mobNav .navLink .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F111\";\n}\n.mainNav .mobNav .navLink .faWrapper .home::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F015\";\n}\n.mainNav .mobNav .navLink .faWrapper .profile::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F007\";\n}\n.mainNav .mobNav .navLink .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F060\";\n}\n.mainNav .mobNav .router-link-active {\n  color: #597249;\n}\n.mainNav .mobNav .router-link-active .link-title {\n  text-decoration: underline;\n}\n.mainNav .mobNav .router-link-active .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #597249;\n  content: \"\\F111\";\n}\n.mainNav .offscreenNav {\n  left: -17em;\n}\n@media (min-width: 700px) {\n.mainNav .shifter {\n    display: none;\n}\n.mainNav .nav {\n    z-index: 501;\n    box-sizing: border-box;\n    position: fixed;\n    bottom: 0;\n    left: 5%;\n    background-color: #fff;\n    width: 90%;\n    height: 7em;\n    padding: 2em;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    border-radius: 3em 3em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n    font-weight: bold;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1rem;\n}\n.mainNav .nav .navLink .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F111\";\n}\n.mainNav .nav .navLink .faWrapper .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .faWrapper .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F060\";\n}\n.mainNav .nav .router-link-active {\n    color: #597249;\n}\n.mainNav .nav .router-link-active .link-title {\n    text-decoration: underline;\n}\n.mainNav .nav .router-link-active .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #597249;\n    content: \"\\F111\";\n}\n}\n@media (min-width: 1200px) {\n.mainNav .nav {\n    left: 15%;\n    background-color: #fff;\n    width: 70%;\n}\n.mainNav .nav .navLink {\n    font-size: 1.9rem;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1.1rem;\n}\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.mainNav {\n  z-index: 500;\n}\n.mainNav .shifter {\n  z-index: 502;\n  font-size: 2.6rem;\n  position: fixed;\n  top: -15px;\n  left: -25px;\n}\n.mainNav .shifter .faWrapper {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .shifter .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: transparent;\n  content: \"\\F111\";\n}\n.mainNav .shifter .faWrapper .bars::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C9\";\n}\n.mainNav .shifter .faWrapper .close::before {\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n.mainNav .mobNav {\n  z-index: 501;\n  position: fixed;\n  padding: 5em 2em;\n  left: 0;\n  top: 0;\n  width: 12em;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  background-color: #fff;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  border-radius: 0px 3em 3em 0px;\n  -webkit-transition: all 0.5s ease-in-out;\n  transition: all 0.5s ease-in-out;\n}\n.mainNav .mobNav .navLink {\n  margin-bottom: 2em;\n  cursor: pointer;\n  text-decoration: none;\n  text-align: center;\n  color: #624972;\n  font-size: 1.7rem;\n  font-weight: bold;\n}\n.mainNav .mobNav .navLink .faWrapper {\n  font-size: 1rem;\n}\n.mainNav .mobNav .navLink .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F111\";\n}\n.mainNav .mobNav .navLink .faWrapper .home::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F015\";\n}\n.mainNav .mobNav .navLink .faWrapper .profile::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F007\";\n}\n.mainNav .mobNav .navLink .faWrapper .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F4D8\";\n}\n.mainNav .mobNav .navLink .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F060\";\n}\n.mainNav .mobNav .subNav {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  margin-top: -2em;\n}\n.mainNav .mobNav .subNav .navLink {\n  font-size: 1.3rem;\n  font-weight: normal;\n  width: 80%;\n  margin-bottom: 1em;\n  text-align: right;\n  position: relative;\n}\n.mainNav .mobNav .router-link-active {\n  color: #597249;\n}\n.mainNav .mobNav .router-link-active .link-title {\n  text-decoration: underline;\n}\n.mainNav .mobNav .router-link-active .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #597249;\n  content: \"\\F111\";\n}\n.mainNav .offscreenNav {\n  left: -17em;\n}\n@media (min-width: 700px) {\n.mainNav .shifter {\n    display: none;\n}\n.mainNav .nav {\n    z-index: 501;\n    box-sizing: border-box;\n    position: fixed;\n    bottom: 0;\n    left: 1%;\n    background-color: #fff;\n    width: 98%;\n    height: 7em;\n    padding: 2em;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n    border-radius: 3em 3em 0px 0px;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.mainNav .nav .navLink {\n    text-decoration: none;\n    color: #624972;\n    font-size: 1.8rem;\n    cursor: pointer;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1rem;\n}\n.mainNav .nav .navLink .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F111\";\n}\n.mainNav .nav .navLink .faWrapper .home::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F015\";\n}\n.mainNav .nav .navLink .faWrapper .profile::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F007\";\n}\n.mainNav .nav .navLink .faWrapper .plant::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F4D8\";\n}\n.mainNav .nav .navLink .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F060\";\n}\n.mainNav .nav .router-link-active {\n    color: #597249;\n}\n.mainNav .nav .router-link-active .link-title {\n    text-decoration: underline;\n}\n.mainNav .nav .router-link-active .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #597249;\n    content: \"\\F111\";\n}\n}\n@media (min-width: 1200px) {\n.mainNav .nav {\n    left: 15%;\n    background-color: #fff;\n    width: 70%;\n}\n.mainNav .nav .navLink {\n    font-size: 1.9rem;\n}\n.mainNav .nav .navLink .faWrapper {\n    font-size: 1.1rem;\n}\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "@charset \"UTF-8\";\n.chartBlanket {\n  overflow: hidden;\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(161, 161, 161, 0.8);\n  z-index: 600;\n}\n.chartBlanket .chartModal {\n  position: fixed;\n  top: 1em;\n  width: 23rem;\n  height: 40em;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n          transform: translateX(-50%);\n  background-color: #f7f7f7;\n  border-radius: 10px;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n  -webkit-box-align: center;\n          align-items: center;\n}\n.chartBlanket .chartModal .chartWrap .chartTitle {\n  color: #624972;\n  text-align: center;\n  z-index: 700;\n}\n.chartBlanket .chartModal .closeChartModal {\n  z-index: 100;\n  position: absolute;\n  top: 0.5em;\n  right: 0.5em;\n  cursor: pointer;\n}\n.chartBlanket .chartModal .closeChartModal .faWrapper {\n  font-size: 1.3rem;\n}\n.chartBlanket .chartModal .closeChartModal .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.chartBlanket .chartModal .closeChartModal .faWrapper .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n@media (min-width: 700px) {\n.chartBlanket .chartModal {\n    top: 3em;\n    width: 35rem;\n    height: 45em;\n    justify-content: space-around;\n}\n}\n@media (min-width: 1200px) {\n.chartBlanket .chartModal {\n    top: 5em;\n    width: 60rem;\n    height: 35em;\n    justify-content: space-around;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n}\n}", ""]);
 
 // exports
 
@@ -7706,7 +7987,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".plantInfoBlanket {\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: #fff;\n  z-index: 100;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 5vh;\n  width: 80vw;\n  left: 5vw;\n  max-height: 90vh;\n  overflow-y: scroll;\n  background-color: #d1d1d1;\n  padding: 2em 5em;\n  z-index: 1000;\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n.plantInfoBlanket {\n  overflow: hidden;\n  position: fixed;\n  top: 0;\n  left: 0;\n  height: 100vh;\n  width: 100vw;\n  background-color: rgba(161, 161, 161, 0.8);\n  z-index: 600;\n}\n.plantInfoBlanket .plantInfoDetail {\n  position: fixed;\n  top: 1em;\n  width: 20em;\n  height: 35em;\n  overflow-y: auto;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n          transform: translateX(-50%);\n  background-color: #f7f7f7;\n  border-radius: 20px;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n  padding: 0;\n  z-index: 1000;\n  display: grid;\n  grid-template-rows: repeat(8, 1fr);\n  grid-template-columns: repeat(2, 1fr);\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar {\n  width: 0.5em;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-track {\n  background: #f7f7f7;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-thumb {\n  background: #d1d1d1;\n  border-radius: 20px;\n}\n.plantInfoBlanket .plantInfoDetail .plantProfileEditImage {\n  grid-row: 1/5;\n  grid-column: 1/3;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  width: 100%;\n  height: 100%;\n  border-radius: 10px 10px 0 0;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap {\n  grid-row: 5/9;\n  grid-column: 1/3;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  justify-content: space-around;\n  justify-self: center;\n  text-align: center;\n  align-self: center;\n  height: 80%;\n  width: 90%;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap h5 {\n  color: #597249;\n  font-weight: bold;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap p {\n  color: #624972;\n}\n.plantInfoBlanket .plantInfoDetail .closePlantInfoModal {\n  position: absolute;\n  top: 0.5em;\n  right: 0.5em;\n  cursor: pointer;\n}\n.plantInfoBlanket .plantInfoDetail .closePlantInfoModal .faWrapper {\n  font-size: 1.3rem;\n}\n.plantInfoBlanket .plantInfoDetail .closePlantInfoModal .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n.plantInfoBlanket .plantInfoDetail .closePlantInfoModal .faWrapper .close::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F00D\";\n}\n@media (min-width: 700px) {\n.plantInfoBlanket .plantInfoDetail {\n    width: 30em;\n    top: 5rem;\n    height: 45em;\n    overflow-y: auto;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar {\n    width: 0.5em;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap {\n    grid-row: 5/9;\n    grid-column: 1/3;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    justify-content: space-around;\n    justify-self: center;\n    text-align: center;\n    align-self: center;\n    height: 80%;\n    width: 80%;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap h5 {\n    color: #597249;\n    font-weight: bold;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap p {\n    color: #624972;\n}\n}\n@media (min-width: 1200px) {\n.plantInfoBlanket .plantInfoDetail {\n    width: 65em;\n    top: 5rem;\n    height: 45em;\n    overflow-y: auto;\n    left: 50%;\n    -webkit-transform: translateX(-50%);\n            transform: translateX(-50%);\n    grid-template-rows: repeat(8, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar {\n    width: 0.5em;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-track {\n    background: #f7f7f7;\n}\n.plantInfoBlanket .plantInfoDetail::-webkit-scrollbar-thumb {\n    background: #d1d1d1;\n    border-radius: 20px;\n}\n.plantInfoBlanket .plantInfoDetail .plantProfileEditImage {\n    grid-row: 1/9;\n    grid-column: 1/4;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: cover;\n    width: 100%;\n    height: 100%;\n    border-radius: 10px 0 0 10px;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap {\n    grid-row: 1/9;\n    grid-column: 4/9;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    justify-content: space-around;\n    justify-self: center;\n    text-align: center;\n    align-self: center;\n    height: 80%;\n    width: 80%;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap h5 {\n    color: #597249;\n    font-weight: bold;\n}\n.plantInfoBlanket .plantInfoDetail .textInfoWrap p {\n    color: #624972;\n}\n}", ""]);
 
 // exports
 
@@ -7725,7 +8006,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".plantListSideMenu {\n  float: left;\n  width: 10rem;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  height: 100%;\n  -webkit-box-pack: center;\n          justify-content: center;\n  align-content: center;\n  height: 100vh;\n  text-align: center;\n  font-size: 1.5rem;\n}", ""]);
+exports.push([module.i, ".plantListSideMenu {\n  display: none;\n}\n@media (min-width: 700px) {\n.plantListSideMenu {\n    float: left;\n    width: 10rem;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    height: 100%;\n    -webkit-box-pack: start;\n            justify-content: flex-start;\n    align-content: center;\n    height: 100vh;\n    font-size: 1.5rem;\n    gap: 1em;\n    text-align: right;\n    padding-top: 3em;\n    border-right: 2px solid #e4e4e4;\n    padding-right: 2em;\n}\n.plantListSideMenu .sideNavPlants {\n    color: #9a9a9a;\n}\n.plantListSideMenu .sideNavPlants:active {\n    color: #9a9a9a;\n}\n.plantListSideMenu .router-link-active {\n    color: #597249;\n}\n.plantListSideMenu .router-link-active .link-title {\n    text-decoration: underline;\n}\n.plantListSideMenu .router-link-active:active {\n    color: #597249;\n}\n}", ""]);
 
 // exports
 
@@ -7744,7 +8025,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "@charset \"UTF-8\";\n.plantProfileCard {\n  display: inline-block;\n  width: 30rem;\n}\n.plantProfileCard .savePlantButton .save::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C7\";\n}\n.plantProfileCard .editPlantButton .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n.plantProfileCard .deletePlantButton .delete::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F1F8\";\n}\n.plantProfileCard .plantNameProfCard .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}", ""]);
+exports.push([module.i, "@charset \"UTF-8\";\n#plantProfileCardContain {\n  display: inline-block;\n  margin: 0 auto;\n  width: 16rem;\n}\n#plantProfileCardContain .plantProfileCard {\n  margin: 0 auto;\n  display: grid;\n  grid-template-rows: repeat(12, 1fr);\n  grid-template-columns: repeat(6, 1fr);\n  background-color: #597249;\n  border-radius: 10px;\n  width: 100%;\n  height: 30rem;\n  margin-bottom: 1em;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage {\n  grid-row: 1/8;\n  grid-column: 1/7;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: cover;\n  width: 100%;\n  border-radius: 10px 10px 0 0;\n  position: relative;\n  display: grid;\n  grid-template-rows: repeat(12, 1fr);\n  grid-template-columns: repeat(6, 1fr);\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit {\n  grid-row: 1/3;\n  grid-column: 1/2;\n  justify-self: center;\n  align-self: center;\n  cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .save::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F0C7\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton {\n  grid-row: 1/3;\n  grid-column: 6/7;\n  justify-self: center;\n  align-self: center;\n  cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton .faWrapper .delete::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F1F8\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg {\n  grid-row: 6/11;\n  grid-column: 2/7;\n  width: 95%;\n  width: 95%;\n  justify-self: center;\n  align-self: center;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-align: end;\n          align-items: flex-end;\n  gap: 1em;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage {\n  background-color: #f7f7f7;\n  padding: 0.5em 1em;\n  border-radius: 10px;\n  cursor: pointer;\n  display: inline-block;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .faWrapper .edit::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F304\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .editPlantImgTxt {\n  font-size: 0.9rem;\n  color: #624972;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .editPlantImgTxt:hover {\n  text-decoration: underline;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap {\n  background-color: #f7f7f7;\n  padding: 0.5em 1em;\n  border-radius: 10px;\n  cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .faWrapper .circle::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #fff;\n  content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .faWrapper .logout::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F060\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .revertNoSave {\n  font-size: 0.9rem;\n  color: #624972;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .revertNoSave:hover {\n  text-decoration: underline;\n}\n#plantProfileCardContain .plantProfileCard .plantNameProfCard {\n  grid-row: 7/9;\n  grid-column: 1/7;\n  background: #fff;\n  border-radius: 10px;\n  padding: 0.5em;\n  color: #624972;\n  justify-self: center;\n  align-self: center;\n  z-index: 400;\n  font-size: 1.2rem;\n}\n#plantProfileCardContain .plantProfileCard .plantNameProfCard .plant::before {\n  font-family: \"Font Awesome 5 Free\";\n  font-weight: 900;\n  color: #624972;\n  content: \"\\F4D8\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary {\n  grid-row: 8/13;\n  grid-column: 1/7;\n  border-radius: 0 0 2em 2em;\n  width: 100%;\n  height: 75%;\n  justify-self: center;\n  align-self: center;\n  color: #fff;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  justify-content: space-around;\n  text-align: center;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary p {\n  font-size: 1rem;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary .plantLocationEdit {\n  display: inline-block;\n  width: auto;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary input {\n  max-width: 40%;\n  padding: 0.5em;\n}\n@media (min-width: 700px) {\n#plantProfileCardContain {\n    display: inline-block;\n    margin: 0 auto;\n    width: 15rem;\n}\n#plantProfileCardContain .plantProfileCard {\n    margin: 0 auto;\n    display: grid;\n    grid-template-rows: repeat(12, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n    background-color: #597249;\n    border-radius: 10px;\n    width: 100%;\n    height: 28rem;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage {\n    grid-row: 1/8;\n    grid-column: 1/7;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: cover;\n    width: 100%;\n    border-radius: 10px 10px 0 0;\n    position: relative;\n    display: grid;\n    grid-template-rows: repeat(12, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit {\n    grid-row: 1/3;\n    grid-column: 1/2;\n    justify-self: center;\n    align-self: center;\n    cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .edit::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F304\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .saveEdit .faWrapper .save::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F0C7\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton {\n    grid-row: 1/3;\n    grid-column: 6/7;\n    justify-self: center;\n    align-self: center;\n    cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .deletePlantButton .faWrapper .delete::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F1F8\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg {\n    grid-row: 6/11;\n    grid-column: 2/7;\n    width: 95%;\n    width: 95%;\n    justify-self: center;\n    align-self: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    -webkit-box-align: end;\n            align-items: flex-end;\n    gap: 1em;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage {\n    background-color: #f7f7f7;\n    padding: 0.5em 1em;\n    border-radius: 10px;\n    cursor: pointer;\n    display: inline-block;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .faWrapper .edit::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F304\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .editPlantImgTxt {\n    font-size: 0.9rem;\n    color: #624972;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .editPlantImage .editPlantImgTxt:hover {\n    text-decoration: underline;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap {\n    background-color: #f7f7f7;\n    padding: 0.5em 1em;\n    border-radius: 10px;\n    cursor: pointer;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .faWrapper .circle::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #fff;\n    content: \"\\F111\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .faWrapper .logout::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F060\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .revertNoSave {\n    font-size: 0.9rem;\n    color: #624972;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileEditImage .editingButtonsPlantImg .revertNoSaveWrap .revertNoSave:hover {\n    text-decoration: underline;\n}\n#plantProfileCardContain .plantProfileCard .plantNameProfCard {\n    grid-row: 7/9;\n    grid-column: 1/7;\n    background: #fff;\n    border-radius: 10px;\n    padding: 0.5em;\n    color: #624972;\n    justify-self: center;\n    align-self: center;\n    z-index: 400;\n    font-size: 1.2rem;\n}\n#plantProfileCardContain .plantProfileCard .plantNameProfCard .plant::before {\n    font-family: \"Font Awesome 5 Free\";\n    font-weight: 900;\n    color: #624972;\n    content: \"\\F4D8\";\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary {\n    grid-row: 8/13;\n    grid-column: 1/7;\n    border-radius: 0 0 2em 2em;\n    width: 100%;\n    height: 75%;\n    justify-self: center;\n    align-self: center;\n    color: #fff;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    justify-content: space-around;\n    text-align: center;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary p {\n    font-size: 1rem;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary .plantLocationEdit {\n    display: inline-block;\n    width: auto;\n}\n#plantProfileCardContain .plantProfileCard .plantProfileSummary input {\n    max-width: 40%;\n    padding: 0.5em;\n}\n}\n@media (min-width: 1200px) {\n#plantProfileCardContain {\n    display: inline-block;\n    margin: 0 auto;\n    width: 24rem;\n}\n#plantProfileCardContain .plantProfileCard {\n    margin: 0 auto;\n    display: grid;\n    grid-template-rows: repeat(12, 1fr);\n    grid-template-columns: repeat(6, 1fr);\n    background-color: #597249;\n    border-radius: 10px;\n    width: 100%;\n    height: 34rem;\n}\n}", ""]);
 
 // exports
 
@@ -7763,7 +8044,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, ".sensorViewCard {\n  display: -webkit-box;\n  display: flex;\n  width: 40rem;\n  -webkit-box-pack: justify;\n          justify-content: space-between;\n  flex-wrap: wrap;\n  margin-top: 5rem;\n  gap: 2rem;\n}\n.sensorViewCard .sensorCardChild {\n  display: -webkit-box;\n  display: flex;\n  border: 1px solid whitesmoke;\n  border-radius: 1rem;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n.sensorViewCard .sensorCardChild * {\n  justify-self: center;\n  text-align: center;\n}\n.meterContainer {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-pack: justify;\n          justify-content: space-between;\n  width: 15rem;\n}\n.activeCell, .inactiveCell {\n  display: inline-block;\n  width: 2rem;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n}\n.activeCell {\n  background-color: #758B66;\n}\n.inactiveCell {\n  background: transparent;\n  border: 1px solid gray;\n}\n.cardImage {\n  background-position: center;\n  background-repeat: no-repeat;\n  height: 15rem;\n  width: 15rem;\n  border-radius: 1rem;\n}", ""]);
+exports.push([module.i, ".sensorViewCard {\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  -webkit-box-pack: justify;\n          justify-content: space-between;\n  width: 16rem;\n}\n.sensorViewCard .sensorCardChild {\n  display: grid;\n  grid-template-columns: repeat(10, 1fr);\n  grid-template-rows: repeat(8, 1fr);\n  border-radius: 10px;\n  background-color: #fff;\n  height: 12rem;\n  margin-bottom: 2em;\n  border: 1px solid rgba(209, 209, 209, 0.7);\n}\n.sensorViewCard .sensorCardChild .cardImage {\n  border-radius: 10px 0 0 0;\n  grid-row: 1/7;\n  grid-column: 1/6;\n  align-self: center;\n  justify-self: center;\n  background-position: center;\n  background-repeat: no-repeat;\n  background-size: contain;\n  width: 70%;\n  height: 70%;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap {\n  border-radius: 0 10px 0 0;\n  grid-row: 1/7;\n  grid-column: 6/11;\n  align-self: center;\n  justify-self: center;\n  width: 80%;\n  height: 70%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n          flex-direction: column;\n  justify-content: space-around;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .readingSensorCard, .sensorViewCard .sensorCardChild .sensorTextWrap .commentSensorCard {\n  text-align: center;\n  color: #624972;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer {\n  width: 100%;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-align: center;\n          align-items: center;\n  justify-content: space-around;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .activeCell, .sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .inactiveCell {\n  display: inline-block;\n  width: 1rem;\n  height: 0.5rem;\n  border-radius: 0.5rem;\n  margin: 0 0.2rem;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .activeCell {\n  background-color: #597249;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .inactiveCell {\n  background-color: #d1dccd;\n}\n.sensorViewCard .sensorCardChild .sensorType {\n  grid-row: 7/9;\n  grid-column: 1/11;\n  width: 100%;\n  height: 100%;\n  border-radius: 0 0 10px 10px;\n  align-self: center;\n  justify-self: center;\n  background-color: #624972;\n  color: #fff;\n  text-align: center;\n  display: -webkit-box;\n  display: flex;\n  -webkit-box-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n          justify-content: center;\n}\n@media (min-width: 700px) {\n.sensorViewCard {\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: horizontal;\n    -webkit-box-direction: normal;\n            flex-direction: row;\n    -webkit-box-pack: justify;\n            justify-content: space-between;\n    flex-wrap: wrap;\n    width: 32rem;\n}\n.sensorViewCard .sensorCardChild {\n    display: grid;\n    grid-template-columns: repeat(10, 1fr);\n    grid-template-rows: repeat(8, 1fr);\n    border-radius: 10px;\n    background-color: #fff;\n    height: 12rem;\n    margin-bottom: 2em;\n    border: 1px solid rgba(209, 209, 209, 0.7);\n}\n.sensorViewCard .sensorCardChild .cardImage {\n    border-radius: 10px 0 0 0;\n    grid-row: 1/7;\n    grid-column: 1/6;\n    align-self: center;\n    justify-self: center;\n    background-position: center;\n    background-repeat: no-repeat;\n    background-size: contain;\n    width: 70%;\n    height: 70%;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap {\n    border-radius: 0 10px 0 0;\n    grid-row: 1/7;\n    grid-column: 6/11;\n    align-self: center;\n    justify-self: center;\n    width: 80%;\n    height: 70%;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-orient: vertical;\n    -webkit-box-direction: normal;\n            flex-direction: column;\n    justify-content: space-around;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .readingSensorCard, .sensorViewCard .sensorCardChild .sensorTextWrap .commentSensorCard {\n    text-align: center;\n    color: #624972;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer {\n    width: 100%;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    justify-content: space-around;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .activeCell, .sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .inactiveCell {\n    display: inline-block;\n    width: 1rem;\n    height: 0.5rem;\n    border-radius: 0.5rem;\n    margin: 0 0.2rem;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .activeCell {\n    background-color: #597249;\n}\n.sensorViewCard .sensorCardChild .sensorTextWrap .meterContainer .inactiveCell {\n    background-color: #d1dccd;\n}\n.sensorViewCard .sensorCardChild .sensorType {\n    grid-row: 7/9;\n    grid-column: 1/11;\n    width: 100%;\n    height: 100%;\n    border-radius: 0 0 10px 10px;\n    align-self: center;\n    justify-self: center;\n    background-color: #624972;\n    color: #fff;\n    text-align: center;\n    display: -webkit-box;\n    display: flex;\n    -webkit-box-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n            justify-content: center;\n}\n}\n@media (min-width: 700px) {\n.sensorViewCard .sensorCardChild {\n    display: grid;\n    grid-template-columns: repeat(10, 1fr);\n    grid-template-rows: repeat(8, 1fr);\n    border-radius: 10px;\n    background-color: #fff;\n    height: 10rem;\n    width: 15rem;\n}\n}\n@media (min-width: 1200px) {\n.sensorViewCard {\n    width: 52rem;\n    gap: 1em;\n}\n.sensorViewCard .sensorCardChild {\n    display: grid;\n    grid-template-columns: repeat(10, 1fr);\n    grid-template-rows: repeat(8, 1fr);\n    border-radius: 10px;\n    background-color: #fff;\n    height: 15rem;\n    width: 25rem;\n    align-self: center;\n    justify-self: center;\n    margin-bottom: 0;\n}\n}", ""]);
 
 // exports
 
@@ -38911,6 +39192,36 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./App.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss&":
 /*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Home.vue?vue&type=style&index=0&lang=scss& ***!
@@ -39070,6 +39381,36 @@ if(false) {}
 
 
 var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Nav.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/nav/Nav.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--7-2!./node_modules/sass-loader/dist/cjs.js??ref--7-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./ChartModal.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&");
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -39842,7 +40183,20 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [_c("Nav"), _vm._v(" "), _c("router-view")], 1)
+  return _c(
+    "div",
+    [
+      _c("Nav", { attrs: { userPlants: _vm.userPlantsMain } }),
+      _vm._v(" "),
+      _c(
+        "transition",
+        { attrs: { name: "viewFade", mode: "out-in" } },
+        [_c("router-view")],
+        1
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -39889,7 +40243,10 @@ var render = function() {
       _vm._v(" "),
       _c(
         "div",
-        { staticClass: "messageList" },
+        {
+          staticClass: "messageList",
+          class: _vm.userMessages.length < 2 ? "centerOne" : ""
+        },
         _vm._l(_vm.userMessages, function(message) {
           return _c("div", { key: message.id, staticClass: "msgCard" }, [
             _c("p", { staticClass: "msgContent" }, [
@@ -39988,7 +40345,7 @@ var render = function() {
                 {
                   staticClass: "routerLink view viewPlantHome",
                   attrs: {
-                    to: { name: "plant", params: { id: "" + plant.id } }
+                    to: { name: "plants", params: { id: "" + plant.id } }
                   }
                 },
                 [_vm._v("view plant >")]
@@ -40027,76 +40384,76 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
+    { attrs: { id: "plantViewPage" } },
     [
-      _c("h1", [_vm._v("PLANT VIEW")]),
+      _c("h2", { staticClass: "invisibleHeader" }, [
+        _vm._v("Plant Profile Page")
+      ]),
       _vm._v(" "),
       _c("PlantListMenu"),
+      _vm._v(" "),
+      _c("div", {
+        staticClass: "plantViewLogo",
+        style: { "background-image": "url(/images/logoP.svg)" }
+      }),
       _vm._v(" "),
       _c(
         "div",
         { staticClass: "mainPlantViewContainer" },
         [
           _vm.currentPlant
-            ? _c(
-                "div",
-                [
-                  _c("PlantProfileCard", {
-                    attrs: { currentPlant: _vm.currentPlant }
-                  }),
-                  _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      staticClass: "morePlantInfoBtn",
-                      on: { click: _vm.togglePlantInfo }
-                    },
-                    [
-                      _c("span", { staticClass: "font-awesome-icons info" }),
-                      _vm._v(" More Plant Info")
-                    ]
-                  ),
-                  _c("br"),
-                  _c("br"),
-                  _c("br"),
-                  _c("br"),
-                  _vm._v(" "),
-                  _c("SensorCardDealer", {
-                    attrs: { cardHealthScores: _vm.cardHealthScores }
-                  })
-                ],
-                1
-              )
+            ? _c("PlantProfileCard", {
+                staticClass: "plantProfileCard",
+                attrs: { currentPlant: _vm.currentPlant }
+              })
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "morePlantInfoBtn",
+              on: { click: _vm.togglePlantInfo }
+            },
+            [
+              _c("span", { staticClass: "font-awesome-icons info" }),
+              _vm._v(" more plant info")
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "chartModalBtn",
+              on: { click: _vm.toggleChartModal }
+            },
+            [
+              _c("span", { staticClass: "font-awesome-icons info" }),
+              _vm._v(" charts")
+            ]
+          ),
+          _vm._v(" "),
+          _vm.currentPlant
+            ? _c("SensorCardDealer", {
+                staticClass: "sensorCardDealer",
+                attrs: { cardHealthScores: _vm.cardHealthScores }
+              })
             : _vm._e(),
           _vm._v(" "),
           _vm.plantInfoOpen
             ? _c("PlantInfoModal", {
+                staticClass: "plantInfoOpen",
                 attrs: { currentPlant: _vm.currentPlant },
                 on: { closePlantInfo: _vm.togglePlantInfo }
               })
             : _vm._e(),
           _vm._v(" "),
-          _c(
-            "div",
-            { attrs: { id: "chartContainer" } },
-            [
-              _c("Chart", {
-                staticClass: "barChart",
-                attrs: {
-                  chartData: _vm.chartData.sensors,
-                  chartType: "BarChart"
-                }
-              }),
-              _vm._v(" "),
-              _c("Chart", {
-                staticClass: "columnChart",
-                attrs: {
-                  chartData: _vm.chartData.summary,
-                  chartType: "ColumnChart"
-                }
+          _vm.chartModalOpen
+            ? _c("ChartModal", {
+                staticClass: "chartModalOpen",
+                attrs: { chartData: _vm.chartData },
+                on: { closeChartModal: _vm.toggleChartModal }
               })
-            ],
-            1
-          )
+            : _vm._e()
         ],
         1
       )
@@ -40171,6 +40528,16 @@ var render = function() {
                             _vm.profImgLoaded
                               ? _c("i", { staticClass: "fa check fa-stack-1x" })
                               : _c("i", { staticClass: "fa edit fa-stack-1x" })
+                          ]),
+                          _vm._v(" "),
+                          _c("span", [
+                            _vm._v(
+                              _vm._s(
+                                _vm.profImgLoaded
+                                  ? "file uploaded!"
+                                  : "update image"
+                              )
+                            )
                           ])
                         ]
                       ),
@@ -40414,7 +40781,7 @@ var render = function() {
   return _vm.chartData
     ? _c(
         "div",
-        { attrs: { id: "chart" } },
+        { staticClass: "chartCompContainer" },
         [
           _c("GChart", {
             staticClass: "chart",
@@ -40475,7 +40842,13 @@ var render = function() {
         _vm._v(" "),
         _c("label", { staticClass: "addPlantImage", attrs: { for: "image" } }, [
           _c("span", { staticClass: "inAddImg" }, [
-            _vm._m(1),
+            _c("span", { staticClass: "fa-stack faWrapper" }, [
+              _c("i", { staticClass: "fa circle fa-stack-2x" }),
+              _vm._v(" "),
+              !_vm.fileLoaded
+                ? _c("i", { staticClass: "fa add fa-stack-1x" })
+                : _c("i", { staticClass: "fa check fa-stack-1x" })
+            ]),
             _vm._v(
               "\n            " +
                 _vm._s(
@@ -40574,16 +40947,6 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("i", { staticClass: "fa close fa-stack-1x" })
     ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("span", { staticClass: "fa-stack faWrapper" }, [
-      _c("i", { staticClass: "fa circle fa-stack-2x" }),
-      _vm._v(" "),
-      _c("i", { staticClass: "fa add fa-stack-1x" })
-    ])
   }
 ]
 render._withStripped = true
@@ -40659,6 +41022,51 @@ var render = function() {
           ]
         ),
         _vm._v(" "),
+        _c(
+          "router-link",
+          {
+            staticClass: "router-link navLink",
+            attrs: {
+              to: {
+                name: "plants",
+                params: { id: _vm.$route.params.id || _vm.userPlants[0].id }
+              }
+            }
+          },
+          [
+            _c("span", { staticClass: "fa-stack faWrapper" }, [
+              _c("i", { staticClass: "fa circle fa-stack-2x" }),
+              _vm._v(" "),
+              _c("i", { staticClass: "fa plant fa-stack-1x" })
+            ]),
+            _vm._v(" "),
+            _c("span", { staticClass: "link-title" }, [_vm._v("plants")])
+          ]
+        ),
+        _vm._v(" "),
+        _vm.$route.name == "plants" && !_vm.isNotMobileScreen
+          ? _c(
+              "div",
+              { key: _vm.$route.name, staticClass: "subNav" },
+              _vm._l(_vm.userPlants, function(plant) {
+                return _c(
+                  "router-link",
+                  {
+                    key: plant.id,
+                    staticClass: "routerLink navLink",
+                    attrs: { to: { name: "plants", params: { id: plant.id } } }
+                  },
+                  [
+                    _c("span", { staticClass: "link-title" }, [
+                      _vm._v(_vm._s(plant.name))
+                    ])
+                  ]
+                )
+              }),
+              1
+            )
+          : _vm._e(),
+        _vm._v(" "),
         _vm._m(0)
       ],
       1
@@ -40686,6 +41094,72 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070&":
+/*!********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070& ***!
+  \********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "chartBlanket" }, [
+    _c(
+      "div",
+      { staticClass: "chartModal" },
+      [
+        _c(
+          "a",
+          { staticClass: "closeChartModal", on: { click: _vm.closeCharts } },
+          [_vm._m(0)]
+        ),
+        _vm._v(" "),
+        _vm._l(_vm.chartData, function(chart) {
+          return _c(
+            "div",
+            { key: chart.id, staticClass: "chartWrap" },
+            [
+              _c("h5", { staticClass: "chartTitle" }, [
+                _vm._v(_vm._s(chart.title))
+              ]),
+              _vm._v(" "),
+              _c("Chart", {
+                class: chart.type,
+                attrs: { chartData: chart.data, chartType: chart.type }
+              })
+            ],
+            1
+          )
+        })
+      ],
+      2
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa close fa-stack-1x" })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/PlantInfoModal.vue?vue&type=template&id=52aa2c75&":
 /*!************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/partials/plantView/PlantInfoModal.vue?vue&type=template&id=52aa2c75& ***!
@@ -40702,24 +41176,61 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "plantInfoBlanket" }, [
+    _c("h2", { staticClass: "invisibleHeader" }, [
+      _vm._v("More Plant Info Modal")
+    ]),
+    _vm._v(" "),
     _vm.addedPlantInfo
       ? _c("div", { staticClass: "plantInfoDetail" }, [
-          _c("h1", [_vm._v("PLANT INFO MODAL")]),
+          _c(
+            "a",
+            {
+              staticClass: "closePlantInfoModal",
+              on: { click: _vm.closePlantInfo }
+            },
+            [_vm._m(0)]
+          ),
           _vm._v(" "),
-          _c("p", [
-            _vm._v("scientific name: " + _vm._s(this.addedPlantInfo.species))
-          ]),
+          _c("div", {
+            staticClass: "plantProfileEditImage",
+            style: { "background-image": "url(" + _vm.currentPlant.image + ")" }
+          }),
           _vm._v(" "),
-          _c("p", [_vm._v("age: " + _vm._s(this.plant.age))]),
-          _vm._v(" "),
-          _c("p", [_vm._v("description: " + _vm._s(this.addedPlantInfo.info))]),
-          _vm._v(" "),
-          _c("button", { on: { click: _vm.closePlantInfo } }, [_vm._v("close")])
+          _c("div", { staticClass: "textInfoWrap" }, [
+            _c("div", { staticClass: "scientificName" }, [
+              _c("h5", [_vm._v("scientific name:")]),
+              _vm._v(" "),
+              _c("p", [_vm._v(_vm._s(this.addedPlantInfo.species))])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "plantAgeInfo" }, [
+              _c("h5", [_vm._v("age:")]),
+              _vm._v(" "),
+              _c("p", [_vm._v(_vm._s(this.plant.age))])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "plantDescriptionInfo" }, [
+              _c("h5", [_vm._v("description:")]),
+              _vm._v(" "),
+              _c("p", [_vm._v(_vm._s(this.addedPlantInfo.info))])
+            ])
+          ])
         ])
       : _vm._e()
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa close fa-stack-1x" })
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -40745,37 +41256,30 @@ var render = function() {
     ? _c(
         "div",
         { staticClass: "plantListSideMenu" },
-        [
-          _c(
-            "router-link",
-            {
-              staticClass: "routerLink sideNavPlants",
-              attrs: { to: { name: "home" } }
-            },
-            [_vm._v("\n        HOME\n    ")]
-          ),
-          _vm._v(" "),
-          _vm._l(_vm.sideNavUserPlants, function(plant) {
-            return _c(
-              "div",
-              { key: plant.id },
-              [
-                _c(
-                  "router-link",
-                  {
-                    staticClass: "routerLink sideNavPlants",
-                    attrs: {
-                      to: { name: "plant", params: { id: "" + plant.id } }
-                    }
-                  },
-                  [_vm._v("\n        " + _vm._s(plant.name) + "\n    ")]
-                )
-              ],
-              1
-            )
-          })
-        ],
-        2
+        _vm._l(_vm.sideNavUserPlants, function(plant) {
+          return _c(
+            "div",
+            { key: plant.id },
+            [
+              _c(
+                "router-link",
+                {
+                  staticClass: "routerLink sideNavPlants",
+                  attrs: {
+                    to: { name: "plants", params: { id: "" + plant.id } }
+                  }
+                },
+                [
+                  _c("span", { staticClass: "link-title" }, [
+                    _vm._v(_vm._s(plant.name))
+                  ])
+                ]
+              )
+            ],
+            1
+          )
+        }),
+        0
       )
     : _vm._e()
 }
@@ -40801,86 +41305,125 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "plantProfileCard" }, [
-    _c("div", [
-      _c(
-        "form",
-        { ref: "plantEditForm", attrs: { enctype: "multipart/form-data" } },
-        [
-          _vm.editingPlant
-            ? _c(
-                "button",
-                {
-                  staticClass: "savePlantButton",
-                  attrs: { type: "button" },
-                  on: { click: _vm.editPlant }
-                },
-                [_c("span", { staticClass: "font-awesome-icons save" })]
-              )
-            : _c(
-                "button",
-                {
-                  staticClass: "editPlantButton",
-                  attrs: { type: "button" },
-                  on: { click: _vm.toggleEdit }
-                },
-                [_c("span", { staticClass: "font-awesome-icons edit" })]
-              ),
+  return _c("div", { attrs: { id: "plantProfileCardContain" } }, [
+    _c("h2", { staticClass: "invisibleHeader" }, [
+      _vm._v("Plant Profile Summary Info Card")
+    ]),
+    _vm._v(" "),
+    _vm.showDeletePlant
+      ? _c("div", { staticClass: "popupDelete" }, [
+          _c("p", [_vm._v("Are you sure you want to delete this plant?")]),
           _vm._v(" "),
-          _vm.editingPlant
-            ? _c(
-                "button",
-                { attrs: { type: "button" }, on: { click: _vm.toggleEdit } },
-                [_vm._v("Back")]
-              )
-            : _vm._e(),
-          _vm._v(" "),
-          !_vm.showDeletePlant
-            ? _c(
-                "button",
-                {
-                  staticClass: "deletePlantButton",
-                  attrs: { type: "button" },
-                  on: { click: _vm.showDeleteToggle }
-                },
-                [_c("span", { staticClass: "font-awesome-icons delete" })]
-              )
-            : _c("div", [
-                _c("p", [_vm._v("Are you sure?")]),
-                _vm._v(" "),
-                _c("button", { on: { click: _vm.deletePlant } }, [
-                  _vm._v("Confirm Delete")
-                ]),
-                _vm._v(" "),
-                _c("button", { on: { click: _vm.showDeleteToggle } }, [
-                  _vm._v("Keep Plant")
-                ])
-              ]),
-          _vm._v(" "),
-          _c("div", {
-            staticClass: "plantProfileImage",
-            style: { "background-image": "url(" + _vm.currentPlant.image + ")" }
-          }),
-          _vm._v(" "),
-          _vm.editingPlant
-            ? _c("div", [
-                _c("p", [_vm._v("upload new image:")]),
-                _vm._v(" "),
-                _c("input", {
-                  staticClass: "form-control",
-                  attrs: { type: "file", name: "image", id: "plantViewImage" }
-                })
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c("p", { staticClass: "plantNameProfCard" }, [
-            _c("span", { staticClass: "font-awesome-icons plant" }),
-            _vm._v(" " + _vm._s(_vm.currentPlant.name))
+          _c("button", { on: { click: _vm.deletePlant } }, [
+            _vm._v("Confirm Delete")
           ]),
           _vm._v(" "),
+          _c("button", { on: { click: _vm.showDeleteToggle } }, [
+            _vm._v("Keep Plant")
+          ])
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _c(
+      "form",
+      {
+        ref: "plantEditForm",
+        staticClass: "plantProfileCard",
+        attrs: { enctype: "multipart/form-data" }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "plantProfileEditImage",
+            style: { "background-image": "url(" + _vm.currentPlant.image + ")" }
+          },
+          [
+            _c(
+              "div",
+              { staticClass: "saveEdit", on: { click: _vm.editPlant } },
+              [
+                _c("span", { staticClass: "fa-stack faWrapper" }, [
+                  _c("i", { staticClass: "fa circle fa-stack-2x" }),
+                  _vm._v(" "),
+                  _vm.editingPlant
+                    ? _c("i", { staticClass: "fa save fa-stack-1x" })
+                    : _c("i", { staticClass: "fa edit fa-stack-1x" })
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "deletePlantButton",
+                on: { click: _vm.showDeleteToggle }
+              },
+              [_vm._m(0)]
+            ),
+            _vm._v(" "),
+            _vm.editingPlant
+              ? _c("div", { staticClass: "editingButtonsPlantImg" }, [
+                  _c(
+                    "label",
+                    {
+                      staticClass: "editPlantImage",
+                      attrs: { for: "imagePlant" }
+                    },
+                    [
+                      _vm._m(1),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "editPlantImgTxt" }, [
+                        _vm._v(
+                          _vm._s(
+                            _vm.plantEditFileLoaded
+                              ? "file uploaded!"
+                              : "update image"
+                          )
+                        )
+                      ])
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c("input", {
+                    staticClass: "form-control",
+                    attrs: {
+                      type: "file",
+                      name: "image",
+                      id: "plantViewImage",
+                      hidden: ""
+                    },
+                    on: { change: _vm.updatePlantFile }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass: "revertNoSaveWrap",
+                      on: { click: _vm.toggleEdit }
+                    },
+                    [
+                      _vm._m(2),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "revertNoSave" }, [
+                        _vm._v("stop editing")
+                      ])
+                    ]
+                  )
+                ])
+              : _vm._e()
+          ]
+        ),
+        _vm._v(" "),
+        _c("p", { staticClass: "plantNameProfCard" }, [
+          _c("span", { staticClass: "font-awesome-icons plant" }),
+          _vm._v(" " + _vm._s(_vm.currentPlant.name))
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "plantProfileSummary" }, [
           _vm.editingPlant
             ? _c("div", [
-                _c("p", [_vm._v("location:")]),
+                _vm._m(3),
                 _vm._v(" "),
                 _c("input", {
                   attrs: {
@@ -40892,18 +41435,64 @@ var render = function() {
                 })
               ])
             : _c("p", [
-                _vm._v("location: " + _vm._s(_vm.currentPlant.location))
+                _c("strong", [_vm._v("location:")]),
+                _vm._v(" " + _vm._s(_vm.currentPlant.location))
               ]),
           _vm._v(" "),
-          _c("p", [_vm._v("plant type: " + _vm._s(_vm.currentPlant.type))]),
+          _c("p", [
+            _c("strong", [_vm._v("type:")]),
+            _vm._v(" " + _vm._s(_vm.currentPlant.type))
+          ]),
           _vm._v(" "),
-          _c("p", [_vm._v("age: " + _vm._s(_vm.currentPlant.age))])
-        ]
-      )
-    ])
+          _c("p", [
+            _c("strong", [_vm._v("age:")]),
+            _vm._v(" " + _vm._s(_vm.currentPlant.age))
+          ])
+        ])
+      ]
+    )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa delete fa-stack-1x" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa edit fa-stack-1x" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "fa-stack faWrapper" }, [
+      _c("i", { staticClass: "fa circle fa-stack-2x" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa logout fa-stack-1x" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("p", { staticClass: "plantLocationEdit" }, [
+      _c("strong", [_vm._v("location:")])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -40929,62 +41518,78 @@ var render = function() {
     ? _c(
         "div",
         { staticClass: "sensorViewCard" },
-        _vm._l(_vm.sensors, function(data) {
-          return _c("div", { key: data.name, staticClass: "sensorCardChild" }, [
-            _c("div", {
-              staticClass: "cardImage",
-              style: {
-                "background-image": "url(/images/" + data.name + ".png)"
-              }
-            }),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(data.reading) + _vm._s(data.unit))]),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.cardHealthScores[data.name]))]),
-            _vm._v(" "),
-            _c("div", { staticClass: "meterContainer" }, [
-              _c("div", {
-                class:
-                  _vm.cardHealthScores[data.name] > 20
-                    ? "activeCell"
-                    : "inactiveCell"
-              }),
-              _vm._v(" "),
-              _c("div", {
-                class:
-                  _vm.cardHealthScores[data.name] > 40
-                    ? "activeCell"
-                    : "inactiveCell"
-              }),
-              _vm._v(" "),
-              _c("div", {
-                class:
-                  _vm.cardHealthScores[data.name] > 60
-                    ? "activeCell"
-                    : "inactiveCell"
-              }),
-              _vm._v(" "),
-              _c("div", {
-                class:
-                  _vm.cardHealthScores[data.name] > 80
-                    ? "activeCell"
-                    : "inactiveCell"
-              }),
-              _vm._v(" "),
-              _c("div", {
-                class:
-                  _vm.cardHealthScores[data.name] > 99
-                    ? "activeCell"
-                    : "inactiveCell"
-              })
-            ]),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(data.comment))]),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(data.displayName))])
-          ])
-        }),
-        0
+        [
+          _c("h2", { staticClass: "invisibleHeader" }, [
+            _vm._v("Sensor Info Card")
+          ]),
+          _vm._v(" "),
+          _vm._l(_vm.sensors, function(data) {
+            return _c(
+              "div",
+              { key: data.name, staticClass: "sensorCardChild" },
+              [
+                _c("div", {
+                  staticClass: "cardImage",
+                  style: {
+                    "background-image": "url(/images/" + data.name + ".png)"
+                  }
+                }),
+                _vm._v(" "),
+                _c("div", { staticClass: "sensorTextWrap" }, [
+                  _c("h5", { staticClass: "readingSensorCard" }, [
+                    _vm._v(_vm._s(data.reading) + _vm._s(data.unit))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "meterContainer" }, [
+                    _c("div", {
+                      class:
+                        _vm.cardHealthScores[data.name] > 20
+                          ? "activeCell"
+                          : "inactiveCell"
+                    }),
+                    _vm._v(" "),
+                    _c("div", {
+                      class:
+                        _vm.cardHealthScores[data.name] > 40
+                          ? "activeCell"
+                          : "inactiveCell"
+                    }),
+                    _vm._v(" "),
+                    _c("div", {
+                      class:
+                        _vm.cardHealthScores[data.name] > 60
+                          ? "activeCell"
+                          : "inactiveCell"
+                    }),
+                    _vm._v(" "),
+                    _c("div", {
+                      class:
+                        _vm.cardHealthScores[data.name] > 80
+                          ? "activeCell"
+                          : "inactiveCell"
+                    }),
+                    _vm._v(" "),
+                    _c("div", {
+                      class:
+                        _vm.cardHealthScores[data.name] > 99
+                          ? "activeCell"
+                          : "inactiveCell"
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("h5", { staticClass: "commentSensorCard" }, [
+                    _vm._v(_vm._s(data.comment))
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("h5", { staticClass: "sensorType" }, [
+                  _vm._v(_vm._s(data.displayName))
+                ])
+              ]
+            )
+          })
+        ],
+        2
       )
     : _vm._e()
 }
@@ -57734,7 +58339,9 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./App.vue?vue&type=template&id=332fccf4& */ "./resources/js/components/App.vue?vue&type=template&id=332fccf4&");
 /* harmony import */ var _App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./App.vue?vue&type=script&lang=js& */ "./resources/js/components/App.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./App.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -57742,7 +58349,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["render"],
   _App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -57771,6 +58378,22 @@ component.options.__file = "resources/js/components/App.vue"
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./App.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&":
+/*!***************************************************************************!*\
+  !*** ./resources/js/components/App.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--7-2!../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../node_modules/vue-loader/lib??vue-loader-options!./App.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/App.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
@@ -58314,6 +58937,93 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/partials/plantView/ChartModal.vue":
+/*!*******************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/ChartModal.vue ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ChartModal.vue?vue&type=template&id=078a9070& */ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070&");
+/* harmony import */ var _ChartModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ChartModal.vue?vue&type=script&lang=js& */ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ChartModal.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _ChartModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/partials/plantView/ChartModal.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./ChartModal.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/style-loader!../../../../../node_modules/css-loader!../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../node_modules/postcss-loader/src??ref--7-2!../../../../../node_modules/sass-loader/dist/cjs.js??ref--7-3!../../../../../node_modules/vue-loader/lib??vue-loader-options!./ChartModal.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_7_2_node_modules_sass_loader_dist_cjs_js_ref_7_3_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070&":
+/*!**************************************************************************************************!*\
+  !*** ./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070& ***!
+  \**************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./ChartModal.vue?vue&type=template&id=078a9070& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/partials/plantView/ChartModal.vue?vue&type=template&id=078a9070&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ChartModal_vue_vue_type_template_id_078a9070___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/partials/plantView/PlantInfoModal.vue":
 /*!***********************************************************************!*\
   !*** ./resources/js/components/partials/plantView/PlantInfoModal.vue ***!
@@ -58696,8 +59406,8 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_router__WEBPACK_IMPORTED_MODU
     name: 'profile',
     component: _components_Profile_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
   }, {
-    path: '/plant/:id',
-    name: 'plant',
+    path: '/plants/:id',
+    name: 'plants',
     component: _components_PlantView_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   }]
 }));

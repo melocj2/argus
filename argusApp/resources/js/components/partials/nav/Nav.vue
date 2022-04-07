@@ -17,12 +17,26 @@
             </router-link>
 
             <router-link class="router-link navLink" :to="'/profile'">
-                    <span class="fa-stack faWrapper">
-                        <i class="fa circle fa-stack-2x"></i>
-                        <i class="fa profile fa-stack-1x"></i>
-                    </span>
-                        <span class="link-title">profile</span>
+                <span class="fa-stack faWrapper">
+                    <i class="fa circle fa-stack-2x"></i>
+                    <i class="fa profile fa-stack-1x"></i>
+                </span>
+                    <span class="link-title">profile</span>
             </router-link>
+
+             <router-link class="router-link navLink" :to="{ name: 'plants', params: { id: $route.params.id || userPlants[0].id }}">
+                <span class="fa-stack faWrapper">
+                    <i class="fa circle fa-stack-2x"></i>
+                    <i class="fa plant fa-stack-1x"></i>
+                </span>
+                    <span class="link-title">plants</span>
+            </router-link>
+
+
+                <div class="subNav" v-if="$route.name == 'plants' && !isNotMobileScreen" :key="$route.name">
+                    <router-link v-for="plant in userPlants" :key="plant.id" :to="{ name: 'plants', params: { id: plant.id }}" class="routerLink navLink" ><span class="link-title">{{plant.name}}</span></router-link>
+                </div>
+
 
             <a class="navLink" href="/logout">
                 <span class="fa-stack faWrapper">
@@ -37,6 +51,8 @@
 
 <script>
     export default {
+
+        props: ["userPlants"],
 
         data() {
             return {
@@ -105,7 +121,6 @@
             z-index: 501;
             position: fixed;
             padding: 5em 2em;
-            gap: 2em;
             left: 0;
             top: 0;
             width: 12em;
@@ -118,38 +133,56 @@
             border-radius: 0px 3em 3em 0px;
             transition: all 0.5s ease-in-out;
             .navLink {
-                    text-decoration: none;
-                    text-align: center;
-                    color: $purple;
-                    font-size: $nav-mobile;
-                    font-weight: bold;
-                    .faWrapper {
-                        font-size: $body-tablet;
-                        .circle::before {
-                            @include awesomeIcon($purple, 'circle');
-                        }
-                        .home::before {
-                            @include awesomeIcon($white, 'home');
-                        }
-                        .profile::before {
-                            @include awesomeIcon($white, 'profile');
-                        }
-                        .logout::before {
-                            @include awesomeIcon($white, 'logout');
-                        }
+                margin-bottom: 2em;
+                cursor: pointer;
+                text-decoration: none;
+                text-align: center;
+                color: $purple;
+                font-size: $nav-mobile;
+                font-weight: bold;
+                .faWrapper {
+                    font-size: $body-tablet;
+                    .circle::before {
+                        @include awesomeIcon($purple, 'circle');
+                    }
+                    .home::before {
+                        @include awesomeIcon($white, 'home');
+                    }
+                    .profile::before {
+                        @include awesomeIcon($white, 'profile');
+                    }
+                    .plant::before {
+                        @include awesomeIcon($white, 'plant');
+                    }
+                    .logout::before {
+                        @include awesomeIcon($white, 'logout');
                     }
                 }
-                .router-link-active {
-                    color: $green;
-                    .link-title {
-                        text-decoration: underline;
-                    }
-                    .faWrapper {
-                        .circle::before {
-                            @include awesomeIcon($green, 'circle');
-                        }
+            }
+            .subNav {
+                display: flex;
+                flex-direction: column;
+                margin-top: -2em;
+                .navLink {
+                    font-size: $card-tablet;
+                    font-weight: normal;
+                    width: 80%;
+                    margin-bottom: 1em;
+                    text-align: right;
+                    position: relative;
+                }
+            }
+            .router-link-active {
+                color: $green;
+                .link-title {
+                    text-decoration: underline;
+                }
+                .faWrapper {
+                    .circle::before {
+                        @include awesomeIcon($green, 'circle');
                     }
                 }
+            }
         }
         .offscreenNav {
             left: -17em;
@@ -168,12 +201,11 @@
                 box-sizing: border-box;
                 position: fixed;
                 bottom: 0;
-                left: 5%;
+                left: 1%;
                 background-color: $white;
-                width: 90%;
+                width: 98%;
                 height: 7em;
                 padding: 2em;
-                // margin-left: 10%;
                 @include border;
                 border-radius: 3em 3em 0px 0px;
                 display: flex;
@@ -185,7 +217,7 @@
                     text-decoration: none;
                     color: $purple;
                     font-size: $nav-tablet;
-                    font-weight: bold;
+                    cursor: pointer;
                     .faWrapper {
                         font-size: $body-tablet;
                         .circle::before {
@@ -196,6 +228,9 @@
                         }
                         .profile::before {
                             @include awesomeIcon($white, 'profile');
+                        }
+                        .plant::before {
+                            @include awesomeIcon($white, 'plant');
                         }
                         .logout::before {
                             @include awesomeIcon($white, 'logout');

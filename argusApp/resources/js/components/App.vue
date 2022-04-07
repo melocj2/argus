@@ -1,9 +1,14 @@
 <template>
     <div>
 
- <Nav />
-        <router-view />
+ <Nav :userPlants="userPlantsMain"/>
 
+        <transition
+         name="viewFade"
+         mode="out-in"
+        >
+        <router-view />
+        </transition>
 
     </div>
 </template>
@@ -28,7 +33,18 @@
         },
 
         computed: {
+            userPlantsMain() {
 
+                if (!this.$store.state.userPlants) {
+                    return false;
+                }
+
+                let plants = this.$store.state.userPlants;
+
+                if (plants && plants[0] && plants[0].id != 'loading data...') {
+                    return plants;
+                }
+            }
 
         },
 
@@ -338,5 +354,16 @@
 <style lang="scss">
 
 
+.viewFade-enter-active,
+.viewFade-leave-active {
+  transition-duration: 0.7s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
+
+.viewFade-enter,
+.viewFade-leave-to {
+  opacity: 0,
+}
 
 </style>

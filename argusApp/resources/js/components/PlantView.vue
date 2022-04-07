@@ -1,24 +1,25 @@
 <template>
-    <div>
-        <h1>PLANT VIEW</h1>
+    <div id="plantViewPage">
+        <h2 class="invisibleHeader">Plant Profile Page</h2>
         <PlantListMenu />
-
+        <div class="plantViewLogo" :style="{'background-image': `url(/images/logoP.svg)`}"></div>
         <div class="mainPlantViewContainer">
-            <div v-if="currentPlant">
-                <PlantProfileCard :currentPlant="currentPlant" />
-               <button class="morePlantInfoBtn" @click="togglePlantInfo"><span class="font-awesome-icons info"></span> More Plant Info</button><br/><br/><br/><br/>
-                <SensorCardDealer :cardHealthScores="cardHealthScores"/>
-            </div>
+
+                <PlantProfileCard :currentPlant="currentPlant" v-if="currentPlant" class="plantProfileCard"/>
+
+               <button class="morePlantInfoBtn" @click="togglePlantInfo"><span class="font-awesome-icons info"></span> more plant info</button>
+
+               <button class="chartModalBtn" @click="toggleChartModal"><span class="font-awesome-icons info"></span> charts</button>
+
+                <SensorCardDealer :cardHealthScores="cardHealthScores" v-if="currentPlant" class="sensorCardDealer" />
 
 
-            <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo" :currentPlant="currentPlant"/>
+
+            <PlantInfoModal v-if="plantInfoOpen" @closePlantInfo="togglePlantInfo" :currentPlant="currentPlant" class="plantInfoOpen" />
+
+            <ChartModal v-if="chartModalOpen" @closeChartModal="toggleChartModal" :chartData="chartData" class="chartModalOpen"/>
 
 
-            <div id="chartContainer">
-                <Chart class="barChart" :chartData="chartData.sensors" chartType="BarChart"/>
-
-                <Chart class="columnChart" :chartData="chartData.summary" chartType="ColumnChart"/>
-            </div>
         </div>
 
 
@@ -32,6 +33,7 @@
     import PlantProfileCard from './partials/plantView/PlantProfileCard.vue';
     import PlantListMenu from './partials/plantView/PlantListMenu.vue';
     import SensorCardDealer from './partials/plantView/SensorCardDealer.vue';
+    import ChartModal from './partials/plantView/ChartModal.vue';
 
     export default {
 
@@ -40,12 +42,15 @@
             Chart,
             PlantProfileCard,
             PlantListMenu,
-            SensorCardDealer
+            SensorCardDealer,
+            ChartModal
         },
 
         data() {
             return {
                 plantInfoOpen: false,
+                chartModalOpen: false,
+                windowWidth: false,
             }
         },
 
@@ -113,13 +118,21 @@
 
                 let info = [dayData, monthData];
 
-                let data = {};
+                let data = [];
 
-                data.sensors = this.convertToChartData(dayData, monthData); //should return 1 array, with both one day and one 30 day data, each with chart data for broken up gas, temp, light, and moisture;
+                data.push({
+                    data: this.convertToChartData(dayData, monthData),
+                    type: 'BarChart',
+                    id: 1,
+                    title: "health score by sensor"
+                });
 
-                data.summary = this.getHealthSummary(dayData, monthData); //should return 2 arrays, one day and one 30 day, each with chart data for summary of 30 day and one day;
-
-                data.info = info;
+                data.push({
+                    data: this.getHealthSummary(dayData, monthData),
+                    type: 'ColumnChart',
+                    id: 2,
+                    title: "summary of health data"
+                });
 
                 return data;
 
@@ -145,7 +158,23 @@
 
         methods: {
             togglePlantInfo() {
+                if (document.querySelector("body").style.overflow != 'hidden') {
+                    document.querySelector("body").style.overflow = 'hidden';
+
+                } else {
+                    document.querySelector("body").style.overflow = 'auto';
+                }
                 this.plantInfoOpen = !this.plantInfoOpen;
+            },
+
+            toggleChartModal() {
+                if (document.querySelector("body").style.overflow != 'hidden') {
+                    document.querySelector("body").style.overflow = 'hidden';
+
+                } else {
+                    document.querySelector("body").style.overflow = 'auto';
+                }
+                this.chartModalOpen = !this.chartModalOpen;
             },
 
             getHealthAvgs (arr) {
@@ -159,7 +188,7 @@
                 })
 
                 if (arr.length > 0) {
-                    //return single object with average of sensor values as health value
+
 
                     arr.forEach(item => {
                         names.forEach(name => {
@@ -250,15 +279,29 @@
                 let chartData = [
 
                     ['plant health', 'gas', {role: 'style'}, { role: 'annotation' }, 'temperature', {role: 'style'}, { role: 'annotation' }, 'light', {role: 'style'},  { role: 'annotation' }, 'moisture', {role: 'style'}, { role: 'annotation' }],
-                    ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temperature', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'],
-                    ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temperature', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']
+                    ['24 hrs', objA.gas, 'color: #624972; opacity: 0.4;', 'gas', objA.temp, 'color: #624972; opacity: 0.6', 'temp.', objA.light, 'color: #624972; opacity: 0.8', 'light', objA.moisture, 'color: #624972', 'moisture'],
+                    ['30 days', objB.gas, 'color: #597249; opacity: 0.4', 'gas', objB.temp, 'color: #597249; opacity: 0.6', 'temp.', objB.light, 'color: #597249; opacity: 0.8', 'light', objB.moisture, 'color: #597249', 'moisture']
 
                 ];
 
                 let options = {};
 
-                options.width = 600
-                options.height = 900
+                let dimensions = [];
+
+                 if (this.isMobileScreen()) {
+                    dimensions.push(360);
+                    dimensions.push(280);
+                } else if (this.isTabletScreen()) {
+                    dimensions.push(400);
+                    dimensions.push(320);
+                } else if (this.isDesktopScreen()) {
+                    dimensions.push(400);
+                    dimensions.push(330);
+                }
+
+                options.width = dimensions[0];
+                options.height = dimensions[1];
+                options.backgroundColor = {fill: '#f7f7f7'}; //this is $bg
                 options.legend = 'none'
                 options.vAxis = {
                     gridlines: {
@@ -299,8 +342,6 @@
 
             getHealthSummary(objA, objB) {
 
-
-
                 let obj = {};
 
                 let daySum = this.quickSum([objA.moisture, objA.light, objA.temp, objA.gas]);
@@ -320,10 +361,24 @@
 
                 let options = {};
 
-                options.width = 700,
-                options.height = 900,
+                let dimensions = [];
+
+                if (this.isMobileScreen()) {
+                    dimensions.push(360);
+                    dimensions.push(280);
+                } else if (this.isTabletScreen()) {
+                    dimensions.push(400);
+                    dimensions.push(320);
+                } else if (this.isDesktopScreen()) {
+                    dimensions.push(400);
+                    dimensions.push(330);
+                }
+
+                options.width = dimensions[0];
+                options.height = dimensions[1];
                 options.bar = {width: '40%'}
-                options.legend = 'none',
+                options.legend = 'none';
+                options.backgroundColor = {fill: '#f7f7f7'}; //this is $bg
                 options.vAxis = {
                     title: 'health rating',
                     viewWindow: {
@@ -342,8 +397,36 @@
                 return finalProduct;
             },
 
-        }
+            isMobileScreen() {
+                let isMobile = this.windowWidth < 700;
+                if (isMobile) {
+                    this.hamburgOpen = false;
+                }
+                return isMobile;
+            },
 
+            isTabletScreen() {
+                let isTablet = (this.windowWidth >= 700 && this.windowWidth < 1200);
+                if (isTablet) {
+                    this.hamburgOpen = false;
+                }
+                return isTablet;
+            },
+
+            isDesktopScreen() {
+                let isTablet = this.windowWidth >= 1200;
+                if (isTablet) {
+                    this.hamburgOpen = false;
+                }
+                return isTablet;
+            },
+        },
+        mounted() {
+            this.windowWidth = window.innerWidth;
+            window.addEventListener('resize', () => {
+                this.windowWidth = window.innerWidth;
+            })
+        }
     };
 </script>
 
@@ -353,41 +436,134 @@
 @import "../.././sass/variables/colors.scss";
 @import "../.././sass/mixins/all-mixins.scss";
 
-.plantProfileImage {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: 20rem;
-    width: 20rem;
-    border-radius: 1rem;
-}
 
-.mainPlantViewContainer {
-    margin-left: 12rem;
-}
+      #plantViewPage {
+            width: 100%;
+             .plantViewLogo {
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+                height: 3rem;
+                width: 100%;
+                border-radius: 10px;
+                background-color: transparent;
+                margin-right: 0;
+                margin-top: 1em;
+                margin-bottom: 2em;
+            }
+            .mainPlantViewContainer {
+                width: 16rem;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                .morePlantInfoBtn, .chartModalBtn {
+                    @include buttonStyle;
+                    @include border;
+                    padding: 1em 2em;
+                    margin-bottom: 1em;
+                    box-sizing: border-box;
+                    cursor: pointer;
+                    .info::before {
+                        @include awesomeIcon($black, 'info');
+                    }
+                }
+            }
+        }
 
-.morePlantInfoBtn {
-    .info::before {
-         @include awesomeIcon($black, 'info');
+
+    @media (min-width: $tablet-break) {
+        #plantViewPage {
+            display: flex;
+            flex: 12rem 1fr;
+            .plantViewLogo {
+                display: none;
+            }
+            .mainPlantViewContainer {
+                width: 100%;
+                height: 80%;
+                min-width: 850px;
+                justify-self: center;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(18, 1fr);
+                .plantProfileCard {
+                    grid-row: 2/11;
+                    grid-column: 1/2;
+                    align-self: center;
+                    justify-self: center;
+                }
+                .morePlantInfoBtn {
+                    grid-row: 11/12;
+                    grid-column: 1/2;
+                    align-self: center;
+                    justify-self: center;
+                    width: 15rem;
+                }
+                .chartModalBtn {
+                    grid-row: 12/13;
+                    grid-column: 1/2;
+                    align-self: center;
+                    justify-self: center;
+                    width: 15rem;
+                }
+                .sensorCardDealer {
+                    grid-row: 2/13;
+                    grid-column: 2/4;
+                    align-self: center;
+                    justify-self: center;
+                }
+            }
+        }
     }
-}
 
 
-#chartContainer {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    gap: 20%;
-    .barChart {
-        display: inline-block;
-        align-self: flex-start;
+@media (min-width: $desktop-break) {
+        #plantViewPage {
+            .plantViewLogo {
+                display: none;
+            }
+            .mainPlantViewContainer {
+
+                // height: 80%;
+                margin: 0 auto;
+                width: 1260px;
+                min-width: 1240px;
+                height: calc(100vh - 7em);
+                min-height: 900px;
+                justify-self: center;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(14, 1fr);
+                .plantProfileCard {
+                    grid-row: 2/12;
+                    grid-column: 1/2;
+                    align-self: center;
+                    justify-self: center;
+                }
+                .morePlantInfoBtn {
+                    grid-row: 12/13;
+                    grid-column: 1/3;
+                    align-self: center;
+                    justify-self: center;
+                    width: 20rem;
+                }
+                .chartModalBtn {
+                    grid-row: 12/13;
+                    grid-column: 2/4;
+                    align-self: center;
+                    justify-self: center;
+                    width: 20rem;
+                }
+                .sensorCardDealer {
+                    grid-row: 3/11;
+                    grid-column: 2/4;
+                    align-self: center;
+                    justify-self: center;
+                }
+            }
+        }
     }
-    .columnChart {
-        display: inline-block;
-        align-self: flex-end;
-    }
 
-}
+
 
 </style>

@@ -3,7 +3,9 @@
         <h2 class="invisibleHeader">Add Plant Modal</h2>
 
             <form ref="plantForm" class="addPlantModalForm" enctype="multipart/form-data">
+
             <h2 class="plantModalTitle">add a plant</h2>
+
             <a class="closeAddPlantModal" @click="closeAddPlant">
                 <span class="fa-stack faWrapper">
                     <i class="fa circle fa-stack-2x"></i>
@@ -14,7 +16,8 @@
                 <span class="inAddImg">
                     <span class="fa-stack faWrapper">
                         <i class="fa circle fa-stack-2x"></i>
-                        <i class="fa add fa-stack-1x"></i>
+                        <i v-if="!fileLoaded" class="fa add fa-stack-1x"></i>
+                        <i v-else class="fa check fa-stack-1x"></i>
                     </span>
                 {{fileLoaded ? 'file uploaded!' : 'upload a picture of your plant'}}
                 </span>
@@ -24,7 +27,7 @@
             <input type="text" class="form-control" name="name" id="name" placeholder="name your plant"/>
             <input type="text" class="form-control" name="type" id="type" placeholder="plant type"/>
             <input type="text" class="form-control" name="location" id="location" placeholder="plant location (e.g. 'kitchen')"/>
-             <label for="datePlanted" class="dateLabel">date planted:
+            <label for="datePlanted" class="dateLabel">date planted:
                 <input type="date" class="form-control" name="date_planted" id="datePlanted" :value="currentDate" min="2000-01-01" :max="currentDate">
             </label>
 
@@ -111,8 +114,6 @@
     @import "../../../.././sass/variables/colors.scss";
     @import "../../../.././sass/mixins/all-mixins.scss";
 
-
-
     .addPlantBlanket {
         overflow: hidden;
         position: fixed;
@@ -130,7 +131,7 @@
             left: 50%;
             transform: translateX(-50%);
             background-color: $bg;
-            border-radius: 1em;
+            border-radius: 20px;
             @include border;
             padding: 4em 2em;
             z-index: 1000;
@@ -158,7 +159,7 @@
             .addPlantImage {
                 height: 8em;
                 width: 8em;
-                border-radius: 1em;
+                border-radius: 20px;
                 @include border;
                 background: $white;
                 align-self: center;
@@ -183,6 +184,9 @@
                         }
                         .add::before {
                             @include awesomeIcon($purple, 'add');
+                        }
+                        .check::before {
+                            @include awesomeIcon($purple, 'check');
                         }
                     }
                 }
