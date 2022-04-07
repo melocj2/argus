@@ -1,11 +1,28 @@
 <template>
     <div class="plantInfoBlanket">
+        <h2 class="invisibleHeader">More Plant Info Modal</h2>
         <div class="plantInfoDetail" v-if="addedPlantInfo">
-            <h1>PLANT INFO MODAL</h1>
-            <p>scientific name: {{this.addedPlantInfo.species}}</p>
-            <p>age: {{this.plant.age}}</p>
-            <p>description: {{this.addedPlantInfo.info}}</p>
-            <button @click="closePlantInfo">close</button>
+            <a class="closePlantInfoModal" @click="closePlantInfo">
+                <span class="fa-stack faWrapper">
+                    <i class="fa circle fa-stack-2x"></i>
+                    <i class="fa close fa-stack-1x"></i>
+                </span>
+            </a>
+            <div class="plantProfileEditImage" :style="{'background-image': `url(${currentPlant.image})`}"></div>
+            <div class="textInfoWrap">
+                <div class="scientificName">
+                    <h5>scientific name:</h5>
+                    <p>{{this.addedPlantInfo.species}}</p>
+                </div>
+                <div class="plantAgeInfo">
+                    <h5>age:</h5>
+                    <p>{{this.plant.age}}</p>
+                </div>
+                <div class="plantDescriptionInfo">
+                    <h5>description:</h5>
+                    <p>{{this.addedPlantInfo.info}}</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -84,24 +101,148 @@
     @import "../../../.././sass/mixins/all-mixins.scss";
 
     .plantInfoBlanket {
+        overflow: hidden;
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
         width: 100vw;
-        background-color: $white;
-        z-index: 100;
+        background-color: rgba(161, 161, 161, 0.8);;
+        z-index: 600;
         .plantInfoDetail {
             position: fixed;
-            top: 5vh;
-            width: 80vw;
-            left: 5vw;
-            max-height: 90vh;
-            overflow-y: scroll;
-            // transform: translate(-50%, -90%);
-            background-color: $grey;
-            padding: 2em 5em;
+            top: 1em;
+            width: 20em;
+            height: 35em;
+            @include scrollbar($grey, $bg);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: $bg;
+            border-radius: 20px;
+            @include border;
+            padding: 0;
             z-index: 1000;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            grid-template-columns: repeat(2, 1fr);
+            .plantProfileEditImage {
+                grid-row: 1/5;
+                grid-column: 1/3;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                width: 100%;
+                height: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+            .textInfoWrap {
+                grid-row: 5/9;
+                grid-column: 1/3;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                justify-self: center;
+                text-align: center;
+                align-self: center;
+                height: 80%;
+                width: 90%;
+                h5 {
+                    color: $green;
+                    font-weight: bold;
+                }
+                p {
+                    color: $purple;
+                }
+            }
+            .closePlantInfoModal {
+                position: absolute;
+                top: 0.5em;
+                right: 0.5em;
+                cursor: pointer;
+                .faWrapper {
+                    font-size: $card-tablet;
+                    .circle::before {
+                        @include awesomeIcon($white, 'circle');
+                    }
+                    .close::before {
+                        @include awesomeIcon($purple, 'close');
+                    }
+                }
+            }
+        }
+    }
+    @media (min-width: $tablet-break) {
+        .plantInfoBlanket {
+            .plantInfoDetail {
+                width: 30em;
+                top: 5rem;
+                height: 45em;
+                @include scrollbar($grey, $bg);
+                left: 50%;
+                transform: translateX(-50%);
+                .textInfoWrap {
+                    grid-row: 5/9;
+                    grid-column: 1/3;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-around;
+                    justify-self: center;
+                    text-align: center;
+                    align-self: center;
+                    height: 80%;
+                    width: 80%;
+                    h5 {
+                        color: $green;
+                        font-weight: bold;
+                    }
+                    p {
+                        color: $purple;
+                    }
+                }
+            }
+        }
+    }
+    @media (min-width: $desktop-break) {
+        .plantInfoBlanket {
+            .plantInfoDetail {
+                width: 65em;
+                top: 5rem;
+                height: 45em;
+                @include scrollbar($grey, $bg);
+                left: 50%;
+                transform: translateX(-50%);
+                grid-template-rows: repeat(8, 1fr);
+                grid-template-columns: repeat(6, 1fr);
+                .plantProfileEditImage {
+                    grid-row: 1/9;
+                    grid-column: 1/4;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 10px 0 0 10px;
+                }
+                .textInfoWrap {
+                    grid-row: 1/9;
+                    grid-column: 4/9;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-around;
+                    justify-self: center;
+                    text-align: center;
+                    align-self: center;
+                    height: 80%;
+                    width: 80%;
+                    h5 {
+                        color: $green;
+                        font-weight: bold;
+                    }
+                    p {
+                        color: $purple;
+                    }
+                }
+            }
         }
     }
 </style>

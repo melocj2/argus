@@ -3,7 +3,7 @@
   <h1 class="invisibleHeader">PROFILE</h1>
     <div v-if="userInfo">
 
-       <div class="userProfileLogo" :style="{'background-image': `url(/images/logoP.svg)`}"></div>
+      <div class="userProfileLogo" :style="{'background-image': `url(/images/logoP.svg)`}"></div>
 
       <form class="userProfilePage" ref="userForm" enctype="multipart/form-data">
 
@@ -18,6 +18,7 @@
                     <i v-if="profImgLoaded" class="fa check fa-stack-1x"></i>
                     <i v-else class="fa edit fa-stack-1x"></i>
               </span>
+              <span>{{profImgLoaded ? 'file uploaded!' : 'update image'}}</span>
             </label>
             <input @change="profFileLoaded" type="file" name="thumbnail" id="thumbnail" hidden/>
           </div>
@@ -119,6 +120,9 @@
 
       methods: {
         toggleEditUser() {
+          if (this.editingUser) {
+            this.profImgLoaded = false;
+          }
           this.editingUser = !this.editingUser;
         },
 
@@ -175,6 +179,8 @@
   align-items: center;
   text-align: center;
   color: $purple;
+  padding-bottom: 2em;
+  box-sizing: border-box;
   .userHeaderName {
     font-weight: bold;
   }
@@ -202,12 +208,23 @@
     }
     .newProfImgContainer {
       position: absolute;
-      top: 0;
+      bottom: 0;
       width: 100%;
       .newProfileImage {
         position: absolute;
-        top: 0.5rem;
+        bottom: 0.5rem;
         right: 0.5rem;
+        background-color: $bg;
+        padding: 0.5em 1em;
+        border-radius: 1em;
+        cursor: pointer;
+        span {
+          font-size: $body-mobile;
+          color:$purple;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
         .faWrapper {
           transition: all 0.5s ease-in-out;
           .circle::before {
@@ -279,7 +296,6 @@
       width: 12rem;
     }
   }
-
 }
 
 
@@ -288,12 +304,10 @@
         display: none;
     }
     .userProfilePage {
-      padding-bottom: 200px;
-      padding-top: 2em;
-      .userHeaderName {}
-      .userProfileImage {}
-      .newProfileImage {}
-      .editUserInfoButton {}
+      padding-top: 4em;
+      padding-bottom: 8em;
+      min-height: 850px;
+      box-sizing: border-box;
       .userProfileCard, .passwordSubCard {
         div {
           label {
@@ -346,16 +360,15 @@
       flex-direction: column;
       flex: 30% 55%;
       flex-wrap: wrap;
-      height: 55rem;
-      padding-top: 1em;
+      height: calc(100vh - 7em);
+      min-height: 850px;
+      padding: 10% 10%;
       align-items: center;
+      align-self: center;
+      justify-self: center;
       gap: 2em;
       justify-content: center;
       box-sizing: border-box;
-      .userHeaderName {}
-      .userProfileImage {}
-      .newProfileImage {}
-      .editUserInfoButton {}
       .userProfileCard, .passwordSubCard {
         div {
           label {
@@ -364,7 +377,7 @@
         }
       }
       .userProfileCard {
-        width: 35em;
+        width: 34em;
         padding-bottom: 3em;
         padding-top: 1em;
         height: 22em;
@@ -374,6 +387,10 @@
         flex-wrap: wrap;
         font-size: $subhead-mobile;
         justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        align-self: center;
+        justify-self: center;
         position: relative;
         .passwordSubCard {
           width: 55%;

@@ -7,7 +7,7 @@
             <h5 class="updateIntro">Here's what happened while you were away:</h5>
         </div>
 
-         <div class="messageList">
+         <div class="messageList" :class="userMessages.length < 2 ? 'centerOne' : ''">
             <div v-for="message in userMessages" :key="message.id" class="msgCard">
                 <p class="msgContent">{{message.message}}
                     <span class="msgTimestamp">{{message.generatedAt}}</span>
@@ -35,7 +35,7 @@
                 <h4 class="plantNameHome"><span class="font-awesome-icons plant"></span> {{plant.name}}</h4>
                 <h5 class="plantLocationHome">location: {{plant.location}}</h5>
                 <h5 class="plantStatusHome">status: {{isHealthy}}</h5>
-                <router-link class="routerLink view viewPlantHome" :to="{ name: 'plant', params: { id: `${plant.id}`}}">view plant ></router-link>
+                <router-link class="routerLink view viewPlantHome" :to="{ name: 'plants', params: { id: `${plant.id}`}}">view plant ></router-link>
             </div>
         </div>
     </div>
@@ -337,8 +337,8 @@
         grid-template-columns: repeat(13, 1fr);
         grid-template-rows: repeat(5, 1fr) repeat(1, 10px);
         width: 100%;
-        padding-top: 5em;
-        padding-bottom: 10em;
+        padding-bottom: 8em;
+        padding-top: 2em;
         min-height: 0;
         min-width: 0;
         .headGroup {
@@ -374,6 +374,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: normal;
             margin-bottom: 0;
             .msgCard {
                 width: 100%;
@@ -381,12 +382,15 @@
                 box-sizing: border-box;
             }
         }
+        .messageList.centerOne {
+            justify-content: center;
+        }
         .weatherCard {
             width: 100%;
             height: 90%;
             grid-row: 1/5;
             grid-column: 9/13;
-            align-self: flex-start;
+            align-self: center;
             justify-self: center;
             display: flex;
             direction: column;
@@ -423,11 +427,13 @@
 
 @media (min-width: $desktop-break) {
     .homePage {
-        height: 70em;
-        padding-top: 2em;
+        padding-top: 0;
+        padding-bottom: 0;
+        height: calc(100vh - 8em);
+        min-height: 55em;
         box-sizing: border-box;
         display: grid;
-        grid-template-rows: repeat(16, 1fr);
+        grid-template-rows: repeat(15, 1fr);
         grid-template-columns: repeat(17, 1fr);
         .headGroup {
             grid-column: 2/9;
@@ -459,7 +465,7 @@
         .weatherCard {
             height: auto;
             grid-column: 2/9;
-            grid-row: 11/16;
+            grid-row: 11/14;
             width: 100%;
             display: initial;
             .weatherTemp {
@@ -486,11 +492,12 @@
         .plantList {
             height: 30em;
             grid-column: 10/17;
-            grid-row: 6/16;
+            grid-row: 6/14;
             display: block;
             align-self: flex-start;
             justify-self: center;
             @include scrollbar($grey, $bg);
+            justify-content: center;
             .plantListGrouping {
                 height: 14em;
                 width: 99%;
