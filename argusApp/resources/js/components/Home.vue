@@ -487,7 +487,7 @@
             height: 30em;
             grid-column: 10/17;
             grid-row: 6/16;
-            display: block;
+            //display: block;
             align-self: flex-start;
             justify-self: center;
             @include scrollbar($grey, $bg);
@@ -500,7 +500,8 @@
                 background-color: $green;
                 border-radius: 30px;
                 @include border;
-                margin-bottom: 1em;
+                margin-bottom: 0px;
+                //margin-bottom: 1em;
                 .plantSideImage {
                     grid-row: 1/6;
                     grid-column: 1/4;

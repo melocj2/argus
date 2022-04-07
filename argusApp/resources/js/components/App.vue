@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="main">
 
  <Nav />
         <router-view />
@@ -336,7 +336,6 @@
 </script>
 
 <style lang="scss">
-
 
 
 </style>
