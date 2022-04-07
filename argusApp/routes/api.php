@@ -44,8 +44,3 @@ Route::get('messages/{user}', 'Api\MessageController@getMessageList')->name('mes
 Route::patch('messages/{id}', 'Api\MessageController@update')->name('messages.update');
 
 Route::post('messages/sendAlert', 'Api\MessageController@sendAlert')->name('messages.sendAlert');
-
-//plant care tips
-Route::group(['namespace' => 'Api'], function () {
-    Route::get('get-tips', 'TipsController@index');
-});
