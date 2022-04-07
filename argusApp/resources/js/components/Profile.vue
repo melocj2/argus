@@ -12,14 +12,14 @@
         <div class="userProfileImage">
           <div class="userImage" :style="{'background-image': `url(${userInfo.thumbnail})`}"></div>
           <div v-if="editingUser" class="newProfImgContainer">
-            <label for="thumbnail" class="newProfileImage">
+            <div class="newProfileImage">
               <span class="fa-stack faWrapper">
                     <i class="fa circle fa-stack-2x"></i>
                     <i v-if="profImgLoaded" class="fa check fa-stack-1x"></i>
                     <i v-else class="fa edit fa-stack-1x"></i>
               </span>
               <span>{{profImgLoaded ? 'file uploaded!' : 'update image'}}</span>
-            </label>
+            </div>
             <input @change="profFileLoaded" type="file" name="thumbnail" id="thumbnail" hidden/>
           </div>
         </div>
@@ -31,40 +31,40 @@
         <div class="userProfileCard" :class="!editingUser ? 'userProfileNotEditing' : '' ">
           <!-- this will be the aside 'card' portion -->
           <div>
-            <label for="new_name">name</label>
-            <input v-if="editingUser" type="text" id="new_name" name="new_name" :placeholder="userInfo.name" />
+            <h5 class="label">name</h5>
+            <input type="text" id="new_name" name="new_name" :placeholder="userInfo.name" v-if="editingUser" />
             <p v-else>{{userInfo.name}}</p>
           </div>
 
           <div>
-            <label for="new_location">location</label>
+            <h5 class="label">location</h5>
             <input v-if="editingUser" type="text" id="new_location" name="new_location" :placeholder="userInfo.location" />
             <p v-else>{{userInfo.location}}</p>
           </div>
 
           <div>
-            <label for="new_phone">phone</label>
+            <h5 class="label">phone</h5>
             <input v-if="editingUser" type="text" id="new_phone" name="new_phone" :placeholder="userInfo.phone" />
             <p v-else>{{userInfo.phone}}</p>
           </div>
 
           <div>
-            <label for="new_email">email</label>
+            <h5 class="label">email</h5>
             <input v-if="editingUser" type="text" id="new_email" name="new_email" :placeholder="userInfo.email" />
             <p v-else>{{userInfo.email}}</p>
           </div>
 
           <div v-if="editingUser" class="passwordSubCard">
             <div>
-                <label for="password">current password</label>
+                <h5 class="label">current password</h5>
                 <input :type="showPasswords ? 'text' : 'password'" id="password" name="password" />
             </div>
             <div>
-                <label for="new_password">new password</label>
+                <h5 class="label">new password</h5>
                 <input :type="showPasswords ? 'text' : 'password'" id="new_password" name="new_password"/>
             </div>
             <div>
-                <label for="new_password_confirm">confirm password</label>
+                <h5 class="label">confirm password</h5>
                 <input :type="showPasswords ? 'text' : 'password'" id="new_password_confirm" name="new_password_confirm"  />
             </div>
             <div>
@@ -83,10 +83,7 @@
           </button>
         </div>
       </form>
-      <!-- <p></p>
-      <p></p>
-      <p></p>
-      <p></p> -->
+
     </div>
 
   </div>
@@ -266,7 +263,7 @@
     text-align: center;
     font-size: $card-tablet;
     div {
-      label {
+      .label {
         font-weight: bold;
         color: $green;
         font-size: $body-mobile;
@@ -310,7 +307,7 @@
       box-sizing: border-box;
       .userProfileCard, .passwordSubCard {
         div {
-          label {
+          .label {
             font-size: $body-tablet;
           }
         }
@@ -322,7 +319,6 @@
         height: 22em;
         display: flex;
         flex-direction: column;
-        flex: 30% 55%;
         flex-wrap: wrap;
         font-size: $card-desktop;
         justify-content: center;
@@ -358,7 +354,6 @@
       width: 95%;
       margin: 0 auto;
       flex-direction: column;
-      flex: 30% 55%;
       flex-wrap: wrap;
       height: calc(100vh - 7em);
       min-height: 850px;
@@ -371,7 +366,7 @@
       box-sizing: border-box;
       .userProfileCard, .passwordSubCard {
         div {
-          label {
+          .label {
             font-size: $body-desktop;
           }
         }
@@ -383,7 +378,6 @@
         height: 22em;
         display: flex;
         flex-direction: column;
-        flex: 30% 55%;
         flex-wrap: wrap;
         font-size: $subhead-mobile;
         justify-content: center;

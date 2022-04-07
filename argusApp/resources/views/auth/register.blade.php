@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="auth"><div class="darken">
+<div class="auth"> <h2 class="invisibleHeader">Register Page</h2><div class="darken">
     <div class="container">
         <div class="col-md-8">
             <div class="card">

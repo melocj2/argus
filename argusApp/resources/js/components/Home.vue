@@ -151,7 +151,7 @@
         .homeLogo {
             background-position: center;
             background-repeat: no-repeat;
-            background-size: fit;
+            background-size: contain;
             height: 8rem;
             width: 15rem;
             border-radius: 1rem;
@@ -393,8 +393,7 @@
             align-self: center;
             justify-self: center;
             display: flex;
-            direction: column;
-            align-items: space-between;
+            flex-direction: column;
             margin-bottom: 0;
             .weatherTemp {
                 font-size: 5rem;

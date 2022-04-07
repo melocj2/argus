@@ -474,7 +474,7 @@
     @media (min-width: $tablet-break) {
         #plantViewPage {
             display: flex;
-            flex: 12rem 1fr;
+            flex: 12rem;
             .plantViewLogo {
                 display: none;
             }
