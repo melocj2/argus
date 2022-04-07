@@ -22,10 +22,6 @@
                     <h5>description:</h5>
                     <p>{{this.addedPlantInfo.info}}</p>
                 </div>
-                <div class="proTip">
-                    <h5>pro tip!</h5>
-                    <p>{{tips}}</p>
-                </div>
             </div>
         </div>
     </div>
@@ -40,7 +36,6 @@
         return {
             plant: this.currentPlant,
             addedPlantInfo: false,
-            tips: {}
         }
     },
 
@@ -94,17 +89,6 @@
 		    });
         },
 
-        created: function () {
-            let vm = this;
-            fetch(`http://localhost:8082/api/get-tips`)
-            .then(function(response){
-                return response.json();
-            })
-            .then(function(data) {
-            vm.tips = data[Math.floor(Math.random()*12)].protip;
-            console.log(data[Math.floor(Math.random()*12)].protip);
-		    });
-        },
 
 
 }
@@ -168,10 +152,6 @@
                 }
                 p {
                     color: $purple;
-                }
-                .label {
-                    color: $green;
-                    font-weight: bold;
                 }
             }
             .closePlantInfoModal {
